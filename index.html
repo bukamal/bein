@@ -1,18 +1,73 @@
 <!DOCTYPE html>
-<html>
+<html lang="ar" dir="rtl">
 <head>
-    <title>Dragon Lair App</title>
-    <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>عرين التنين - Dragon Coin</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <style>
-        body { background: #1a1a1a; color: gold; text-align: center; font-family: sans-serif; }
-        .btn { background: orange; padding: 20px; border-radius: 50px; cursor: pointer; border: none; font-weight: bold; }
+        body { background-color: #121212; color: #FFD700; font-family: 'Arial', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .container { background: #1a1a1a; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid #333; width: 80%; max-width: 400px; }
+        .logo { font-size: 50px; margin-bottom: 10px; }
+        h2 { margin-bottom: 20px; color: #fff; }
+        .btn { background: linear-gradient(45deg, #FF8C00, #FFA500); color: white; border: none; padding: 15px 30px; border-radius: 50px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.3s; width: 100%; }
+        .btn:active { transform: scale(0.95); }
+        #status { margin-top: 20px; font-size: 14px; color: #bbb; word-break: break-all; }
     </style>
 </head>
 <body>
-    <h1>🐉 عرين التنين 🐉</h1>
-    <p>اربط محفظتك للمطالبة بـ $DRGN</p>
-    <button class="btn" onclick="processClaim()">طالب بالمكافأة الآن</button>
-    <p id="status"></p>
-    <script src="script.js"></script>
+
+    <div class="container">
+        <div class="logo">🐲</div>
+        <h2>عرين التنين</h2>
+        <p>اربط محفظتك للمطالبة بـ $DRGN</p>
+        
+        <button id="claimBtn" class="btn">طالب بالمكافأة الآن</button>
+        
+        <div id="status">جاهز للربط..</div>
+    </div>
+
+    <script>
+        // الرابط الخاص بك من جوجل سكريبت (تأكد من وضعه هنا)
+        const GOOGLE_SCRIPT_URL = "رابط_الـ_exec_الخاص_بك_هنا";
+
+        document.getElementById('claimBtn').onclick = async () => {
+            const status = document.getElementById('status');
+            
+            // التحقق من وجود محفظة
+            if (typeof window.ethereum !== 'undefined') {
+                try {
+                    status.innerText = "⏳ جاري الاتصال بالمحفظة...";
+                    
+                    // طلب الحسابات
+                    const provider = new ethers.providers.Web3Provider(window.ethereum);
+                    const accounts = await provider.send("eth_requestAccounts", []);
+                    const address = accounts[0];
+
+                    status.innerHTML = "✅ تم الاتصال!<br>جاري تسجيل عنوانك...";
+
+                    // إرسال البيانات لجوجل شيت
+                    await fetch(GOOGLE_SCRIPT_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ address: address })
+                    });
+
+                    status.innerHTML = `<b style="color: #00ff00;">🎉 تم التسجيل في العرين!</b><br>${address}`;
+                    document.getElementById('claimBtn').innerText = "تمت العملية";
+                    document.getElementById('claimBtn').disabled = true;
+
+                } catch (err) {
+                    status.innerText = "❌ حدث خطأ أو رفضت الاتصال.";
+                    console.error(err);
+                }
+            } else {
+                // رسالة ذكية إذا لم يجد محفظة
+                status.innerHTML = "⚠️ المحفظة غير مكتشفة!<br>يرجى فتح البوت من داخل متصفح MetaMask أو Trust Wallet.";
+                alert("يرجى فتح التطبيق من داخل متصفح المحفظة (MetaMask DApp Browser)");
+            }
+        };
+    </script>
 </body>
 </html>
