@@ -7,20 +7,18 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <style>
         body { background-color: #121212; color: #FFD700; font-family: 'Arial', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .container { background: #1a1a1a; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid #333; width: 80%; max-width: 400px; }
-        .logo { font-size: 50px; margin-bottom: 10px; }
-        h2 { margin-bottom: 20px; color: #fff; }
-        .btn { background: linear-gradient(45deg, #FF8C00, #FFA500); color: white; border: none; padding: 15px 30px; border-radius: 50px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.3s; width: 100%; }
-        .btn:active { transform: scale(0.95); }
-        #status { margin-top: 20px; font-size: 14px; color: #bbb; word-break: break-all; }
+        .container { background: #1a1a1a; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid #333; width: 85%; max-width: 400px; text-align: center; }
+        h2 { color: #fff; margin-bottom: 10px; }
+        .btn { background: linear-gradient(45deg, #FF8C00, #FFA500); color: white; border: none; padding: 15px 30px; border-radius: 50px; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.3s; width: 100%; margin-top: 20px; }
+        #status { margin-top: 20px; font-size: 14px; color: #bbb; line-height: 1.6; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <div class="logo">🐲</div>
+        <div style="font-size: 60px;">🐲</div>
         <h2>عرين التنين</h2>
-        <p>اربط محفظتك للمطالبة بـ $DRGN</p>
+        <p>اربط محفظتك وسجل عنوانك للمطالبة بـ $DRGN</p>
         
         <button id="claimBtn" class="btn">طالب بالمكافأة الآن</button>
         
@@ -28,23 +26,21 @@
     </div>
 
     <script>
-        // الرابط الخاص بك من جوجل سكريبت (تأكد من وضعه هنا)
-        const GOOGLE_SCRIPT_URL = "رابط_الـ_exec_الخاص_بك_هنا";
+        // رابط جوجل سكريبت الخاص بك
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzwpsk8ov6u_9puC2Rs4WTyo1JnGpp8zvqUow9C_hTw-DKa1fF83OEKIEUvK2GvnNfrVg/exec";
 
         document.getElementById('claimBtn').onclick = async () => {
             const status = document.getElementById('status');
             
-            // التحقق من وجود محفظة
             if (typeof window.ethereum !== 'undefined') {
                 try {
                     status.innerText = "⏳ جاري الاتصال بالمحفظة...";
                     
-                    // طلب الحسابات
                     const provider = new ethers.providers.Web3Provider(window.ethereum);
                     const accounts = await provider.send("eth_requestAccounts", []);
                     const address = accounts[0];
 
-                    status.innerHTML = "✅ تم الاتصال!<br>جاري تسجيل عنوانك...";
+                    status.innerHTML = "✅ تم الاتصال!<br>جاري تسجيل عنوانك في العرين...";
 
                     // إرسال البيانات لجوجل شيت
                     await fetch(GOOGLE_SCRIPT_URL, {
@@ -54,7 +50,7 @@
                         body: JSON.stringify({ address: address })
                     });
 
-                    status.innerHTML = `<b style="color: #00ff00;">🎉 تم التسجيل في العرين!</b><br>${address}`;
+                    status.innerHTML = `<b style="color: #00ff00;">🎉 تم التسجيل بنجاح!</b><br>عنوانك المسجل:<br>${address}`;
                     document.getElementById('claimBtn').innerText = "تمت العملية";
                     document.getElementById('claimBtn').disabled = true;
 
@@ -63,9 +59,8 @@
                     console.error(err);
                 }
             } else {
-                // رسالة ذكية إذا لم يجد محفظة
-                status.innerHTML = "⚠️ المحفظة غير مكتشفة!<br>يرجى فتح البوت من داخل متصفح MetaMask أو Trust Wallet.";
-                alert("يرجى فتح التطبيق من داخل متصفح المحفظة (MetaMask DApp Browser)");
+                status.innerHTML = "⚠️ المحفظة غير مكتشفة!<br>يرجى فتح هذا الرابط من داخل متصفح MetaMask أو Trust Wallet.";
+                alert("يرجى فتح التطبيق من داخل متصفح المحفظة (DApp Browser)");
             }
         };
     </script>
