@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dragon Elite Dashboard 🐉</title>
+    <title>Dragon Nexus v7.0 🐉</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -11,161 +11,159 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
 
     <style>
-        :root { --gold: #f59e0b; --dark: #050505; --card: #0f0f0f; }
-        body { font-family: 'Tajawal', sans-serif; background: var(--dark); color: #fff; }
+        :root { --gold: #f59e0b; --dark-bg: #050505; }
+        body { font-family: 'Tajawal', sans-serif; background: var(--dark-bg); color: #fff; overflow-x: hidden; }
         .font-v { font-family: 'Orbitron', sans-serif; }
-        .dragon-border { border: 1px solid rgba(245, 158, 11, 0.2); border-radius: 2rem; }
-        .gold-gradient { background: linear-gradient(135deg, #f59e0b 0%, #78350f 100%); }
-        .glass { background: rgba(255, 255, 255, 0.02); backdrop-filter: blur(10px); }
-        .stat-box { border-left: 3px solid var(--gold); background: rgba(245, 158, 11, 0.05); }
-        .animate-glow { animation: glow 2s infinite alternate; }
-        @keyframes glow { from { box-shadow: 0 0 5px rgba(245, 158, 11, 0.2); } to { box-shadow: 0 0 20px rgba(245, 158, 11, 0.5); } }
+        .dragon-card { background: rgba(15, 15, 15, 0.95); border: 1px solid rgba(245, 158, 11, 0.2); border-radius: 2rem; transition: 0.3s; }
+        .gold-glow { box-shadow: 0 0 20px rgba(245, 158, 11, 0.15); }
+        .btn-main { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #000; font-weight: 900; }
+        .btn-main:active { transform: scale(0.96); }
+        .zero-abbrev { font-size: 0.7em; vertical-align: middle; color: #666; margin: 0 2px; }
+        #notification { transition: all 0.5s ease; transform: translateY(-100px); }
+        #notification.show { transform: translateY(20px); }
     </style>
 </head>
-<body class="p-4 pb-20 max-w-2xl mx-auto">
+<body class="p-4 md:p-8 max-w-xl mx-auto">
 
-    <header class="flex justify-between items-center py-6 px-2">
+    <div id="notification" class="fixed top-0 left-0 right-0 mx-auto w-64 z-50 bg-yellow-500 text-black p-3 rounded-2xl text-center text-xs font-bold shadow-2xl"></div>
+
+    <header class="flex justify-between items-center mb-10">
         <div class="flex items-center gap-3">
-            <div class="w-12 h-12 gold-gradient rounded-full flex items-center justify-center text-2xl shadow-xl animate-glow">🐉</div>
-            <h1 class="font-v font-black text-xl text-yellow-500 tracking-widest">DRAGON</h1>
+            <div class="w-12 h-12 btn-main rounded-2xl flex items-center justify-center text-2xl shadow-lg">🐉</div>
+            <h1 class="font-v font-black text-xl tracking-widest text-yellow-500 italic">DRGN.AI</h1>
         </div>
-        <button onclick="connectWallet()" id="walletBtn" class="glass border border-yellow-500/30 px-5 py-2 rounded-2xl text-[10px] font-bold hover:bg-yellow-500 hover:text-black transition-all">CONNECT WALLET</button>
+        <button onclick="smartConnect()" id="walletBtn" class="border border-yellow-500/40 px-5 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-yellow-500 hover:text-black transition-all">Connect</button>
     </header>
 
-    <main class="space-y-6">
-        <div class="dragon-border p-8 glass relative">
-            <div class="flex justify-between items-center mb-2">
-                <span class="text-xs text-gray-500 font-bold uppercase tracking-widest italic">Live Market Cap</span>
-                <span id="priceChange" class="text-xs font-bold text-green-500">+0.00%</span>
-            </div>
-            <h2 id="priceDisplay" class="font-v text-4xl font-black text-yellow-500 mb-6 tracking-tighter">$0.0000000000</h2>
-            <canvas id="mainChart" class="w-full h-48"></canvas>
+    <section class="dragon-card p-8 mb-6 gold-glow relative overflow-hidden">
+        <div class="flex justify-between text-gray-500 text-[10px] font-bold uppercase mb-2">
+            <span>Market Price (DRGN/BNB)</span>
+            <span id="priceStatus" class="text-green-500 italic">● Streaming</span>
         </div>
+        <h2 id="priceDisplay" class="font-v text-4xl font-black mb-6 tracking-tight text-white flex items-center">
+            $0.00...00
+        </h2>
+        <canvas id="priceChart" class="w-full h-40"></canvas>
+    </section>
 
-        <div class="dragon-border p-6 glass">
-            <h3 class="text-sm font-black text-yellow-500 mb-4">🧮 حاسبة أرباح التنين</h3>
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label class="text-[10px] text-gray-500">كمية العملات لديك</label>
-                    <input id="calcAmount" type="number" placeholder="0" class="w-full bg-black/50 border border-white/10 p-3 rounded-xl text-sm outline-none mt-1">
-                </div>
-                <div>
-                    <label class="text-[10px] text-gray-500">السعر المستهدف ($)</label>
-                    <input id="targetPrice" type="number" placeholder="0.001" class="w-full bg-black/50 border border-white/10 p-3 rounded-xl text-sm outline-none mt-1">
-                </div>
+    <div class="grid grid-cols-1 gap-4">
+        <div class="dragon-card p-6">
+            <h3 class="text-xs font-black text-yellow-500 mb-4 uppercase tracking-widest italic">Wallet Analyzer</h3>
+            <div class="relative group">
+                <input id="targetAddr" type="text" placeholder="أدخل عنوان المحفظة هنا..." 
+                       class="w-full bg-black/50 border border-white/5 p-4 rounded-2xl outline-none focus:border-yellow-500 transition-all font-mono text-[10px] mb-4">
             </div>
-            <button onclick="calculateProfit()" class="w-full mt-4 py-3 gold-gradient rounded-xl text-black font-black text-xs uppercase shadow-lg shadow-yellow-500/10">احسب الأرباح المتوقعة</button>
-            <div id="profitRes" class="hidden mt-4 p-4 stat-box rounded-xl text-center">
-                <p class="text-[10px] text-gray-400">قيمة استثمارك ستصبح:</p>
-                <p id="totalProfit" class="text-2xl font-black text-green-500 font-v">$0.00</p>
-            </div>
-        </div>
-
-        <div class="dragon-border p-6 glass border-2 border-yellow-500/20">
-            <h3 class="text-sm font-black text-yellow-500 mb-4 flex items-center gap-2 italic">
-                <span>⚡</span> فاحص البيانات الفوري
-            </h3>
-            <input id="scanInput" type="text" placeholder="أدخل عنوان أي محفظة..." 
-                   class="w-full bg-black/60 border border-yellow-500/10 p-4 rounded-2xl outline-none focus:border-yellow-500 text-xs mb-4 font-mono">
-            <button onclick="scanWallet()" class="w-full py-4 bg-zinc-900 rounded-2xl font-black text-xs hover:bg-zinc-800 border border-white/5 uppercase tracking-widest transition-all">Scan Network</button>
+            <button onclick="analyzeWallet()" class="w-full py-4 btn-main rounded-2xl text-[11px] uppercase tracking-tighter shadow-xl">تحليل الرصيد والقيمة</button>
             
-            <div id="scanRes" class="hidden mt-6 space-y-4">
-                <div class="flex justify-between p-4 bg-white/5 rounded-2xl border border-white/5">
-                    <span class="text-xs text-gray-400">الرصيد</span>
-                    <span id="scanBal" class="text-sm font-black text-yellow-500">0.00 DRGN</span>
+            <div id="dataPane" class="hidden mt-6 space-y-3 animate-pulse-once">
+                <div class="flex justify-between bg-white/5 p-4 rounded-xl border border-white/5">
+                    <span class="text-[10px] text-gray-500 font-bold uppercase">Holdings</span>
+                    <span id="resBal" class="text-sm font-black gold-text font-v">0.00</span>
                 </div>
-                <div class="flex justify-between p-4 bg-white/5 rounded-2xl border border-white/5">
-                    <span class="text-xs text-gray-400">القيمة المالية</span>
-                    <span id="scanVal" class="text-sm font-black text-green-500">$0.00</span>
+                <div class="flex justify-between bg-white/5 p-4 rounded-xl border border-white/5">
+                    <span class="text-[10px] text-gray-500 font-bold uppercase">Net Value</span>
+                    <span id="resVal" class="text-sm font-black text-green-500 font-v">$0.00</span>
                 </div>
             </div>
         </div>
 
-    </main>
-
-    <footer class="mt-10 pb-10 text-center">
-        <div class="flex justify-center gap-6 text-gray-600 mb-4">
-            <a href="https://pancakeswap.finance/swap?outputCurrency=0x583787E29Bb2D92FcBc713389FD66807602c72F3" class="hover:text-yellow-500 transition">BUY</a>
-            <a href="https://www.pinksale.finance/pinklock/record/11?chain=BSC" class="hover:text-yellow-500 transition">LOCK</a>
-            <a href="#" class="hover:text-yellow-500 transition">CHART</a>
+        <div class="flex gap-3">
+            <a href="https://pancakeswap.finance/swap?outputCurrency=0x583787E29Bb2D92FcBc713389FD66807602c72F3" class="flex-1 dragon-card p-4 text-center font-black text-[10px] uppercase hover:border-yellow-500 transition">Swap Tokens</a>
+            <a href="https://www.pinksale.finance/pinklock/record/11?chain=BSC" class="flex-1 dragon-card p-4 text-center font-black text-[10px] uppercase hover:border-yellow-500 transition">Audit & Lock</a>
         </div>
-        <p class="text-[10px] text-gray-800 uppercase font-bold tracking-widest">Powered by Dragon Intelligence Engine</p>
-    </footer>
+    </div>
 
     <script>
-        const CONTRACT = "0x583787E29Bb2D92FcBc713389FD66807602c72F3";
-        const RPC = "https://bsc-dataseed1.binance.org/";
-        const ABI = ["function balanceOf(address) view returns (uint256)"];
-        let price = 0;
+        const DRGN = "0x583787E29Bb2D92FcBc713389FD66807602c72F3";
+        let livePrice = 0;
 
-        // 1. نظام جلب السعر مع مؤشر التغير
-        async function loadPrice() {
+        // 1. وظيفة الربط الذكي (MetaMask Deep Link)
+        function smartConnect() {
+            if (typeof window.ethereum !== 'undefined') {
+                connectWallet();
+            } else {
+                showNotify("جاري فتح MetaMask...");
+                // هذا الرابط يفتح المحفظة ويوجهها لموقعك تلقائياً
+                const currentUrl = window.location.href.replace(/^https?:\/\//, '');
+                window.location.href = `https://metamask.app.link/dapp/${currentUrl}`;
+            }
+        }
+
+        async function connectWallet() {
             try {
-                const r = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${CONTRACT}`);
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                document.getElementById('walletBtn').innerText = accounts[0].substring(0,6) + "...";
+                document.getElementById('targetAddr').value = accounts[0];
+                analyzeWallet();
+                showNotify("تم ربط المحفظة بنجاح ✅");
+            } catch (e) { showNotify("فشل الاتصال بالمحفظة"); }
+        }
+
+        // 2. معالجة الأصفار (Zero Compressor)
+        function formatPrice(p) {
+            let str = p.toFixed(14);
+            let match = str.match(/\.0+/);
+            if (match && match[0].length > 4) {
+                let zerosCount = match[0].length - 1;
+                let remaining = str.split(match[0])[1].substring(0, 4);
+                return `$0.0<span class="zero-abbrev">{${zerosCount}}</span>${remaining}`;
+            }
+            return `$${p.toFixed(10)}`;
+        }
+
+        // 3. تحديث السعر والشارت
+        async function fetchMarket() {
+            try {
+                const r = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${DRGN}`);
                 const d = await r.json();
                 if(d.pairs) {
-                    price = parseFloat(d.pairs[0].priceUsd);
-                    const change = d.pairs[0].priceChange.h24;
-                    document.getElementById('priceDisplay').innerText = '$' + price.toFixed(11);
-                    const chEl = document.getElementById('priceChange');
-                    chEl.innerText = (change > 0 ? '+' : '') + change + '% (24h)';
-                    chEl.className = change > 0 ? 'text-xs font-bold text-green-500' : 'text-xs font-bold text-red-500';
-                    updateMainChart(price);
+                    livePrice = parseFloat(d.pairs[0].priceUsd);
+                    document.getElementById('priceDisplay').innerHTML = formatPrice(livePrice);
+                    updateChart(livePrice);
                 }
             } catch(e) {}
         }
 
-        // 2. الرسم البياني المتطور
-        const ctx = document.getElementById('mainChart').getContext('2d');
-        const mainChart = new Chart(ctx, {
+        const ctx = document.getElementById('priceChart').getContext('2d');
+        const chart = new Chart(ctx, {
             type: 'line',
-            data: { labels: new Array(12).fill(''), datasets: [{ data: [], borderColor: '#f59e0b', borderWidth: 3, tension: 0.3, fill: true, backgroundColor: 'rgba(245, 158, 11, 0.05)', pointRadius: 0 }] },
+            data: { labels: new Array(15).fill(''), datasets: [{ data: [], borderColor: '#f59e0b', borderWidth: 2, tension: 0.4, fill: true, backgroundColor: 'rgba(245, 158, 11, 0.05)', pointRadius: 0 }] },
             options: { plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } }
         });
 
-        function updateMainChart(p) {
-            mainChart.data.datasets[0].data.push(p);
-            if(mainChart.data.datasets[0].data.length > 12) mainChart.data.datasets[0].data.shift();
-            mainChart.update();
+        function updateChart(p) {
+            chart.data.datasets[0].data.push(p);
+            if(chart.data.datasets[0].data.length > 15) chart.data.datasets[0].data.shift();
+            chart.update();
         }
 
-        // 3. حاسبة الأرباح
-        function calculateProfit() {
-            const amt = document.getElementById('calcAmount').value;
-            const target = document.getElementById('targetPrice').value;
-            if(!amt || !target) return;
-            const result = amt * target;
-            document.getElementById('profitRes').classList.remove('hidden');
-            document.getElementById('totalProfit').innerText = '$' + result.toLocaleString();
-        }
+        // 4. تحليل الرصيد
+        async function analyzeWallet() {
+            const addr = document.getElementById('targetAddr').value.trim();
+            if(!ethers.utils.isAddress(addr)) return showNotify("العنوان غير صحيح!");
 
-        // 4. الفحص العميق
-        async function scanWallet() {
-            const addr = document.getElementById('scanInput').value.trim();
-            if(!ethers.utils.isAddress(addr)) return alert("العنوان غير صحيح");
+            const provider = new ethers.providers.JsonRpcProvider("https://bsc-dataseed.binance.org/");
+            const abi = ["function balanceOf(address) view returns (uint256)"];
+            const contract = new ethers.Contract(DRGN, abi, provider);
             
-            const provider = new ethers.providers.JsonRpcProvider(RPC);
-            const contract = new ethers.Contract(CONTRACT, ABI, provider);
-            const bal = await contract.balanceOf(addr);
-            const fmt = ethers.utils.formatUnits(bal, 18);
-
-            document.getElementById('scanRes').classList.remove('hidden');
-            document.getElementById('scanBal').innerText = parseFloat(fmt).toLocaleString() + " DRGN";
-            document.getElementById('scanVal').innerText = "$" + (parseFloat(fmt) * price).toFixed(2);
+            try {
+                const b = await contract.balanceOf(addr);
+                const f = ethers.utils.formatUnits(b, 18);
+                document.getElementById('dataPane').classList.remove('hidden');
+                document.getElementById('resBal').innerText = parseFloat(f).toLocaleString() + " DRGN";
+                document.getElementById('resVal').innerText = "$" + (parseFloat(f) * livePrice).toFixed(2);
+            } catch(e) { showNotify("خطأ في الشبكة"); }
         }
 
-        // 5. ربط المحفظة
-        async function connectWallet() {
-            if(window.ethereum) {
-                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                document.getElementById('walletBtn').innerText = accounts[0].substring(0,8) + "...";
-                document.getElementById('scanInput').value = accounts[0];
-                scanWallet();
-            } else { alert("يرجى استخدام MetaMask Browser"); }
+        function showNotify(msg) {
+            const n = document.getElementById('notification');
+            n.innerText = msg;
+            n.classList.add('show');
+            setTimeout(() => n.classList.remove('show'), 3000);
         }
 
-        setInterval(loadPrice, 15000);
-        loadPrice();
+        setInterval(fetchMarket, 10000);
+        fetchMarket();
     </script>
 </body>
 </html>
