@@ -3,183 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DRGN Intelligence Dashboard 🐉</title>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Dragon Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Tajawal', sans-serif; background: #050505; color: #fff; }
-        .glass-card { background: rgba(15, 15, 15, 0.9); border: 1px solid rgba(251, 191, 36, 0.2); border-radius: 2rem; }
-        .dragon-gradient { background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); color: #000; }
-        .animate-pulse-slow { animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+        body { background: #050505; color: #fff; font-family: sans-serif; }
+        .dragon-card { background: #111; border: 1px solid #d4af3733; border-radius: 1.5rem; }
     </style>
 </head>
 <body class="p-4">
 
-    <header class="flex justify-between items-center mb-6">
-        <div class="flex items-center gap-2">
-            <div class="w-10 h-10 dragon-gradient rounded-full flex items-center justify-center text-xl">🐉</div>
-            <h1 class="text-lg font-black text-yellow-500">DRAGON APP</h1>
-        </div>
-        <button onclick="connectWallet()" id="walletBtn" class="dragon-gradient px-4 py-2 rounded-xl text-xs font-bold">ربط المحفظة</button>
-    </header>
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-yellow-500 font-bold">DRAGON 🐉</h1>
+        <button onclick="connect()" id="btn" class="bg-yellow-500 text-black px-4 py-2 rounded-lg text-xs font-bold">ربط المحفظة</button>
+    </div>
 
-    <section class="glass-card p-6 mb-4">
-        <p class="text-gray-500 text-xs uppercase tracking-tighter">السعر المباشر ($DRGN)</p>
-        <h2 id="livePrice" class="text-3xl font-black text-yellow-500 mb-4 tracking-tighter animate-pulse-slow">$0.0000000000</h2>
-        <canvas id="priceChart" class="w-full h-32"></canvas>
-    </section>
+    <div class="dragon-card p-6 mb-4 text-center">
+        <p class="text-gray-400 text-xs">سعر التنين</p>
+        <h2 id="price" class="text-2xl font-bold text-yellow-500">$0.0000000000</h2>
+    </div>
 
-    <div class="grid grid-cols-2 gap-3 mb-6">
-        <div class="glass-card p-4 text-center">
-            <p class="text-[10px] text-gray-500 uppercase">السيولة المقفلة</p>
-            <p class="text-md font-bold text-green-400">$41.00</p>
-        </div>
-        <div class="glass-card p-4 text-center">
-            <p class="text-[10px] text-gray-500 uppercase">القفل حتى</p>
-            <p class="text-md font-bold text-blue-400">2027</p>
+    <div class="dragon-card p-6">
+        <input id="addr" type="text" placeholder="العنوان" class="w-full bg-black border border-gray-800 p-3 rounded-lg mb-4 text-sm">
+        <button onclick="check()" class="w-full bg-zinc-800 py-3 rounded-lg font-bold">فحص الرصيد</button>
+        
+        <div id="res" class="hidden mt-4 text-center border-t border-gray-800 pt-4">
+            <p id="bal" class="text-xl font-bold text-yellow-500"></p>
+            <p id="val" class="text-xs text-gray-400"></p>
         </div>
     </div>
 
-    <section class="glass-card p-6 border border-yellow-500/30">
-        <h3 class="text-md font-bold mb-4 text-yellow-500 italic">🔍 كاشف الأرصدة المتطور</h3>
-        <input id="walletAddrInput" type="text" placeholder="أدخل العنوان هنا" 
-               class="w-full bg-black/50 border border-white/10 p-4 rounded-2xl outline-none focus:border-yellow-500 text-sm mb-4">
-        <button onclick="checkStats()" class="w-full py-4 bg-zinc-800 rounded-2xl font-black hover:bg-zinc-700 transition active:scale-95">فحص البيانات الحية</button>
-        
-        <div id="checkResult" class="hidden mt-6 p-4 bg-yellow-500/5 rounded-2xl border border-yellow-500/10 text-center">
-            <p class="text-gray-400 text-xs mb-1">رصيدك الحالي</p>
-            <p id="userBalance" class="text-2xl font-black text-yellow-500">0 $DRGN</p>
-            <div class="flex justify-center gap-2 mt-2">
-                <span id="userValue" class="text-xs text-gray-500">$0.00 USD</span>
-                <span class="text-xs text-gray-600">|</span>
-                <span id="tokenStatus" class="text-xs text-green-500 font-bold">نشط ✅</span>
-            </div>
-        </div>
-    </section>
-
     <script>
-        const TOKEN_ADDR = "0x583787E29Bb2D92FcBc713389FD66807602c72F3";
-        const ABI = ["function balanceOf(address) view returns (uint256)"];
-        let dragonPrice = 0;
+        const DRGN = "0x583787E29Bb2D92FcBc713389FD66807602c72F3";
+        let pUSD = 0;
 
-        // تطوير 1: جلب السعر مع معالجة الأخطاء
-        async function fetchPrice() {
-            try {
-                const res = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${TOKEN_ADDR}`);
-                const data = await res.json();
-                if (data.pairs && data.pairs[0]) {
-                    dragonPrice = parseFloat(data.pairs[0].priceUsd);
-                    document.getElementById('livePrice').innerText = '$' + dragonPrice.toFixed(11);
-                }
-            } catch (e) { console.error("Price API Error"); }
-        }
-
-        // تطوير 2: فحص الرصيد باستخدام "المحفظة المتصلة" كأولوية
-        async function checkStats() {
-            const addr = document.getElementById('walletAddrInput').value.trim();
-            if (!ethers.utils.isAddress(addr)) return alert("العنوان غير صحيح");
-
-            try {
-                // إذا كان المستخدم في ميتاماسك، نستخدم محفظته كمزود بيانات لضمان السرعة
-                let provider;
-                if (window.ethereum) {
-                    provider = new ethers.providers.Web3Provider(window.ethereum);
-                } else {
-                    provider = new ethers.providers.JsonRpcProvider("https://bsc-dataseed.binance.org/");
-                }
-
-                const contract = new ethers.Contract(TOKEN_ADDR, ABI, provider);
-                const balanceBN = await contract.balanceOf(addr);
-                const balance = ethers.utils.formatUnits(balanceBN, 18);
-
-                document.getElementById('checkResult').classList.remove('hidden');
-                document.getElementById('userBalance').innerText = parseFloat(balance).toLocaleString() + " $DRGN";
-                document.getElementById('userValue').innerText = "$" + (parseFloat(balance) * dragonPrice).toFixed(4) + " USD";
-            } catch (err) {
-                console.error(err);
-                alert("تعذر جلب البيانات. تأكد من أنك على شبكة Smart Chain");
+        async function getP() {
+            const r = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${DRGN}`);
+            const d = await r.json();
+            if(d.pairs) {
+                pUSD = d.pairs[0].priceUsd;
+                document.getElementById('price').innerText = '$' + parseFloat(pUSD).toFixed(11);
             }
         }
 
-        // تطوير 3: ربط المحفظة التلقائي
-        async function connectWallet() {
-            if (window.ethereum) {
-                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                document.getElementById('walletBtn').innerText = accounts[0].substring(0, 6) + "...";
-                document.getElementById('walletAddrInput').value = accounts[0];
-                checkStats();
-            } else {
-                alert("افتح التطبيق داخل MetaMask أو Trust Wallet");
+        async function connect() {
+            if(window.ethereum) {
+                const acc = await window.ethereum.request({method:'eth_requestAccounts'});
+                document.getElementById('btn').innerText = acc[0].substring(0,6)+'...';
+                document.getElementById('addr').value = acc[0];
+                check();
             }
         }
 
-        // رسم الشارت (بسيط للتوضيح)
-        const ctx = document.getElementById('priceChart').getContext('2d');
-        const priceChart = new Chart(ctx, {
-            type: 'line',
-            data: { labels: [1,2,3,4,5,6], datasets: [{ data: [0,0,0,0,0,0], borderColor: '#fbbf24', tension: 0.4, pointRadius: 0 }] },
-            options: { plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } }
-        });
-
-        fetchPrice();
-        setInterval(fetchPrice, 15000);
-    </script>
-</body>
-</html>
-                    data: chartData,
-                    borderColor: '#fbbf24',
-                    borderWidth: 3,
-                    tension: 0.4,
-                    pointRadius: 0,
-                    fill: true,
-                    backgroundColor: 'rgba(251, 191, 36, 0.05)'
-                }]
-            },
-            options: {
-                plugins: { legend: { display: false } },
-                scales: { x: { display: false }, y: { display: false } },
-                animation: { duration: 2000 }
-            }
-        });
-
-        // 3. ربط المحفظة
-        async function connectWallet() {
-            if (window.ethereum) {
-                try {
-                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                    document.getElementById('walletBtn').innerText = "متصل: " + accounts[0].substring(0, 5) + "..";
-                    document.getElementById('walletAddrInput').value = accounts[0];
-                    checkStats();
-                } catch (e) { alert("تم إلغاء العملية"); }
-            } else { alert("يرجى فتح الموقع من متصفح محفظة (Trust/MetaMask)"); }
+        async function check() {
+            const a = document.getElementById('addr').value;
+            if(!ethers.utils.isAddress(a)) return;
+            
+            // استخدام Web3 من الميتاماسك مباشرة
+            const provider = window.ethereum ? new ethers.providers.Web3Provider(window.ethereum) : new ethers.providers.JsonRpcProvider("https://bsc-dataseed.binance.org/");
+            const abi = ["function balanceOf(address) view returns (uint256)"];
+            const contract = new ethers.Contract(DRGN, abi, provider);
+            
+            const b = await contract.balanceOf(a);
+            const formatted = ethers.utils.formatUnits(b, 18);
+            
+            document.getElementById('res').classList.remove('hidden');
+            document.getElementById('bal').innerText = parseFloat(formatted).toLocaleString() + " DRGN";
+            document.getElementById('val').innerText = "$" + (parseFloat(formatted) * pUSD).toFixed(2);
         }
 
-        // 4. فحص الرصيد (مباشر من الشبكة)
-        async function checkStats() {
-            const addr = document.getElementById('walletAddrInput').value.trim();
-            if (!ethers.utils.isAddress(addr)) {
-                alert("العنوان غير صحيح!");
-                return;
-            }
-
-            try {
-                const provider = new ethers.providers.JsonRpcProvider(RPC_URL);
-                const contract = new ethers.Contract(TOKEN_ADDRESS, TOKEN_ABI, provider);
-                const balanceBN = await contract.balanceOf(addr);
-                const balance = ethers.utils.formatUnits(balanceBN, 18);
-
-                document.getElementById('checkResult').classList.remove('hidden');
-                document.getElementById('userBalance').innerText = parseFloat(balance).toLocaleString() + " $DRGN";
-                document.getElementById('userValue').innerText = "$" + (parseFloat(balance) * currentDragonPrice).toFixed(4) + " USD";
-            } catch (e) { alert("خطأ في الاتصال بالشبكة"); }
-        }
-
-        // التحديث التلقائي
-        setInterval(updatePriceData, 15000);
-        updatePriceData();
+        getP();
+        setInterval(getP, 20000);
     </script>
 </body>
 </html>
