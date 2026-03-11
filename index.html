@@ -3,79 +3,134 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Dragon Dashboard</title>
+    <title>Dragon Coin App | تطبيق التنين</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
+
     <style>
-        body { background: #050505; color: #fff; font-family: sans-serif; }
-        .dragon-card { background: #111; border: 1px solid #d4af3733; border-radius: 1.5rem; }
+        body { font-family: 'Tajawal', sans-serif; background: #0a0a0a; color: #fff; overflow-x: hidden; }
+        .dragon-card { background: linear-gradient(145deg, #111, #1a1a1a); border: 1px solid rgba(212, 175, 55, 0.2); border-radius: 2rem; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .gold-text { color: #D4AF37; }
+        .gold-bg { background: linear-gradient(90deg, #D4AF37, #F5C642); color: #000; }
+        .glow { box-shadow: 0 0 15px rgba(212, 175, 55, 0.3); }
+        .animate-flicker { animation: flicker 2s infinite; }
+        @keyframes flicker { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
     </style>
 </head>
-<body class="p-4">
+<body class="p-4 md:p-10 max-w-lg mx-auto">
 
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-yellow-500 font-bold">DRAGON 🐉</h1>
-        <button onclick="connect()" id="btn" class="bg-yellow-500 text-black px-4 py-2 rounded-lg text-xs font-bold">ربط المحفظة</button>
-    </div>
-
-    <div class="dragon-card p-6 mb-4 text-center">
-        <p class="text-gray-400 text-xs">سعر التنين</p>
-        <h2 id="price" class="text-2xl font-bold text-yellow-500">$0.0000000000</h2>
-    </div>
-
-    <div class="dragon-card p-6">
-        <input id="addr" type="text" placeholder="العنوان" class="w-full bg-black border border-gray-800 p-3 rounded-lg mb-4 text-sm">
-        <button onclick="check()" class="w-full bg-zinc-800 py-3 rounded-lg font-bold">فحص الرصيد</button>
-        
-        <div id="res" class="hidden mt-4 text-center border-t border-gray-800 pt-4">
-            <p id="bal" class="text-xl font-bold text-yellow-500"></p>
-            <p id="val" class="text-xs text-gray-400"></p>
+    <header class="flex justify-between items-center mb-8">
+        <div class="flex items-center gap-3">
+            <div class="w-12 h-12 gold-bg rounded-2xl flex items-center justify-center text-2xl shadow-lg glow">🐉</div>
+            <div>
+                <h1 class="text-xl font-black gold-text leading-none uppercase">$DRGN</h1>
+                <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">The Dragon Nest</p>
+            </div>
         </div>
+        <button onclick="connectWallet()" id="connectBtn" class="gold-bg px-4 py-2 rounded-xl text-xs font-black shadow-md transition-all active:scale-95">ربط المحفظة</button>
+    </header>
+
+    <section class="dragon-card p-6 mb-6 relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-yellow-500/5 rounded-full blur-3xl"></div>
+        <div class="flex justify-between items-start mb-4">
+            <span class="text-xs text-gray-500 font-bold uppercase tracking-tighter">سعر التنين المباشر</span>
+            <span class="bg-green-500/10 text-green-500 text-[10px] px-2 py-1 rounded-md border border-green-500/20 animate-flicker font-bold">LIVE ON BSC</span>
+        </div>
+        <h2 id="livePrice" class="text-4xl font-black mb-2 tracking-tighter gold-text">$0.0000000000</h2>
+        <p class="text-[10px] text-gray-500">تم التحديث منذ لحظات • السيولة مقفلة ✅</p>
+    </section>
+
+    <section class="dragon-card p-6 mb-8">
+        <h3 class="text-sm font-black gold-text mb-4 flex items-center gap-2 italic uppercase">
+            <span>🔍</span> فحص رصيد المحفظة
+        </h3>
+        <div class="relative mb-4">
+            <input id="addrInput" type="text" placeholder="ضع عنوان المحفظة هنا" 
+                   class="w-full bg-black/40 border border-white/5 p-4 rounded-2xl outline-none focus:border-yellow-500 transition-all font-mono text-xs placeholder:text-gray-700">
+        </div>
+        <button onclick="fetchAccountData()" class="w-full py-4 bg-zinc-800 rounded-2xl font-black text-sm hover:bg-zinc-700 transition-all active:scale-95 border border-white/5">تحليل البيانات</button>
+        
+        <div id="results" class="hidden mt-6 pt-6 border-t border-white/5 space-y-4">
+            <div class="text-center">
+                <p class="text-[10px] text-gray-500 uppercase mb-1">الرصيد المتاح</p>
+                <p id="userBal" class="text-3xl font-black gold-text leading-none tracking-tighter">0.00</p>
+                <p class="text-[10px] text-gray-500 mt-1 uppercase font-bold">$DRGN Tokens</p>
+            </div>
+            <div class="flex justify-between items-center bg-white/5 p-3 rounded-xl border border-white/5">
+                <span class="text-[10px] text-gray-400">القيمة التقديرية</span>
+                <span id="userUSD" class="text-sm font-bold text-green-400">$0.00 USD</span>
+            </div>
+        </div>
+    </section>
+
+    <div class="grid grid-cols-2 gap-3 mb-10">
+        <a href="https://pancakeswap.finance/swap?outputCurrency=0x583787E29Bb2D92FcBc713389FD66807602c72F3" target="_blank" class="dragon-card p-4 flex flex-col items-center justify-center hover:bg-white/5 transition">
+            <span class="text-xl mb-1">🛒</span>
+            <span class="text-[10px] font-bold uppercase">شراء $DRGN</span>
+        </a>
+        <a href="https://www.pinksale.finance/pinklock/record/11?chain=BSC" target="_blank" class="dragon-card p-4 flex flex-col items-center justify-center hover:bg-white/5 transition">
+            <span class="text-xl mb-1">🔒</span>
+            <span class="text-[10px] font-bold uppercase">سجل القفل</span>
+        </a>
     </div>
 
     <script>
-        const DRGN = "0x583787E29Bb2D92FcBc713389FD66807602c72F3";
-        let pUSD = 0;
+        const DRGN_CONTRACT = "0x583787E29Bb2D92FcBc713389FD66807602c72F3";
+        const BSC_RPC = "https://bsc-dataseed1.binance.org/";
+        const ABI = ["function balanceOf(address) view returns (uint256)"];
+        let currentPrice = 0;
 
-        async function getP() {
-            const r = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${DRGN}`);
-            const d = await r.json();
-            if(d.pairs) {
-                pUSD = d.pairs[0].priceUsd;
-                document.getElementById('price').innerText = '$' + parseFloat(pUSD).toFixed(11);
+        async function updatePrice() {
+            try {
+                const response = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${DRGN_CONTRACT}`);
+                const data = await response.json();
+                if (data.pairs && data.pairs[0]) {
+                    currentPrice = parseFloat(data.pairs[0].priceUsd);
+                    document.getElementById('livePrice').innerText = '$' + currentPrice.toFixed(11);
+                }
+            } catch (e) { console.error("Price Error"); }
+        }
+
+        async function connectWallet() {
+            if (window.ethereum) {
+                try {
+                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    document.getElementById('connectBtn').innerText = "متصل: " + accounts[0].substring(0,6) + "..";
+                    document.getElementById('addrInput').value = accounts[0];
+                    fetchAccountData();
+                } catch (err) { alert("تم رفض الاتصال"); }
+            } else { alert("افتح التطبيق من داخل Trust Wallet أو MetaMask"); }
+        }
+
+        async function fetchAccountData() {
+            const address = document.getElementById('addrInput').value.trim();
+            if (!ethers.utils.isAddress(address)) {
+                alert("يرجى إدخال عنوان محفظة صحيح");
+                return;
+            }
+
+            try {
+                // استخدام الـ Provider المناسب (Web3 أو RPC مباشر)
+                const provider = window.ethereum ? new ethers.providers.Web3Provider(window.ethereum) : new ethers.providers.JsonRpcProvider(BSC_RPC);
+                const contract = new ethers.Contract(DRGN_CONTRACT, ABI, provider);
+                
+                const balRaw = await contract.balanceOf(address);
+                const balFormatted = ethers.utils.formatUnits(balRaw, 18);
+                
+                document.getElementById('results').classList.remove('hidden');
+                document.getElementById('userBal').innerText = parseFloat(balFormatted).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 2});
+                document.getElementById('userUSD').innerText = "$" + (parseFloat(balFormatted) * currentPrice).toFixed(2) + " USD";
+            } catch (error) {
+                console.error(error);
+                alert("حدث خطأ أثناء جلب الرصيد من الشبكة");
             }
         }
 
-        async function connect() {
-            if(window.ethereum) {
-                const acc = await window.ethereum.request({method:'eth_requestAccounts'});
-                document.getElementById('btn').innerText = acc[0].substring(0,6)+'...';
-                document.getElementById('addr').value = acc[0];
-                check();
-            }
-        }
-
-        async function check() {
-            const a = document.getElementById('addr').value;
-            if(!ethers.utils.isAddress(a)) return;
-            
-            // استخدام Web3 من الميتاماسك مباشرة
-            const provider = window.ethereum ? new ethers.providers.Web3Provider(window.ethereum) : new ethers.providers.JsonRpcProvider("https://bsc-dataseed.binance.org/");
-            const abi = ["function balanceOf(address) view returns (uint256)"];
-            const contract = new ethers.Contract(DRGN, abi, provider);
-            
-            const b = await contract.balanceOf(a);
-            const formatted = ethers.utils.formatUnits(b, 18);
-            
-            document.getElementById('res').classList.remove('hidden');
-            document.getElementById('bal').innerText = parseFloat(formatted).toLocaleString() + " DRGN";
-            document.getElementById('val').innerText = "$" + (parseFloat(formatted) * pUSD).toFixed(2);
-        }
-
-        getP();
-        setInterval(getP, 20000);
+        // تحديث السعر تلقائياً كل 20 ثانية
+        setInterval(updatePrice, 20000);
+        updatePrice();
     </script>
 </body>
 </html>
