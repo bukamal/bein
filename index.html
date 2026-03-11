@@ -3,108 +3,235 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dragon Nexus v7.0 🐉</title>
+    <title>Dragon Elite DApp | النسخة الشاملة 🐉</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Tajawal:wght@500;800;900&display=swap" rel="stylesheet">
 
     <style>
-        :root { --gold: #f59e0b; --dark-bg: #050505; }
-        body { font-family: 'Tajawal', sans-serif; background: var(--dark-bg); color: #fff; overflow-x: hidden; }
+        :root { --gold: #f59e0b; --dark: #000000; --glass: rgba(15, 15, 15, 0.95); }
+        body { font-family: 'Tajawal', sans-serif; background: var(--dark); color: #fff; overflow-x: hidden; }
         .font-v { font-family: 'Orbitron', sans-serif; }
-        .dragon-card { background: rgba(15, 15, 15, 0.95); border: 1px solid rgba(245, 158, 11, 0.2); border-radius: 2rem; transition: 0.3s; }
-        .gold-glow { box-shadow: 0 0 20px rgba(245, 158, 11, 0.15); }
-        .btn-main { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: #000; font-weight: 900; }
-        .btn-main:active { transform: scale(0.96); }
-        .zero-abbrev { font-size: 0.7em; vertical-align: middle; color: #666; margin: 0 2px; }
-        #notification { transition: all 0.5s ease; transform: translateY(-100px); }
-        #notification.show { transform: translateY(20px); }
+        
+        /* تصميم الكروت الزجاجي */
+        .dragon-card { background: var(--glass); border: 1px solid rgba(245, 158, 11, 0.15); border-radius: 2rem; transition: 0.3s; }
+        .gold-glow { box-shadow: 0 0 30px rgba(245, 158, 11, 0.1); }
+        .btn-gold { background: linear-gradient(135deg, #f59e0b 0%, #78350f 100%); color: #000; font-weight: 900; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3); }
+        
+        /* تأثيرات الحرق والرتب */
+        .burn-bar { height: 8px; background: #111; border-radius: 10px; overflow: hidden; border: 1px solid #222; }
+        .burn-fill { height: 100%; background: linear-gradient(90deg, #ff4b2b, #ff416c); width: 0%; transition: 2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .zero-small { font-size: 0.65em; vertical-align: middle; color: #666; margin: 0 1px; }
+        
+        /* الرتب ولوحة الشرف */
+        .hall-item { background: rgba(255,255,255,0.02); border-radius: 1.5rem; border: 1px solid rgba(255,255,255,0.05); transition: 0.3s; }
+        .rank-gold { border-color: #f59e0b; background: rgba(245,158,11,0.05); }
+
+        /* التنبيهات */
+        #toast { transition: 0.5s; transform: translateY(-100px); }
+        #toast.show { transform: translateY(20px); }
     </style>
 </head>
-<body class="p-4 md:p-8 max-w-xl mx-auto">
+<body class="p-4 md:p-8 max-w-xl mx-auto pb-32">
 
-    <div id="notification" class="fixed top-0 left-0 right-0 mx-auto w-64 z-50 bg-yellow-500 text-black p-3 rounded-2xl text-center text-xs font-bold shadow-2xl"></div>
+    <div id="toast" class="fixed top-0 left-0 right-0 mx-auto w-72 z-50 bg-yellow-500 text-black p-4 rounded-2xl text-center text-xs font-black shadow-2xl"></div>
 
-    <header class="flex justify-between items-center mb-10">
+    <header class="flex justify-between items-center mb-8">
         <div class="flex items-center gap-3">
-            <div class="w-12 h-12 btn-main rounded-2xl flex items-center justify-center text-2xl shadow-lg">🐉</div>
-            <h1 class="font-v font-black text-xl tracking-widest text-yellow-500 italic">DRGN.AI</h1>
+            <div class="w-12 h-12 btn-gold rounded-2xl flex items-center justify-center text-2xl shadow-xl">🐲</div>
+            <div>
+                <h1 class="font-v text-xl font-black text-yellow-500 tracking-widest leading-none">DRAGON</h1>
+                <p class="text-[9px] text-gray-600 font-bold uppercase tracking-widest mt-1">Legendary Ecosystem</p>
+            </div>
         </div>
         <button onclick="smartConnect()" id="walletBtn" class="border border-yellow-500/40 px-5 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-yellow-500 hover:text-black transition-all">Connect</button>
     </header>
 
-    <section class="dragon-card p-8 mb-6 gold-glow relative overflow-hidden">
-        <div class="flex justify-between text-gray-500 text-[10px] font-bold uppercase mb-2">
-            <span>Market Price (DRGN/BNB)</span>
-            <span id="priceStatus" class="text-green-500 italic">● Streaming</span>
-        </div>
-        <h2 id="priceDisplay" class="font-v text-4xl font-black mb-6 tracking-tight text-white flex items-center">
-            $0.00...00
-        </h2>
-        <canvas id="priceChart" class="w-full h-40"></canvas>
-    </section>
-
-    <div class="grid grid-cols-1 gap-4">
-        <div class="dragon-card p-6">
-            <h3 class="text-xs font-black text-yellow-500 mb-4 uppercase tracking-widest italic">Wallet Analyzer</h3>
-            <div class="relative group">
-                <input id="targetAddr" type="text" placeholder="أدخل عنوان المحفظة هنا..." 
-                       class="w-full bg-black/50 border border-white/5 p-4 rounded-2xl outline-none focus:border-yellow-500 transition-all font-mono text-[10px] mb-4">
-            </div>
-            <button onclick="analyzeWallet()" class="w-full py-4 btn-main rounded-2xl text-[11px] uppercase tracking-tighter shadow-xl">تحليل الرصيد والقيمة</button>
-            
-            <div id="dataPane" class="hidden mt-6 space-y-3 animate-pulse-once">
-                <div class="flex justify-between bg-white/5 p-4 rounded-xl border border-white/5">
-                    <span class="text-[10px] text-gray-500 font-bold uppercase">Holdings</span>
-                    <span id="resBal" class="text-sm font-black gold-text font-v">0.00</span>
-                </div>
-                <div class="flex justify-between bg-white/5 p-4 rounded-xl border border-white/5">
-                    <span class="text-[10px] text-gray-500 font-bold uppercase">Net Value</span>
-                    <span id="resVal" class="text-sm font-black text-green-500 font-v">$0.00</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="flex gap-3">
-            <a href="https://pancakeswap.finance/swap?outputCurrency=0x583787E29Bb2D92FcBc713389FD66807602c72F3" class="flex-1 dragon-card p-4 text-center font-black text-[10px] uppercase hover:border-yellow-500 transition">Swap Tokens</a>
-            <a href="https://www.pinksale.finance/pinklock/record/11?chain=BSC" class="flex-1 dragon-card p-4 text-center font-black text-[10px] uppercase hover:border-yellow-500 transition">Audit & Lock</a>
-        </div>
+    <div id="rankSection" class="hidden dragon-card p-8 mb-6 text-center border-yellow-500/40 bg-gradient-to-b from-yellow-500/5 to-transparent shadow-2xl animate-pulse-once">
+        <div id="rankIcon" class="text-6xl mb-4 drop-shadow-[0_0_15px_rgba(245,158,11,0.5)]">🥚</div>
+        <p class="text-[10px] text-gray-500 uppercase tracking-[0.3em] mb-1">Current Rank</p>
+        <h2 id="rankTitle" class="text-3xl font-black text-yellow-500 uppercase mb-3">Dragon Egg</h2>
+        <div id="rankBadge" class="inline-block px-4 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-bold text-gray-400 italic">مستثمر نشط في العرين</div>
     </div>
 
-    <script>
-        const DRGN = "0x583787E29Bb2D92FcBc713389FD66807602c72F3";
-        let livePrice = 0;
+    <section class="dragon-card p-6 mb-6 gold-glow overflow-hidden">
+        <div class="flex justify-between items-center mb-4">
+            <span class="text-[10px] text-gray-500 font-black uppercase italic">Market Pulse</span>
+            <span class="flex items-center gap-1 text-[9px] text-green-500 font-bold"><span class="w-2 h-2 bg-green-500 rounded-full animate-ping"></span> LIVE BSC</span>
+        </div>
+        <h2 id="priceDisplay" class="font-v text-4xl font-black mb-6 tracking-tighter text-white">
+            $0.00...00
+        </h2>
+        
+        <div class="space-y-2">
+            <div class="flex justify-between items-end text-[10px] font-bold uppercase">
+                <span class="text-orange-500">حرق التنين 🔥</span>
+                <span id="burnPercent" class="text-gray-500">0%</span>
+            </div>
+            <div class="burn-bar"><div id="burnFill" class="burn-fill"></div></div>
+            <p id="burnTotal" class="text-[9px] text-gray-600 italic text-right mt-1 font-mono uppercase">0 DRGN Burned</p>
+        </div>
+    </section>
 
-        // 1. وظيفة الربط الذكي (MetaMask Deep Link)
+    <section class="mb-8">
+        <h3 class="text-xs font-black text-yellow-500 mb-4 px-2 uppercase tracking-widest italic flex items-center gap-2">
+            <span>🏆</span> لوحة شرف العرين
+        </h3>
+        <div class="space-y-3">
+            <div class="hall-item p-4 flex justify-between items-center rank-gold border-yellow-500/30">
+                <div class="flex items-center gap-3">
+                    <span class="w-8 h-8 rounded-full bg-yellow-500 text-black flex items-center justify-center font-black text-xs">1</span>
+                    <div><p class="text-[10px] text-gray-400 font-bold">التنين الأعظم</p><p class="text-xs font-mono">0x72a...F82c</p></div>
+                </div>
+                <p class="text-xs font-black text-yellow-500">12.5B DRGN</p>
+            </div>
+            <div class="hall-item p-4 flex justify-between items-center opacity-70">
+                <div class="flex items-center gap-3">
+                    <span class="w-8 h-8 rounded-full bg-gray-500 text-black flex items-center justify-center font-black text-xs">2</span>
+                    <div><p class="text-[10px] text-gray-400 font-bold">تنين النار</p><p class="text-xs font-mono">0x3f1...E91a</p></div>
+                </div>
+                <p class="text-xs font-black">8.2B DRGN</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="mb-8">
+        <h3 class="text-xs font-black text-yellow-500 mb-4 px-2 uppercase tracking-widest italic">⚔️ مهمات تعزيز القوة</h3>
+        <div class="grid grid-cols-1 gap-3">
+            <div onclick="window.open('https://t.me/YourGroup')" class="dragon-card p-4 flex justify-between items-center border-l-4 border-yellow-500 hover:bg-white/5 transition active:scale-95">
+                <div><h4 class="text-xs font-bold">الانضمام للجيش</h4><p class="text-[9px] text-gray-500 mt-1">تفاعل مع المجتمع لزيادة رتبتك</p></div>
+                <span class="text-[10px] font-black text-yellow-500">+50 XP</span>
+            </div>
+            <div onclick="shareApp()" class="dragon-card p-4 flex justify-between items-center border-l-4 border-blue-500 hover:bg-white/5 transition active:scale-95">
+                <div><h4 class="text-xs font-bold">استدعاء الرفاق</h4><p class="text-[9px] text-gray-500 mt-1">شارك التطبيق في مجموعات الكريبتو</p></div>
+                <span class="text-[10px] font-black text-blue-500">RANK UP</span>
+            </div>
+        </div>
+    </section>
+
+    <div class="dragon-card p-6 border-white/5 bg-gradient-to-t from-zinc-900/50 to-transparent">
+        <input id="scanAddr" type="text" placeholder="أدخل عنوان المحفظة للتحليل العميق.." 
+               class="w-full bg-black/40 border border-white/5 p-4 rounded-2xl outline-none focus:border-yellow-500 text-xs font-mono mb-4 text-center placeholder:text-gray-700">
+        <button onclick="analyze()" class="w-full py-4 btn-gold rounded-2xl text-[11px] uppercase tracking-[0.2em] shadow-2xl active:scale-95 transition-all">Analyze Power</button>
+    </div>
+
+    <footer class="mt-12 pb-10 text-center">
+        <div class="flex justify-center gap-6 text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-4">
+            <a href="#" class="hover:text-yellow-500 transition">Audit</a>
+            <a href="#" class="hover:text-yellow-500 transition">Liquidity</a>
+            <a href="#" class="hover:text-yellow-500 transition">Contact</a>
+        </div>
+        <p class="text-[8px] text-gray-800 uppercase font-black tracking-[0.5em]">Dragon Intelligence Engine v11.0</p>
+    </footer>
+
+    <script>
+        const CONTRACT = "0x583787E29Bb2D92FcBc713389FD66807602c72F3";
+        const DEAD = "0x000000000000000000000000000000000000dead";
+        const RPC = "https://bsc-dataseed.binance.org/";
+        let currentPrice = 0;
+
+        // 1. نظام الرتب
+        const RANKS = [
+            { min: 0, title: "Dragon Egg 🥚", icon: "🥚", badge: "مستثمر في مرحلة الحضانة" },
+            { min: 50000000, title: "Hatchling 🐲", icon: "🐲", badge: "تنين ناشئ اكتسب قوته" },
+            { min: 500000000, title: "Warrior ⚔️", icon: "⚔️", badge: "محارب العرين الموثوق" },
+            { min: 2000000000, title: "Elder Dragon 🐉", icon: "🐉", badge: "حكيم التنانين القدامى" },
+            { min: 10000000000, title: "Dragon King 👑", icon: "👑", badge: "ملك السيادة المطلقة" }
+        ];
+
+        // 2. معالجة الأصفار الذكية
+        function formatSmartPrice(p) {
+            let s = p.toFixed(14);
+            let m = s.match(/\.0+/);
+            if (m && m[0].length > 4) {
+                let count = m[0].length - 1;
+                let rem = s.split(m[0])[1].substring(0, 4);
+                return `$0.0<span class="zero-small">{${count}}</span>${rem}`;
+            }
+            return `$${p.toFixed(10)}`;
+        }
+
+        // 3. تحديث البيانات الحية
+        async function fetchMarketData() {
+            try {
+                const res = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${CONTRACT}`);
+                const data = await res.json();
+                if(data.pairs) {
+                    currentPrice = parseFloat(data.pairs[0].priceUsd);
+                    document.getElementById('priceDisplay').innerHTML = formatSmartPrice(currentPrice);
+                }
+
+                const provider = new ethers.providers.JsonRpcProvider(RPC);
+                const abi = ["function balanceOf(address) view returns (uint256)"];
+                const contract = new ethers.Contract(CONTRACT, abi, provider);
+                
+                const deadBal = await contract.balanceOf(DEAD);
+                const burned = parseFloat(ethers.utils.formatUnits(deadBal, 18));
+                const burnP = ((burned / 1000000000000) * 100).toFixed(2); // نسبة الحرق من تريليون
+
+                document.getElementById('burnFill').style.width = burnP + "%";
+                document.getElementById('burnPercent').innerText = burnP + "%";
+                document.getElementById('burnTotal').innerText = burned.toLocaleString() + " DRGN Burned";
+            } catch(e) { console.error("Update Error"); }
+        }
+
+        // 4. تحليل المحفظة والرتبة
+        async function analyze() {
+            const addr = document.getElementById('scanAddr').value.trim();
+            if(!ethers.utils.isAddress(addr)) return showToast("العنوان غير صحيح!");
+
+            showToast("جاري فحص العرين... 🔍");
+            
+            const provider = new ethers.providers.JsonRpcProvider(RPC);
+            const contract = new ethers.Contract(CONTRACT, ["function balanceOf(address) view returns (uint256)"], provider);
+            const b = await contract.balanceOf(addr);
+            const fmt = parseFloat(ethers.utils.formatUnits(b, 18));
+
+            const rank = RANKS.slice().reverse().find(r => fmt >= r.min) || RANKS[0];
+            
+            setTimeout(() => {
+                document.getElementById('rankSection').classList.remove('hidden');
+                document.getElementById('rankIcon').innerText = rank.icon;
+                document.getElementById('rankTitle').innerText = rank.title;
+                document.getElementById('rankBadge').innerText = rank.badge;
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                showToast("اكتمل التحليل بنجاح ✅");
+            }, 1000);
+        }
+
+        // 5. الربط والمشاركة
         function smartConnect() {
-            if (typeof window.ethereum !== 'undefined') {
-                connectWallet();
+            if (window.ethereum) {
+                window.ethereum.request({ method: 'eth_requestAccounts' }).then(acc => {
+                    document.getElementById('walletBtn').innerText = acc[0].substring(0,6) + "..";
+                    document.getElementById('scanAddr').value = acc[0];
+                    analyze();
+                });
             } else {
-                showNotify("جاري فتح MetaMask...");
-                // هذا الرابط يفتح المحفظة ويوجهها لموقعك تلقائياً
-                const currentUrl = window.location.href.replace(/^https?:\/\//, '');
-                window.location.href = `https://metamask.app.link/dapp/${currentUrl}`;
+                const url = window.location.href.replace(/^https?:\/\//, '');
+                window.location.href = `https://metamask.app.link/dapp/${url}`;
             }
         }
 
-        async function connectWallet() {
-            try {
-                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                document.getElementById('walletBtn').innerText = accounts[0].substring(0,6) + "...";
-                document.getElementById('targetAddr').value = accounts[0];
-                analyzeWallet();
-                showNotify("تم ربط المحفظة بنجاح ✅");
-            } catch (e) { showNotify("فشل الاتصال بالمحفظة"); }
+        function shareApp() {
+            if(navigator.share) {
+                navigator.share({ title: 'Dragon DApp', text: 'انضم لعرين التنين وتحقق من رتبتك!', url: window.location.href });
+            } else { showToast("انسخ الرابط وشاركه يدوياً"); }
         }
 
-        // 2. معالجة الأصفار (Zero Compressor)
-        function formatPrice(p) {
-            let str = p.toFixed(14);
-            let match = str.match(/\.0+/);
-            if (match && match[0].length > 4) {
-                let zerosCount = match[0].length - 1;
+        function showToast(m) {
+            const t = document.getElementById('toast');
+            t.innerText = m;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+
+        fetchMarketData();
+        setInterval(fetchMarketData, 20000);
+    </script>
+</body>
+</html>
                 let remaining = str.split(match[0])[1].substring(0, 4);
                 return `$0.0<span class="zero-abbrev">{${zerosCount}}</span>${remaining}`;
             }
