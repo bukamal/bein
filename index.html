@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" id="mainHtml">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -10,16 +10,16 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     
     <style>
-        body { background-color: #050505; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow-x: hidden; }
+        body { background-color: #050505; color: #fff; font-family: 'Segoe UI', sans-serif; transition: all 0.3s ease; }
         .dragon-card { background: linear-gradient(145deg, #161616, #0a0a0a); border: 1px solid #222; }
         .tab-content { display: none; }
         .tab-content.active { display: block; animation: fadeIn 0.4s ease; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .nav-item.active { color: #ff4d4d; }
-        .task-done { opacity: 0.5; pointer-events: none; border-color: #111 !important; }
-        .gold-glow { text-shadow: 0 0 10px rgba(255, 215, 0, 0.3); color: #ffd700; }
-        #toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: #ff4d4d; color: white; padding: 12px 25px; border-radius: 50px; font-weight: bold; opacity: 0; transition: 0.3s; z-index: 9999; pointer-events: none; }
+        .task-done { opacity: 0.5; pointer-events: none; filter: grayscale(1); }
+        #toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: #ff4d4d; padding: 12px 25px; border-radius: 50px; font-weight: bold; opacity: 0; z-index: 9999; pointer-events: none; transition: 0.3s; }
         #toast.show { opacity: 1; }
+        .lang-btn { border: 1px solid #333; background: rgba(255,255,255,0.05); }
     </style>
 </head>
 <body class="pb-32">
@@ -34,221 +34,198 @@
                 <p id="totalPoints" class="text-[10px] font-bold text-yellow-500 uppercase">Points: 0</p>
             </div>
         </div>
-        <button id="walletBtn" onclick="smartConnect()" class="bg-white text-black text-[10px] font-black px-5 py-2 rounded-full uppercase transition active:scale-95">
-            Connect Wallet
-        </button>
+        
+        <div class="flex gap-2">
+            <button onclick="toggleLang()" class="lang-btn text-[10px] px-3 py-2 rounded-lg font-bold uppercase" id="langSwitch">EN</button>
+            <button id="walletBtn" onclick="smartConnect()" class="bg-white text-black text-[10px] font-black px-4 py-2 rounded-full uppercase transition active:scale-95" data-en="Connect" data-ar="ربط">ربط</button>
+        </div>
     </header>
 
     <div id="home-tab" class="tab-content active p-4 space-y-5">
-        
         <div class="dragon-card p-6 rounded-[2rem]">
             <div class="flex justify-between items-center mb-3">
-                <h3 class="text-[10px] font-black text-gray-400 uppercase tracking-widest">معدل الحرق المباشر 🔥</h3>
-                <span id="burnPercent" class="text-red-500 font-black text-xs">0.0000%</span>
+                <h3 class="text-[10px] font-black text-gray-400 uppercase tracking-widest" data-en="Live Burn Rate 🔥" data-ar="معدل الحرق المباشر 🔥">معدل الحرق المباشر 🔥</h3>
+                <span id="burnPercent" class="text-red-500 font-black text-xs font-mono">0.00%</span>
             </div>
             <div class="w-full bg-[#111] h-3 rounded-full overflow-hidden border border-white/5">
                 <div id="burnFill" class="bg-red-600 h-full w-0 transition-all duration-[2s]"></div>
             </div>
-            <p id="burnValue" class="text-[9px] text-gray-500 mt-3 text-left font-mono">DRGN Burned: 0</p>
+            <p id="burnValue" class="text-[9px] text-gray-500 mt-3 font-mono">0 $DRGN Burned</p>
         </div>
 
         <div class="space-y-3">
-            <h3 class="text-[11px] font-black text-gray-500 uppercase tracking-widest px-1">مهام تعزيز العرين ⚔️</h3>
+            <h3 class="text-[11px] font-black text-gray-500 uppercase tracking-widest px-1" data-en="Dragon Army Tasks ⚔️" data-ar="مهام جيش التنين ⚔️">مهام جيش التنين ⚔️</h3>
             
             <div id="task-tiktok" class="dragon-card p-5 rounded-2xl flex items-center justify-between border-r-4 border-red-600">
                 <div class="flex items-center gap-4">
-                    <i class="fab fa-tiktok text-xl text-white"></i>
+                    <i class="fab fa-tiktok text-xl"></i>
                     <div>
-                        <p class="text-xs font-black">دعم @thedragonsport</p>
-                        <p class="text-[9px] text-gray-500">Point 1000+</p>
+                        <p class="text-xs font-black" data-en="Support @thedragonsport" data-ar="دعم @thedragonsport">دعم @thedragonsport</p>
+                        <p class="text-[9px] text-gray-500">+1000 Point</p>
                     </div>
                 </div>
-                <button onclick="executeTask('tiktok', 1000, 'https://www.tiktok.com/@thedragonsport')" class="bg-red-600 text-[10px] font-black px-4 py-2 rounded-xl">تنفيذ</button>
+                <button onclick="executeTask('tiktok', 1000, 'https://www.tiktok.com/@thedragonsport')" class="bg-red-600 text-[10px] font-black px-4 py-2 rounded-xl" data-en="GO" data-ar="تنفيذ">تنفيذ</button>
             </div>
 
             <div id="task-x" class="dragon-card p-5 rounded-2xl flex items-center justify-between border-r-4 border-blue-400">
                 <div class="flex items-center gap-4">
                     <i class="fab fa-twitter text-xl text-blue-400"></i>
                     <div>
-                        <p class="text-xs font-black">متابعة @XY_signals</p>
-                        <p class="text-[9px] text-gray-500">Point 500+</p>
+                        <p class="text-xs font-black" data-en="Follow @XY_signals" data-ar="متابعة @XY_signals">متابعة @XY_signals</p>
+                        <p class="text-[9px] text-gray-500">+500 Point</p>
                     </div>
                 </div>
-                <button onclick="executeTask('x', 500, 'https://x.com/XY_signals')" class="bg-blue-500 text-[10px] font-black px-4 py-2 rounded-xl">دعم</button>
+                <button onclick="executeTask('x', 500, 'https://x.com/XY_signals')" class="bg-blue-500 text-[10px] font-black px-4 py-2 rounded-xl" data-en="FOLLOW" data-ar="دعم">دعم</button>
             </div>
         </div>
     </div>
 
     <div id="data-tab" class="tab-content p-4 space-y-4">
-        <h3 class="text-center font-black text-red-500 mb-2 italic text-lg">إحصائيات الشبكة 📊</h3>
+        <h3 class="text-center font-black text-red-500 mb-2 italic text-lg" data-en="Ecosystem Stats 📊" data-ar="إحصائيات الشبكة 📊">إحصائيات الشبكة 📊</h3>
         <div class="dragon-card p-5 rounded-2xl flex justify-between items-center">
-            <span class="text-xs text-gray-400 font-bold uppercase">العدد الإجمالي:</span>
+            <span class="text-xs text-gray-400 font-bold uppercase" data-en="Total Supply:" data-ar="العدد الإجمالي:">العدد الإجمالي:</span>
             <span class="text-white font-black">1,000,000,000</span>
         </div>
-        <div class="dragon-card p-5 rounded-2xl flex justify-between items-center">
-            <span class="text-xs text-gray-400 font-bold uppercase">الشبكة:</span>
-            <span class="text-yellow-500 font-black italic">BSC (BEP-20)</span>
-        </div>
         <div class="dragon-card p-5 rounded-2xl">
-            <p class="text-[10px] text-gray-500 uppercase font-bold mb-2">Contract Address:</p>
-            <p class="text-[10px] font-mono text-white bg-black/40 p-3 rounded-lg break-all">0x583787E29Bb2D92FcBc713389FD66807602c72F3</p>
+            <p class="text-[10px] text-gray-500 uppercase font-bold mb-2" data-en="Contract Address:" data-ar="عنوان العقد:">عنوان العقد:</p>
+            <p class="text-[9px] font-mono text-white bg-black/40 p-3 rounded-lg break-all">0x583787E29Bb2D92FcBc713389FD66807602c72F3</p>
         </div>
     </div>
 
     <div id="ranks-tab" class="tab-content p-4 text-center">
-        <div class="dragon-card p-12 rounded-[3rem] bg-gradient-to-b from-[#111] to-black">
+        <div class="dragon-card p-12 rounded-[3rem]">
             <div id="rankIcon" class="text-8xl mb-6">🥚</div>
-            <h2 id="rankTitle" class="text-2xl font-black uppercase tracking-tighter italic">Dragon Egg</h2>
-            <p id="rankBadge" class="text-gray-500 text-[10px] font-black uppercase mt-2 tracking-widest">Connect Wallet to Rank Up</p>
+            <h2 id="rankTitle" class="text-2xl font-black uppercase italic" data-en="Dragon Egg" data-ar="بيضة التنين">بيضة التنين</h2>
+            <p id="rankBadge" class="text-gray-500 text-[10px] font-black uppercase mt-2 tracking-widest" data-en="Connect Wallet to Rank Up" data-ar="اربط المحفظة لترقية رتبتك">اربط المحفظة لترقية رتبتك</p>
         </div>
     </div>
 
     <div id="assets-tab" class="tab-content p-4 text-center">
         <div class="dragon-card p-8 rounded-[2.5rem]">
             <i class="fas fa-wallet text-5xl mb-4 text-gray-700"></i>
-            <p class="text-[10px] text-gray-500 font-black uppercase mb-2">Your $DRGN Balance</p>
-            <div id="userBalance" class="text-4xl font-black font-mono tracking-tighter">0.00</div>
-            
-            <a href="https://pancakeswap.finance/swap?outputCurrency=0x583787E29Bb2D92FcBc713389FD66807602c72F3" target="_blank" class="block mt-8 w-full bg-red-600 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-lg shadow-red-900/40 active:scale-95 transition">
-                شراء $DRGN الآن
-            </a>
+            <p class="text-[10px] text-gray-500 font-black uppercase mb-2" data-en="Your Balance" data-ar="رصيدك الحالي">رصيدك الحالي</p>
+            <div id="userBalance" class="text-4xl font-black font-mono">0.00</div>
+            <a href="https://pancakeswap.finance/swap?outputCurrency=0x583787E29Bb2D92FcBc713389FD66807602c72F3" target="_blank" class="block mt-8 w-full bg-red-600 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest active:scale-95 transition" data-en="Buy $DRGN Now" data-ar="شراء $DRGN الآن">شراء $DRGN الآن</a>
         </div>
     </div>
 
-    <nav class="fixed bottom-0 left-0 right-0 bg-black/95 backdrop-blur-xl border-t border-white/5 flex justify-around p-4 z-50">
+    <nav class="fixed bottom-0 left-0 right-0 bg-black/95 border-t border-white/5 flex justify-around p-4 z-50 backdrop-blur-md">
         <button onclick="switchTab('home')" class="nav-item flex flex-col items-center active" id="nav-home">
-            <i class="fas fa-home text-lg"></i><span class="text-[8px] mt-1 font-bold uppercase">Home</span>
+            <i class="fas fa-home"></i><span class="text-[8px] mt-1 font-bold uppercase" data-en="Home" data-ar="الرئيسية">الرئيسية</span>
         </button>
         <button onclick="switchTab('data')" class="nav-item flex flex-col items-center text-gray-600" id="nav-data">
-            <i class="fas fa-chart-bar text-lg"></i><span class="text-[8px] mt-1 font-bold uppercase">Data</span>
+            <i class="fas fa-chart-bar"></i><span class="text-[8px] mt-1 font-bold uppercase" data-en="Data" data-ar="البيانات">البيانات</span>
         </button>
         <button onclick="switchTab('ranks')" class="nav-item flex flex-col items-center text-gray-600" id="nav-ranks">
-            <i class="fas fa-shield-alt text-lg"></i><span class="text-[8px] mt-1 font-bold uppercase">Ranks</span>
+            <i class="fas fa-shield-alt"></i><span class="text-[8px] mt-1 font-bold uppercase" data-en="Ranks" data-ar="الرتب">الرتب</span>
         </button>
         <button onclick="switchTab('assets')" class="nav-item flex flex-col items-center text-gray-600" id="nav-assets">
-            <i class="fas fa-wallet text-lg"></i><span class="text-[8px] mt-1 font-bold uppercase">Wallet</span>
+            <i class="fas fa-wallet"></i><span class="text-[8px] mt-1 font-bold uppercase" data-en="Wallet" data-ar="المحفظة">المحفظة</span>
         </button>
     </nav>
 
     <div id="toast"></div>
 
     <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-        tg.ready();
-
+        let currentLang = localStorage.getItem('lang') || 'ar';
         const RPC = "https://bsc-dataseed1.binance.org/";
         const CONTRACT = "0x583787E29Bb2D92FcBc713389FD66807602c72F3";
         const DEAD = "0x000000000000000000000000000000000000dEaD";
-        const TOTAL_SUPPLY = 1000000000;
 
-        // --- نظام النقاط والمهام ---
-        let userPoints = parseInt(localStorage.getItem('dragonPoints')) || 0;
-        updatePointsDisplay();
-
-        function updatePointsDisplay() {
-            document.getElementById('totalPoints').innerText = `Points: ${userPoints.toLocaleString()}`;
+        function toggleLang() {
+            currentLang = currentLang === 'ar' ? 'en' : 'ar';
+            localStorage.setItem('lang', currentLang);
+            applyLang();
         }
 
-        function executeTask(taskId, reward, url) {
-            if (localStorage.getItem('task_done_' + taskId)) {
-                showToast("لقد نفذت هذه المهمة بالفعل! 🐲");
-                return;
-            }
-
-            window.open(url, '_blank');
+        function applyLang() {
+            const isEn = currentLang === 'en';
+            document.getElementById('mainHtml').dir = isEn ? 'ltr' : 'rtl';
+            document.getElementById('mainHtml').lang = currentLang;
+            document.getElementById('langSwitch').innerText = isEn ? 'AR' : 'EN';
             
-            // محاكاة تأكيد المهمة بعد العودة
+            document.querySelectorAll('[data-en]').forEach(el => {
+                el.innerText = isEn ? el.getAttribute('data-en') : el.getAttribute('data-ar');
+            });
+            
+            if(window.Telegram && window.Telegram.WebApp.HapticFeedback) window.Telegram.WebApp.HapticFeedback.impactOccurred('medium');
+        }
+
+        // --- نظام المهام والنقاط ---
+        let points = parseInt(localStorage.getItem('dragonPoints')) || 0;
+        document.getElementById('totalPoints').innerText = `Points: ${points.toLocaleString()}`;
+
+        function executeTask(id, reward, url) {
+            if(localStorage.getItem('done_'+id)) return showToast(currentLang === 'ar' ? "نفذتها بالفعل!" : "Already Done!");
+            window.open(url, '_blank');
             setTimeout(() => {
-                userPoints += reward;
-                localStorage.setItem('dragonPoints', userPoints);
-                localStorage.setItem('task_done_' + taskId, 'true');
-                updatePointsDisplay();
-                checkTasksStatus();
-                showToast(`أحسنت! +${reward} نقطة إلى رصيدك 🔥`);
-                if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                points += reward;
+                localStorage.setItem('dragonPoints', points);
+                localStorage.setItem('done_'+id, 'true');
+                document.getElementById('totalPoints').innerText = `Points: ${points.toLocaleString()}`;
+                checkTasks();
+                showToast(currentLang === 'ar' ? `تمت الإضافة +${reward}` : `Reward Added +${reward}`);
             }, 3000);
         }
 
-        function checkTasksStatus() {
-            if(localStorage.getItem('task_done_tiktok')) document.getElementById('task-tiktok').classList.add('task-done');
-            if(localStorage.getItem('task_done_x')) document.getElementById('task-x').classList.add('task-done');
+        function checkTasks() {
+            if(localStorage.getItem('done_tiktok')) document.getElementById('task-tiktok').classList.add('task-done');
+            if(localStorage.getItem('done_x')) document.getElementById('task-x').classList.add('task-done');
         }
 
-        // --- نظام التبويبات ---
-        function switchTab(tabName) {
-            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(nav => {
-                nav.classList.remove('active', 'text-red-500');
-                nav.classList.add('text-gray-600');
-            });
-            
-            document.getElementById(tabName + '-tab').classList.add('active');
-            const currentNav = document.getElementById('nav-' + tabName);
-            currentNav.classList.add('active', 'text-red-500');
-            currentNav.classList.remove('text-gray-600');
-            
-            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+        function switchTab(t) {
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active', 'text-red-500'));
+            document.getElementById(t + '-tab').classList.add('active');
+            document.getElementById('nav-' + t).classList.add('active', 'text-red-500');
         }
 
-        // --- جلب بيانات البلوكشين الحقيقية ---
-        async function fetchBlockchainData() {
-            try {
-                const provider = new ethers.providers.JsonRpcProvider(RPC);
-                const abi = ["function balanceOf(address) view returns (uint256)"];
-                const contract = new ethers.Contract(CONTRACT, abi, provider);
-                
-                const deadBal = await contract.balanceOf(DEAD);
-                const burned = parseFloat(ethers.utils.formatUnits(deadBal, 18));
-                const burnP = ((burned / TOTAL_SUPPLY) * 100).toFixed(4);
-
-                document.getElementById('burnFill').style.width = burnP + "%";
-                document.getElementById('burnPercent').innerText = burnP + "%";
-                document.getElementById('burnValue').innerText = `DRGN Burned: ${burned.toLocaleString()}`;
-            } catch(e) { console.error("Chain Data Error"); }
-        }
-
-        async function updateBalance(addr) {
+        async function fetchStats() {
             try {
                 const provider = new ethers.providers.JsonRpcProvider(RPC);
                 const contract = new ethers.Contract(CONTRACT, ["function balanceOf(address) view returns (uint256)"], provider);
-                const balance = await contract.balanceOf(addr);
-                const fmt = parseFloat(ethers.utils.formatUnits(balance, 18));
-                
-                document.getElementById('userBalance').innerText = fmt.toLocaleString(undefined, {minimumFractionDigits: 2});
-                
-                // تحديث الرتبة بناءً على الرصيد الفعلي
-                const rIcon = document.getElementById('rankIcon');
-                const rTitle = document.getElementById('rankTitle');
-                if (fmt >= 1000000) { rIcon.innerText = "👑"; rTitle.innerText = "Dragon King"; }
-                else if (fmt >= 100000) { rIcon.innerText = "⚔️"; rTitle.innerText = "Warrior Dragon"; }
-                else { rIcon.innerText = "🥚"; rTitle.innerText = "Dragon Egg"; }
-            } catch(e) { console.error(e); }
+                const deadBal = await contract.balanceOf(DEAD);
+                const burned = parseFloat(ethers.utils.formatUnits(deadBal, 18));
+                const burnP = ((burned / 1000000000) * 100).toFixed(4);
+                document.getElementById('burnFill').style.width = burnP + "%";
+                document.getElementById('burnPercent').innerText = burnP + "%";
+                document.getElementById('burnValue').innerText = `${burned.toLocaleString()} $DRGN Burned`;
+            } catch(e) {}
         }
 
         function smartConnect() {
-            if (window.ethereum) {
+            if(window.ethereum) {
                 window.ethereum.request({ method: 'eth_requestAccounts' }).then(acc => {
-                    const addr = acc[0];
-                    document.getElementById('walletBtn').innerText = addr.substring(0,6) + "...";
-                    showToast("تم ربط العرين بنجاح! 🐉");
-                    updateBalance(addr);
-                }).catch(() => showToast("فشل في الربط"));
+                    document.getElementById('walletBtn').innerText = acc[0].substring(0,6) + "...";
+                    updateBal(acc[0]);
+                });
             } else {
-                showToast("افتح التطبيق من متصفح محفظة آمنة");
+                showToast(currentLang === 'ar' ? "استخدم محفظة آمنة" : "Use Secure Wallet");
             }
         }
 
+        async function updateBal(a) {
+            const provider = new ethers.providers.JsonRpcProvider(RPC);
+            const contract = new ethers.Contract(CONTRACT, ["function balanceOf(address) view returns (uint256)"], provider);
+            const bal = await contract.balanceOf(a);
+            const fmt = parseFloat(ethers.utils.formatUnits(bal, 18));
+            document.getElementById('userBalance').innerText = fmt.toLocaleString();
+            
+            const rIcon = document.getElementById('rankIcon');
+            const rTitle = document.getElementById('rankTitle');
+            if (fmt >= 1000000) { rIcon.innerText = "👑"; rTitle.innerText = currentLang === 'ar' ? "ملك التنانين" : "Dragon King"; }
+            else if (fmt >= 100000) { rIcon.innerText = "⚔️"; rTitle.innerText = currentLang === 'ar' ? "تنين محارب" : "Warrior Dragon"; }
+        }
+
         function showToast(m) {
-            const t = document.getElementById('toast');
-            t.innerText = m; t.classList.add('show');
+            const t = document.getElementById('toast'); t.innerText = m; t.classList.add('show');
             setTimeout(() => t.classList.remove('show'), 3000);
         }
 
-        // تشغيل الوظائف عند التحميل
-        fetchBlockchainData();
-        checkTasksStatus();
-        setInterval(fetchBlockchainData, 30000);
+        applyLang();
+        fetchStats();
+        checkTasks();
+        setInterval(fetchStats, 30000);
     </script>
 </body>
 </html>
