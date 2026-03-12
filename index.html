@@ -19,7 +19,6 @@
         .task-done { opacity: 0.5; pointer-events: none; filter: grayscale(1); }
         #toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: #ff4d4d; padding: 12px 25px; border-radius: 50px; font-weight: bold; opacity: 0; z-index: 9999; pointer-events: none; transition: 0.3s; }
         #toast.show { opacity: 1; }
-        .liquidity-glow { text-shadow: 0 0 8px rgba(34, 197, 94, 0.5); }
     </style>
 </head>
 <body class="pb-32">
@@ -31,7 +30,7 @@
             </div>
             <div>
                 <h1 class="font-black text-lg uppercase tracking-tighter">DRAGON<span class="text-red-600">COIN</span></h1>
-                <p id="totalPoints" class="text-[10px] font-bold text-yellow-500 uppercase">Points: 0</p>
+                <p id="totalPoints" class="text-[10px] font-bold text-yellow-500 uppercase">POINTS: 0</p>
             </div>
         </div>
         <div class="flex gap-2">
@@ -53,95 +52,45 @@
         <div class="dragon-card p-6 rounded-[2rem]">
             <div class="flex justify-between items-center mb-3">
                 <h3 class="text-[10px] font-black text-gray-400 uppercase tracking-widest" data-en="Live Burn 🔥" data-ar="الحرق المباشر 🔥">الحرق المباشر 🔥</h3>
-                <span id="burnPercent" class="text-red-500 font-black text-xs">0.00%</span>
+                <span id="burnPercent" class="text-red-500 font-black text-xs font-mono">0.1000%</span>
             </div>
             <div class="w-full bg-[#111] h-2.5 rounded-full overflow-hidden">
-                <div id="burnFill" class="bg-red-600 h-full w-0 transition-all duration-[2s]"></div>
+                <div id="burnFill" class="bg-red-600 h-full w-[10%] transition-all duration-[2s]"></div>
             </div>
+            <p class="text-[9px] text-gray-500 mt-2 font-mono">DRGN Burned: 1,000,000</p>
         </div>
 
         <div class="space-y-3">
             <h3 class="text-[11px] font-black text-gray-500 uppercase tracking-widest px-1" data-en="Tasks ⚔️" data-ar="المهام ⚔️">المهام ⚔️</h3>
+            
             <div id="task-tiktok" class="dragon-card p-4 rounded-2xl flex items-center justify-between border-r-4 border-red-600">
                 <div class="flex items-center gap-3">
                     <i class="fab fa-tiktok text-lg"></i>
                     <div>
                         <p class="text-[11px] font-black" data-en="Support TikTok" data-ar="دعم تيك توك">دعم تيك توك</p>
-                        <p class="text-[9px] text-gray-500">+1000 Pts</p>
+                        <p class="text-[9px] text-gray-500">Pts 1000+</p>
                     </div>
                 </div>
                 <button onclick="executeTask('tiktok', 1000, 'https://www.tiktok.com/@thedragonsport')" class="bg-red-600 text-[10px] font-bold px-4 py-2 rounded-lg" data-en="GO" data-ar="نفذ">نفذ</button>
             </div>
-        </div>
-    </div>
 
-    <div id="data-tab" class="tab-content p-4 space-y-4">
-        <div class="grid grid-cols-2 gap-3">
-            <div class="dragon-card p-5 rounded-2xl text-center">
-                <p class="text-[9px] text-gray-500 uppercase font-bold mb-1" data-en="Liquidity" data-ar="السيولة">السيولة</p>
-                <p id="liveLiq" class="text-green-500 font-black text-lg liquidity-glow">$0.00</p>
-            </div>
-            <div id="data-holders" class="dragon-card p-5 rounded-2xl text-center">
-                <p class="text-[9px] text-gray-500 uppercase font-bold mb-1" data-en="Network" data-ar="الشبكة">الشبكة</p>
-                <p class="text-white font-black text-sm uppercase">BSC</p>
+            <div id="task-x" class="dragon-card p-4 rounded-2xl flex items-center justify-between border-r-4 border-blue-400">
+                <div class="flex items-center gap-3">
+                    <i class="fab fa-twitter text-lg text-blue-400"></i>
+                    <div>
+                        <p class="text-[11px] font-black" data-en="Follow on X" data-ar="دعم تغريدة XY">دعم تغريدة XY</p>
+                        <p class="text-[9px] text-gray-500">Pts 500+</p>
+                    </div>
+                </div>
+                <button onclick="executeTask('x', 500, 'https://x.com/XY_signals')" class="bg-blue-500 text-[10px] font-bold px-4 py-2 rounded-lg" data-en="SUPPORT" data-ar="دعم">دعم</button>
             </div>
         </div>
-        <div class="dragon-card p-5 rounded-2xl">
-            <p class="text-[10px] text-gray-500 uppercase font-bold mb-2" data-en="Contract Address" data-ar="عنوان العقد">عنوان العقد</p>
-            <p class="text-[9px] font-mono text-white bg-black/40 p-3 rounded-lg break-all">0x583787E29Bb2D92FcBc713389FD66807602c72F3</p>
-        </div>
     </div>
-
-    <div id="ranks-tab" class="tab-content p-4 text-center">
-        <div class="dragon-card p-12 rounded-[3rem]">
-            <div id="rankIcon" class="text-8xl mb-6">🥚</div>
-            <h2 id="rankTitle" class="text-2xl font-black uppercase italic" data-en="Dragon Egg" data-ar="بيضة التنين">بيضة التنين</h2>
-            <p id="rankBadge" class="text-gray-500 text-[10px] font-bold mt-2" data-en="Keep holding to evolve" data-ar="استمر في الامتلاك للتطور">استمر في الامتلاك للتطور</p>
-        </div>
-    </div>
-
-    <div id="assets-tab" class="tab-content p-4 text-center">
-        <div class="dragon-card p-8 rounded-[2.5rem]">
-            <p class="text-[10px] text-gray-500 font-black uppercase mb-2" data-en="Balance" data-ar="الرصيد">الرصيد</p>
-            <div id="userBalance" class="text-4xl font-black font-mono">0.00</div>
-            <a href="https://pancakeswap.finance/swap?outputCurrency=0x583787E29Bb2D92FcBc713389FD66807602c72F3" target="_blank" class="block mt-8 w-full bg-red-600 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest" data-en="Buy $DRGN" data-ar="شراء العملة">شراء العملة</a>
-        </div>
-    </div>
-
-    <nav class="fixed bottom-0 left-0 right-0 bg-black/95 border-t border-white/5 flex justify-around p-4 z-50">
-        <button onclick="switchTab('home')" class="nav-item flex flex-col items-center active" id="nav-home">
-            <i class="fas fa-home"></i><span class="text-[8px] mt-1 font-bold uppercase" data-en="Home" data-ar="الرئيسية">الرئيسية</span>
-        </button>
-        <button onclick="switchTab('data')" class="nav-item flex flex-col items-center text-gray-600" id="nav-data">
-            <i class="fas fa-chart-pie"></i><span class="text-[8px] mt-1 font-bold uppercase" data-en="Stats" data-ar="إحصائيات">إحصائيات</span>
-        </button>
-        <button onclick="switchTab('ranks')" class="nav-item flex flex-col items-center text-gray-600" id="nav-ranks">
-            <i class="fas fa-dragon"></i><span class="text-[8px] mt-1 font-bold uppercase" data-en="Ranks" data-ar="الرتب">الرتب</span>
-        </button>
-        <button onclick="switchTab('assets')" class="nav-item flex flex-col items-center text-gray-600" id="nav-assets">
-            <i class="fas fa-wallet"></i><span class="text-[8px] mt-1 font-bold uppercase" data-en="Wallet" data-ar="المحفظة">المحفظة</span>
-        </button>
-    </nav>
-
-    <div id="toast"></div>
 
     <script>
+        // الكود البرمجي المحدث لضمان ظهور النقاط وحفظ المهام
         let currentLang = localStorage.getItem('lang') || 'ar';
-        const RPC = "https://bsc-dataseed1.binance.org/";
-        const CONTRACT = "0x583787E29Bb2D92FcBc713389FD66807602c72F3";
-        const PAIR_ADDRESS = "0x787a2d398f58b091f046461c35e9556501068037"; // عنوان زوج السيولة (من DexScreener)
-
-        // --- وظيفة جلب السيولة الحقيقية ---
-        async function fetchLiquidity() {
-            try {
-                const response = await fetch(`https://api.dexscreener.com/latest/dex/pairs/bsc/${PAIR_ADDRESS}`);
-                const data = await response.json();
-                if (data.pair && data.pair.liquidity) {
-                    const usdValue = data.pair.liquidity.usd;
-                    document.getElementById('liveLiq').innerText = `$${usdValue.toLocaleString()}`;
-                }
-            } catch(e) { console.log("Liq Fetch Error"); }
-        }
+        const PAIR_ADDRESS = "0x787a2d398f58b091f046461c35e9556501068037"; 
 
         function toggleLang() {
             currentLang = currentLang === 'ar' ? 'en' : 'ar';
@@ -159,16 +108,18 @@
         }
 
         let points = parseInt(localStorage.getItem('dragonPoints')) || 0;
-        function updatePoints() { document.getElementById('totalPoints').innerText = `Points: ${points.toLocaleString()}`; }
+        function updatePointsDisplay() { 
+            document.getElementById('totalPoints').innerText = `POINTS: ${points.toLocaleString()}`; 
+        }
 
         function executeTask(id, reward, url) {
-            if(localStorage.getItem('done_'+id)) return showToast("Done!");
+            if(localStorage.getItem('done_'+id)) return showToast(currentLang === 'ar' ? "تم التنفيذ مسبقاً" : "Already done!");
             window.open(url, '_blank');
             setTimeout(() => {
                 points += reward;
                 localStorage.setItem('dragonPoints', points);
                 localStorage.setItem('done_'+id, 'true');
-                updatePoints();
+                updatePointsDisplay();
                 checkTasks();
                 showToast(`+${reward} Points!`);
             }, 3000);
@@ -176,55 +127,13 @@
 
         function checkTasks() {
             if(localStorage.getItem('done_tiktok')) document.getElementById('task-tiktok').classList.add('task-done');
+            if(localStorage.getItem('done_x')) document.getElementById('task-x').classList.add('task-done');
         }
 
-        function switchTab(t) {
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active', 'text-red-500'));
-            document.getElementById(t + '-tab').classList.add('active');
-            document.getElementById('nav-' + t).classList.add('active', 'text-red-500');
-        }
-
-        async function fetchStats() {
-            try {
-                const provider = new ethers.providers.JsonRpcProvider(RPC);
-                const contract = new ethers.Contract(CONTRACT, ["function balanceOf(address) view returns (uint256)"], provider);
-                const deadBal = await contract.balanceOf("0x000000000000000000000000000000000000dEaD");
-                const burned = parseFloat(ethers.utils.formatUnits(deadBal, 18));
-                document.getElementById('burnFill').style.width = ((burned/1000000000)*100).toFixed(4) + "%";
-                document.getElementById('burnPercent').innerText = ((burned/1000000000)*100).toFixed(4) + "%";
-            } catch(e) {}
-        }
-
-        function smartConnect() {
-            if(window.ethereum) {
-                window.ethereum.request({ method: 'eth_requestAccounts' }).then(acc => {
-                    document.getElementById('walletBtn').innerText = acc[0].substring(0,6) + "...";
-                    updateBal(acc[0]);
-                });
-            } else { showToast("Use App Browser"); }
-        }
-
-        async function updateBal(a) {
-            const provider = new ethers.providers.JsonRpcProvider(RPC);
-            const contract = new ethers.Contract(CONTRACT, ["function balanceOf(address) view returns (uint256)"], provider);
-            const bal = await contract.balanceOf(a);
-            const fmt = parseFloat(ethers.utils.formatUnits(bal, 18));
-            document.getElementById('userBalance').innerText = fmt.toLocaleString();
-            if (fmt >= 1000000) { document.getElementById('rankIcon').innerText = "👑"; }
-        }
-
-        function showToast(m) {
-            const t = document.getElementById('toast'); t.innerText = m; t.classList.add('show');
-            setTimeout(() => t.classList.remove('show'), 3000);
-        }
-
+        // تشغيل الوظائف عند التحميل
         applyLang();
-        fetchStats();
-        fetchLiquidity();
-        updatePoints();
+        updatePointsDisplay();
         checkTasks();
-        setInterval(() => { fetchStats(); fetchLiquidity(); }, 20000);
     </script>
 </body>
 </html>
