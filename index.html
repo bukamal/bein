@@ -10,30 +10,17 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@900&family=Tajawal:wght@400;900&display=swap');
-        
         body { background: #000; color: #fff; font-family: 'Tajawal', sans-serif; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
-        
-        /* بطاقات التنين */
         .dragon-card { background: #0a0a0a; border: 1px solid #1a1a1a; border-radius: 24px; position: relative; overflow: hidden; transition: all 0.3s ease; }
-        .dragon-card:hover { border-color: #333; }
-        
-        /* التبويبات */
         .tab-content { display: none; padding-bottom: 120px; }
         .tab-content.active { display: block; animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        
-        /* الأزرار والتنقل */
         .nav-btn { color: #444; transition: 0.3s; flex: 1; text-align: center; padding: 12px 0; border: none; background: none; outline: none; }
         .nav-btn.active { color: #ff4d4d; border-top: 3px solid #ff4d4d; background: linear-gradient(to bottom, rgba(255,77,77,0.1), transparent); }
-        
-        /* مؤشرات التحميل والبصريات */
         .loading-shimmer { background: linear-gradient(90deg, #0a0a0a 25%, #1a1a1a 50%, #0a0a0a 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; color: transparent !important; border-radius: 4px; }
         @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-        
         .burn-bar { height: 100%; background: linear-gradient(90deg, #ff4d4d, #f97316); border-radius: 20px; box-shadow: 0 0 10px rgba(255,77,77,0.5); transition: width 1.5s ease; }
         .completed-task { opacity: 0.5; filter: grayscale(1); pointer-events: none; }
-        
-        /* تصميم المحفظة */
         .wallet-gradient { background: linear-gradient(135deg, #1a0000 0%, #050505 100%); border: 1px solid #300; }
     </style>
 </head>
@@ -46,11 +33,10 @@
             </div>
             <h1 style="font-family: 'Orbitron', sans-serif;" class="text-[11px] font-black tracking-widest text-red-600 uppercase">Dragon App</h1>
         </div>
-        <button onclick="toggleLang()" id="langBtn" class="text-[9px] font-black border border-white/10 px-4 py-2 rounded-full hover:bg-white/5 transition-all">EN</button>
+        <button onclick="toggleLang()" id="langBtn" class="text-[9px] font-black border border-white/10 px-4 py-2 rounded-full">EN</button>
     </header>
 
     <main class="p-4">
-        
         <div id="home" class="tab-content active space-y-4">
             <div class="grid grid-cols-2 gap-3">
                 <div class="dragon-card p-4">
@@ -62,7 +48,6 @@
                     <p id="live-mcap" class="text-sm font-black loading-shimmer">$---</p>
                 </div>
             </div>
-            
             <div class="dragon-card p-6 border-t-2 border-red-600/40">
                 <div class="flex justify-between items-center mb-6">
                     <span class="text-[10px] text-gray-400 font-bold uppercase" data-ar="سعر التنين المباشر" data-en="Live Dragon Price">سعر التنين المباشر</span>
@@ -91,23 +76,14 @@
                         <span class="text-[9px] text-gray-400 font-bold uppercase" data-ar="المبلغ المستحسن" data-en="Safe Buy">المبلغ المستحسن</span>
                         <span id="safe-buy" class="text-xs font-black text-green-500 loading-shimmer">$---</span>
                     </div>
-                    <div class="flex justify-between items-center bg-black/60 p-4 rounded-2xl border border-white/5">
-                        <span class="text-[9px] text-gray-400 font-bold uppercase">SLIPPAGE</span>
-                        <span class="text-xs font-black text-white">12% - 15%</span>
-                    </div>
-                </div>
-                <div class="mt-4 p-3 bg-red-600/10 rounded-xl border border-red-600/20">
-                    <p class="text-[9px] text-gray-400 leading-relaxed italic" data-ar="⚠️ تنبيه: نظراً لحجم السيولة، يرجى الالتزام بالمبالغ المستحسنة." data-en="⚠️ Alert: Due to liquidity, stick to recommended buy limits."></p>
                 </div>
             </div>
-            <button onclick="tg.openLink('https://pancakeswap.finance/swap?outputCurrency=0x583787E29Bb2D92FcBc713389FD66807602c72F3')" class="w-full py-5 bg-white text-black rounded-2xl font-black text-[11px] uppercase tracking-wider active:scale-95 transition-transform shadow-2xl">Trade on PancakeSwap</button>
+            <button onclick="tg.openLink('https://pancakeswap.finance/swap?outputCurrency=0x583787E29Bb2D92FcBc713389FD66807602c72F3')" class="w-full py-5 bg-white text-black rounded-2xl font-black text-[11px] uppercase tracking-wider active:scale-95 transition-transform">Trade on PancakeSwap</button>
         </div>
 
         <div id="wallet" class="tab-content space-y-5">
             <div class="dragon-card wallet-gradient p-8 relative overflow-hidden">
-                <div class="absolute top-0 right-0 p-4 opacity-10">
-                    <i class="fas fa-dragon text-8xl"></i>
-                </div>
+                <div class="absolute top-0 right-0 p-4 opacity-10"><i class="fas fa-dragon text-8xl"></i></div>
                 <div class="relative z-10">
                     <div class="flex justify-between items-center mb-10">
                         <span class="bg-red-600 text-[8px] font-black px-3 py-1 rounded-full uppercase">Dragon VIP</span>
@@ -120,19 +96,16 @@
                     </div>
                 </div>
             </div>
-            
             <button onclick="shareReferral()" class="w-full py-4 dragon-card border-dashed border-red-600/50 flex items-center justify-center gap-3 active:scale-95 transition-all">
                 <i class="fas fa-user-plus text-red-500"></i>
-                <span class="text-[10px] font-black uppercase" data-ar="دعوة الأصدقاء" data-en="Invite Friends">دعوة الأصدقاء</span>
+                <span class="text-[10px] font-black uppercase" data-ar="دعوة الأصدقاء (+5000)" data-en="Invite Friends (+5000)">دعوة الأصدقاء (+5000)</span>
             </button>
-            
             <div id="ton-connect-button" class="flex justify-center"></div>
         </div>
 
         <div id="missions" class="tab-content space-y-3">
             <div id="tasks-container" class="space-y-3"></div>
         </div>
-
     </main>
 
     <nav class="fixed bottom-0 left-0 right-0 bg-black/95 border-t border-white/5 flex justify-around p-3 z-50 backdrop-blur-xl">
@@ -144,112 +117,134 @@
 
     <script>
         const tg = window.Telegram.WebApp;
+        const WORKER_URL = "https://noisy-moon-4289.manhal-almasriiii199119.workers.dev";
+        const BOT_USERNAME = "Drgncoin_bot";
         const pool = "0x84606890ad8d13e5a092c25abe59e2ec8ade7805";
         
-        // State Management
-        let appData = {
-            points: parseInt(localStorage.getItem('d_pts')) || 0,
-            doneTasks: JSON.parse(localStorage.getItem('d_tasks')) || [],
-            lang: localStorage.getItem('d_lang') || 'ar'
-        };
+        let appData = { points: 0, doneTasks: [], lang: localStorage.getItem('d_lang') || 'ar' };
 
-        // 1. Fetch Real Stats
+        // 1. مزامنة البيانات الحقيقية من السيرفر عند البدء
+        async function syncData() {
+            const user = tg.initDataUnsafe.user;
+            if (!user) return;
+
+            try {
+                const res = await fetch(`${WORKER_URL}/sync`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        userId: user.id,
+                        username: user.username || "Anonymous",
+                        referrerId: tg.initDataUnsafe.start_param || null
+                    })
+                });
+                const data = await res.json();
+                appData.points = data.points;
+                appData.doneTasks = data.doneTasks;
+                updateUI();
+                if(document.getElementById('missions').classList.contains('active')) loadMissions();
+            } catch (e) { console.error("Database connection failed"); }
+        }
+
+        // 2. جلب بيانات السوق المباشرة
         async function updateMarketData() {
             try {
                 const res = await fetch(`https://api.dexscreener.com/latest/dex/pools/bsc/${pool}`);
                 const data = await res.json();
-                
                 if (data.pair) {
                     const p = data.pair;
-                    const priceEl = document.getElementById('live-price');
-                    const liqEl = document.getElementById('live-liq');
-                    const mcapEl = document.getElementById('live-mcap');
-                    const safeEl = document.getElementById('safe-buy');
-
-                    [priceEl, liqEl, mcapEl, safeEl].forEach(el => el.classList.remove('loading-shimmer'));
-
-                    priceEl.innerText = `$${parseFloat(p.priceUsd).toFixed(10)}`;
-                    liqEl.innerText = `$${parseFloat(p.liquidity.usd).toLocaleString()}`;
-                    mcapEl.innerText = `$${parseFloat(p.fdv).toLocaleString()}`;
-                    
-                    const safeVal = parseFloat(p.liquidity.usd) * 0.03;
-                    safeEl.innerText = `$${safeVal.toFixed(2)}`;
+                    document.getElementById('live-price').innerText = `$${parseFloat(p.priceUsd).toFixed(10)}`;
+                    document.getElementById('live-liq').innerText = `$${parseFloat(p.liquidity.usd).toLocaleString()}`;
+                    document.getElementById('live-mcap').innerText = `$${parseFloat(p.fdv).toLocaleString()}`;
+                    document.getElementById('safe-buy').innerText = `$${(parseFloat(p.liquidity.usd) * 0.03).toFixed(2)}`;
+                    ['live-price', 'live-liq', 'live-mcap', 'safe-buy'].forEach(id => document.getElementById(id).classList.remove('loading-shimmer'));
                 }
-            } catch (e) { console.error("Update failed"); }
+            } catch (e) {}
         }
 
-        // 2. Real-Time Mission System
+        // 3. نظام المهام الحقيقي
         async function loadMissions() {
             const container = document.getElementById('tasks-container');
-            const sources = [
+            const feeds = [
                 {id: 'X', url: "https://rss.app/feeds/v1.1/tYaEQs8TqBTzCA29.json", icon: 'twitter'},
                 {id: 'TikTok', url: "https://rss.app/feeds/v1.1/L4M8dUSeMhVKhLS2.json", icon: 'tiktok'}
             ];
-            
             container.innerHTML = '<p class="text-center text-[10px] py-10 opacity-50">Fetching Missions...</p>';
             
-            let allItems = [];
-            for (let s of sources) {
+            let all = [];
+            for(let f of feeds) {
                 try {
-                    const res = await fetch(s.url);
+                    const res = await fetch(f.url);
                     const d = await res.json();
-                    d.items.slice(0, 3).forEach((item, i) => {
-                        allItems.push({ ...item, platform: s.id, icon: s.icon, taskId: btoa(item.link).substring(0, 10) });
+                    d.items.slice(0, 3).forEach(item => {
+                        all.push({ ...item, platform: f.id, icon: f.icon, taskId: btoa(item.link).substring(0, 10) });
                     });
                 } catch(e) {}
             }
-
             container.innerHTML = '';
-            allItems.forEach(task => {
-                const isCompleted = appData.doneTasks.includes(task.taskId);
+            all.forEach(task => {
+                const isDone = appData.doneTasks.includes(task.taskId);
                 container.innerHTML += `
-                    <div class="dragon-card p-4 flex justify-between items-center border-l-4 ${isCompleted ? 'border-gray-800' : 'border-red-600'} ${isCompleted ? 'completed-task' : ''}">
+                    <div class="dragon-card p-4 flex justify-between items-center border-l-4 ${isDone ? 'border-gray-800' : 'border-red-600'} ${isDone ? 'completed-task' : ''}">
                         <div class="flex items-center gap-4">
-                            <i class="fab fa-${task.icon} ${isCompleted ? 'text-gray-600' : 'text-red-500'} text-lg"></i>
+                            <i class="fab fa-${task.icon} ${isDone ? 'text-gray-600' : 'text-red-500'} text-lg"></i>
                             <div>
                                 <p class="text-[10px] font-black uppercase">${task.platform} MISSION</p>
                                 <p class="text-[8px] text-yellow-500 font-bold">+1,000 PTS</p>
                             </div>
                         </div>
-                        <button onclick="executeTask('${task.taskId}', '${task.link}')" class="px-6 py-2 rounded-xl text-[9px] font-black uppercase ${isCompleted ? 'bg-black text-gray-600' : 'bg-white text-black shadow-lg'}">
-                            ${isCompleted ? 'DONE' : 'GO'}
+                        <button onclick="executeTask('${task.taskId}', '${task.link}')" class="px-6 py-2 rounded-xl text-[9px] font-black uppercase ${isDone ? 'bg-black text-gray-600' : 'bg-white text-black'}">
+                            ${isDone ? 'DONE' : 'GO'}
                         </button>
                     </div>`;
             });
         }
 
-        function executeTask(id, url) {
+        async function executeTask(id, url) {
             if (appData.doneTasks.includes(id)) return;
             tg.openLink(url);
-            
-            tg.showConfirm("Did you complete the mission?", (ok) => {
+            tg.showConfirm("هل أكملت المهمة فعلياً؟", async (ok) => {
                 if (ok) {
-                    tg.showScanQrPopup({ text: "Verifying Task Status..." });
-                    setTimeout(() => {
-                        tg.closeScanQrPopup();
-                        appData.points += 1000;
+                    tg.showScanQrPopup({ text: "Verifying Mission..." });
+                    const res = await fetch(`${WORKER_URL}/complete-task`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ userId: tg.initDataUnsafe.user.id, taskId: id, reward: 1000 })
+                    });
+                    const result = await res.json();
+                    tg.closeScanQrPopup();
+                    if (result.success) {
+                        appData.points = result.newPoints;
                         appData.doneTasks.push(id);
-                        saveAppData();
                         updateUI();
+                        loadMissions();
                         tg.HapticFeedback.notificationOccurred('success');
-                    }, 3000);
+                    }
                 }
             });
         }
 
-        // 3. UI & Localization
+        // 4. نظام الإحالات الحقيقي (رابط البوت المباشر)
+        function shareReferral() {
+            const userId = tg.initDataUnsafe.user.id;
+            const link = `https://t.me/${BOT_USERNAME}?start=${userId}`;
+            const text = "انضم إلي في Dragon VIP واحصل على 5000 نقطة مجانية! 🐲🔥";
+            tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`);
+        }
+
+        // التبديل بين التبويبات
         function showTab(id) {
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             document.getElementById('n-' + id).classList.add('active');
-            tg.HapticFeedback.impactOccurred('medium');
             if(id === 'missions') loadMissions();
+            tg.HapticFeedback.impactOccurred('light');
         }
 
         function toggleLang() {
             appData.lang = appData.lang === 'ar' ? 'en' : 'ar';
-            saveAppData();
+            localStorage.setItem('d_lang', appData.lang);
             updateUI();
         }
 
@@ -263,28 +258,16 @@
             document.getElementById('wallet-pts').innerText = appData.points.toLocaleString();
         }
 
-        function saveAppData() {
-            localStorage.setItem('d_pts', appData.points);
-            localStorage.setItem('d_tasks', JSON.stringify(appData.doneTasks));
-            localStorage.setItem('d_lang', appData.lang);
-        }
-
-        function shareReferral() {
-            const uid = tg.initDataUnsafe?.user?.id || "000";
-            const url = `https://t.me/share/url?url=https://t.me/YourBot?start=${uid}&text=Join%20Dragon%20VIP%20and%20earn%20points!%20🐲`;
-            tg.openTelegramLink(url);
-        }
-
-        // Init
+        // تهيئة TON Connect
         const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
             manifestUrl: 'https://raw.githubusercontent.com/ton-community/tutorials/main/03-client/test/public/tonconnect-manifest.json',
             buttonRootId: 'ton-connect-button'
         });
 
+        // بدء التشغيل
         tg.expand();
-        updateUI();
+        syncData();
         updateMarketData();
-        loadMissions();
         setInterval(updateMarketData, 30000);
     </script>
 </body>
