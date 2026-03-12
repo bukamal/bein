@@ -30,6 +30,9 @@
 
         .wallet-gradient { background: linear-gradient(135deg, #1a0000 0%, #050505 100%); border: 1px solid #300; }
         .completed-task { opacity: 0.5; filter: grayscale(1); pointer-events: none; }
+        
+        /* تصميم زر التداول المميز */
+        .swap-btn { background: linear-gradient(90deg, #f3ba2f, #f0b90b); color: #000; font-weight: 900; box-shadow: 0 4px 15px rgba(243, 186, 47, 0.3); }
     </style>
 </head>
 <body>
@@ -61,13 +64,34 @@
                     <p id="live-mcap" class="text-sm font-black loading-shimmer">$---</p>
                 </div>
             </div>
+            
             <div class="dragon-card p-6 border-t-2 border-red-600/40">
                 <div class="flex justify-between items-center mb-6 text-[10px] font-bold uppercase">
                     <span data-ar="سعر التنين" data-en="Dragon Price">سعر التنين</span>
                     <span id="live-price" class="text-sm font-mono text-red-500 loading-shimmer">$---</span>
                 </div>
-                <div class="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
-                    <div class="h-full bg-red-600 shadow-[0_0_10px_#dc2626]" style="width: 45%;"></div>
+                <div class="w-full h-1.5 bg-white/5 rounded-full overflow-hidden mb-6">
+                    <div id="price-bar" class="h-full bg-red-600 shadow-[0_0_10px_#dc2626] transition-all duration-500" style="width: 50%;"></div>
+                </div>
+
+                <button onclick="openSwapWithWarning()" class="w-full py-4 rounded-2xl swap-btn flex items-center justify-center gap-2 transition-transform active:scale-95">
+                    <i class="fas fa-exchange-alt"></i>
+                    <span data-ar="تداول الآن على PancakeSwap" data-en="Trade on PancakeSwap">تداول الآن على PancakeSwap</span>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2">
+                <div class="dragon-card p-3 text-center">
+                    <p class="text-[7px] text-gray-500 uppercase" data-ar="تغير 24س" data-en="24h Change">تغير 24س</p>
+                    <p id="change-24h" class="text-[10px] font-black tracking-tighter">--%</p>
+                </div>
+                <div class="dragon-card p-3 text-center">
+                    <p class="text-[7px] text-gray-500 uppercase" data-ar="الحجم 24س" data-en="24h Volume">الحجم 24س</p>
+                    <p id="vol-24h" class="text-[10px] font-black tracking-tighter">$---</p>
+                </div>
+                <div class="dragon-card p-3 text-center">
+                    <p class="text-[7px] text-gray-500 uppercase" data-ar="المعاملات" data-en="TXNS">المعاملات</p>
+                    <p id="txns-24h" class="text-[10px] font-black tracking-tighter">---</p>
                 </div>
             </div>
         </div>
@@ -139,10 +163,21 @@
         const WORKER_URL = "https://noisy-moon-4289.manhal-almasriiii199119.workers.dev";
         const BOT_USERNAME = "Drgncoin_bot";
         const pool = "0x84606890ad8d13e5a092c25abe59e2ec8ade7805";
+        const swapUrl = "https://pancakeswap.finance/swap?outputCurrency=0x583787E29Bb2D92FcBc713389FD66807602c72F3";
         
         let appData = { points: 0, doneTasks: [], lang: localStorage.getItem('d_lang') || 'ar' };
 
-        // مزامنة البيانات
+        // دالة فتح التبادل مع التحذير
+        function openSwapWithWarning() {
+            const msg = appData.lang === 'ar' ? 
+                "⚠️ تحذير: العملات الرقمية عالية المخاطر. تأكد من ضبط نسبة الانزلاق (Slippage) إلى 12% لضمان نجاح المعاملة. هل تود الاستمرار؟" : 
+                "⚠️ Warning: Crypto trading is risky. Ensure Slippage is set to 12% for a successful transaction. Continue?";
+            
+            tg.showConfirm(msg, (ok) => {
+                if (ok) tg.openLink(swapUrl);
+            });
+        }
+
         async function syncData() {
             const user = tg.initDataUnsafe.user;
             if (!user) return;
@@ -150,11 +185,7 @@
                 const res = await fetch(`${WORKER_URL}/sync`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ 
-                        userId: user.id, 
-                        username: user.first_name, 
-                        referrerId: tg.initDataUnsafe.start_param 
-                    })
+                    body: JSON.stringify({ userId: user.id, username: user.first_name, referrerId: tg.initDataUnsafe.start_param })
                 });
                 const data = await res.json();
                 appData.points = data.points;
@@ -164,24 +195,37 @@
                     document.getElementById('app-loader').style.opacity = '0';
                     setTimeout(() => document.getElementById('app-loader').style.display = 'none', 500);
                 }, 1000);
-            } catch (e) { console.error("Sync Error"); }
+            } catch (e) {}
         }
 
-        // تحديث بيانات السوق
         async function updateMarketData() {
             try {
                 const res = await fetch(`https://api.dexscreener.com/latest/dex/pools/bsc/${pool}`);
                 const data = await res.json();
                 if (data.pair) {
-                    document.getElementById('live-price').innerText = `$${parseFloat(data.pair.priceUsd).toFixed(10)}`;
-                    document.getElementById('live-liq').innerText = `$${parseFloat(data.pair.liquidity.usd).toLocaleString()}`;
-                    document.getElementById('live-mcap').innerText = `$${parseFloat(data.pair.fdv).toLocaleString()}`;
-                    ['live-price', 'live-liq', 'live-mcap'].forEach(id => document.getElementById(id).classList.remove('loading-shimmer'));
+                    const pair = data.pair;
+                    document.getElementById('live-price').innerText = `$${parseFloat(pair.priceUsd).toFixed(10)}`;
+                    document.getElementById('live-liq').innerText = `$${parseFloat(pair.liquidity.usd).toLocaleString()}`;
+                    document.getElementById('live-mcap').innerText = `$${parseFloat(pair.fdv).toLocaleString()}`;
+                    
+                    // بيانات إضافية
+                    const change = parseFloat(pair.priceChange.h24);
+                    const changeEl = document.getElementById('change-24h');
+                    changeEl.innerText = (change > 0 ? '+' : '') + change + '%';
+                    changeEl.className = `text-[10px] font-black tracking-tighter ${change >= 0 ? 'text-green-500' : 'text-red-500'}`;
+                    
+                    document.getElementById('vol-24h').innerText = `$${parseFloat(pair.volume.h24).toLocaleString()}`;
+                    document.getElementById('txns-24h').innerText = pair.txns.h24.buys + pair.txns.h24.sells;
+
+                    // تحديث شريط السعر البصري بناءً على التغير
+                    const barWidth = Math.min(Math.max(50 + change, 10), 100);
+                    document.getElementById('price-bar').style.width = barWidth + '%';
+
+                    ['live-price', 'live-liq', 'live-mcap', 'vol-24h'].forEach(id => document.getElementById(id).classList.remove('loading-shimmer'));
                 }
             } catch (e) {}
         }
 
-        // المطالبة بالمكافأة اليومية
         async function claimDaily() {
             const btn = document.getElementById('dailyBtn');
             btn.disabled = true;
@@ -204,7 +248,6 @@
             btn.disabled = false;
         }
 
-        // تحميل قائمة المتصدرين
         async function loadLeaderboard() {
             const list = document.getElementById('leaderboard-list');
             list.innerHTML = '<p class="text-center py-5 text-[10px] opacity-50 uppercase">Loading Champions...</p>';
@@ -213,67 +256,43 @@
                 const top = await res.json();
                 list.innerHTML = '';
                 top.forEach((u, i) => {
-                    const isTop3 = i < 3;
                     const colors = ['text-yellow-400', 'text-gray-300', 'text-orange-400'];
                     list.innerHTML += `
-                        <div class="dragon-card p-4 flex justify-between items-center ${isTop3 ? 'border-yellow-500/20 bg-yellow-500/5' : 'border-white/5'}">
+                        <div class="dragon-card p-4 flex justify-between items-center ${i < 3 ? 'border-yellow-500/20 bg-yellow-500/5' : 'border-white/5'}">
                             <div class="flex items-center gap-3">
-                                <span class="text-[10px] font-black w-4 ${isTop3 ? colors[i] : 'text-gray-600'}">#${i+1}</span>
+                                <span class="text-[10px] font-black w-4 ${i < 3 ? colors[i] : 'text-gray-600'}">#${i+1}</span>
                                 <span class="text-xs font-bold">${u.username}</span>
                             </div>
-                            <span class="text-xs font-black ${isTop3 ? colors[i] : 'text-white'}">${u.points.toLocaleString()}</span>
+                            <span class="text-xs font-black ${i < 3 ? colors[i] : 'text-white'}">${u.points.toLocaleString()}</span>
                         </div>`;
                 });
             } catch (e) {}
         }
 
-        // تحميل المهام (تليجرام + X + تيك توك)
         async function loadMissions() {
             const container = document.getElementById('tasks-container');
             container.innerHTML = '<p class="text-center py-5 opacity-50 text-[10px] uppercase">Fetching Missions...</p>';
-            
-            const staticTasks = [
-                { id: 'tg_chan', title: 'Join Official Channel', link: 'https://t.me/Dragon_Coin_Official', reward: 2000, icon: 'fa-telegram' }
-            ];
-
-            const feeds = [
-                { id: 'X', url: "https://rss.app/feeds/v1.1/tYaEQs8TqBTzCA29.json", icon: 'fa-twitter' },
-                { id: 'TikTok', url: "https://rss.app/feeds/v1.1/L4M8dUSeMhVKhLS2.json", icon: 'fa-tiktok' }
-            ];
-
+            const staticTasks = [{ id: 'tg_chan', title: 'Join Official Channel', link: 'https://t.me/Dragon_Coin_Official', reward: 2000, icon: 'fa-telegram' }];
+            const feeds = [{ id: 'X', url: "https://rss.app/feeds/v1.1/tYaEQs8TqBTzCA29.json", icon: 'fa-twitter' }, { id: 'TikTok', url: "https://rss.app/feeds/v1.1/L4M8dUSeMhVKhLS2.json", icon: 'fa-tiktok' }];
             let dynamicTasks = [];
             for (let f of feeds) {
                 try {
                     const res = await fetch(f.url);
                     const d = await res.json();
                     d.items.slice(0, 3).forEach(item => {
-                        dynamicTasks.push({
-                            id: btoa(item.link).substring(0, 10),
-                            title: `${f.id}: Mission`,
-                            link: item.link,
-                            reward: 1000,
-                            icon: f.icon
-                        });
+                        dynamicTasks.push({ id: btoa(item.link).substring(0, 10), title: `${f.id}: Mission`, link: item.link, reward: 1000, icon: f.icon });
                     });
                 } catch (e) {}
             }
-
             const allTasks = [...staticTasks, ...dynamicTasks];
             container.innerHTML = '';
             allTasks.forEach(t => {
                 const isDone = appData.doneTasks.includes(t.id);
                 container.innerHTML += `
                     <div class="dragon-card p-4 flex justify-between items-center border-l-2 ${isDone ? 'border-gray-800 opacity-50' : 'border-red-600'}">
-                        <div class="flex items-center gap-3">
-                            <i class="fab ${t.icon} ${isDone ? 'text-gray-600' : 'text-red-500'} text-lg"></i>
-                            <div>
-                                <p class="text-[10px] font-black uppercase">${t.title}</p>
-                                <p class="text-[8px] text-yellow-500 font-bold">+${t.reward.toLocaleString()} PTS</p>
-                            </div>
-                        </div>
-                        <button onclick="executeTask('${t.id}', '${t.link}', ${t.reward})" class="px-5 py-2 rounded-xl text-[9px] font-black uppercase ${isDone ? 'bg-black text-gray-700' : 'bg-white text-black'}">
-                            ${isDone ? 'DONE' : 'GO'}
-                        </button>
+                        <div class="flex items-center gap-3"><i class="fab ${t.icon} ${isDone ? 'text-gray-600' : 'text-red-500'} text-lg"></i>
+                        <div><p class="text-[10px] font-black uppercase">${t.title}</p><p class="text-[8px] text-yellow-500 font-bold">+${t.reward.toLocaleString()} PTS</p></div></div>
+                        <button onclick="executeTask('${t.id}', '${t.link}', ${t.reward})" class="px-5 py-2 rounded-xl text-[9px] font-black uppercase ${isDone ? 'bg-black text-gray-700' : 'bg-white text-black'}">${isDone ? 'DONE' : 'GO'}</button>
                     </div>`;
             });
         }
@@ -290,19 +309,12 @@
                             body: JSON.stringify({ userId: tg.initDataUnsafe.user.id, taskId: id, reward: reward })
                         });
                         const r = await res.json();
-                        if(r.success) { 
-                            appData.points = r.newPoints; 
-                            appData.doneTasks.push(id); 
-                            updateUI(); 
-                            loadMissions();
-                            tg.HapticFeedback.notificationOccurred('success');
-                        }
+                        if(r.success) { appData.points = r.newPoints; appData.doneTasks.push(id); updateUI(); loadMissions(); tg.HapticFeedback.notificationOccurred('success'); }
                     }
                 });
             }, 2000);
         }
 
-        // الإحالات
         function shareReferral() {
             const userId = tg.initDataUnsafe.user?.id || "0";
             const link = `https://t.me/${BOT_USERNAME}?start=${userId}`;
@@ -310,7 +322,6 @@
             tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`);
         }
 
-        // التبديل بين التبويبات
         function showTab(id) {
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -321,35 +332,22 @@
             tg.HapticFeedback.impactOccurred('light');
         }
 
-        // نظام المستويات
         function updateTierUI(pts) {
-            const tiers = [
-                { name: 'Bronze', min: 0, max: 100000, color: '#b45309' },
-                { name: 'Silver', min: 100000, max: 500000, color: '#94a3b8' },
-                { name: 'Gold', min: 500000, max: 1000000, color: '#f59e0b' },
-                { name: 'Legend', min: 1000000, max: 10000000, color: '#6366f1' }
-            ];
+            const tiers = [{ name: 'Bronze', min: 0, max: 100000, color: '#b45309' }, { name: 'Silver', min: 100000, max: 500000, color: '#94a3b8' }, { name: 'Gold', min: 500000, max: 1000000, color: '#f59e0b' }, { name: 'Legend', min: 1000000, max: 10000000, color: '#6366f1' }];
             let tier = tiers.find((t, i) => pts >= t.min && (tiers[i+1] ? pts < tiers[i+1].min : true)) || tiers[0];
             const badge = document.getElementById('tier-badge');
-            badge.innerText = tier.name;
-            badge.style.backgroundColor = tier.color;
+            badge.innerText = tier.name; badge.style.backgroundColor = tier.color;
             document.getElementById('tier-card').style.borderColor = tier.color + '44';
             let percent = ((pts - tier.min) / (tier.max - tier.min)) * 100;
             document.getElementById('tier-progress-bar').style.width = Math.min(percent, 100) + '%';
             document.getElementById('tier-progress-bar').style.backgroundColor = tier.color;
         }
 
-        // تحديث الواجهة واللغة
         function updateUI() {
             const isAr = appData.lang === 'ar';
             document.getElementById('htmlTag').dir = isAr ? 'rtl' : 'ltr';
             document.getElementById('langBtn').innerText = isAr ? 'EN' : 'AR';
-            
-            // تحديث كافة العناصر التي تحمل بيانات اللغة
-            document.querySelectorAll('[data-ar]').forEach(el => {
-                el.innerText = isAr ? el.getAttribute('data-ar') : el.getAttribute('data-en');
-            });
-
+            document.querySelectorAll('[data-ar]').forEach(el => { el.innerText = isAr ? el.getAttribute('data-ar') : el.getAttribute('data-en'); });
             document.getElementById('wallet-pts').innerText = appData.points.toLocaleString();
             updateTierUI(appData.points);
         }
@@ -360,13 +358,11 @@
             updateUI();
         }
 
-        // تهيئة TON Connect
         const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
             manifestUrl: 'https://raw.githubusercontent.com/ton-community/tutorials/main/03-client/test/public/tonconnect-manifest.json',
             buttonRootId: 'ton-connect-button'
         });
 
-        // بدء التشغيل
         tg.expand();
         syncData();
         updateMarketData();
