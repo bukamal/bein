@@ -36,7 +36,7 @@
 
     <div id="app-loader">
         <i class="fas fa-dragon loader-dragon"></i>
-        <p class="mt-4 text-[10px] font-black tracking-widest uppercase text-gray-500">Syncing with Dragon Chain...</p>
+        <p class="mt-4 text-[10px] font-black tracking-widest uppercase text-gray-500">جاري المزامنة مع شبكة التنين...</p>
     </div>
 
     <header class="p-5 flex justify-between items-center sticky top-0 bg-black/95 backdrop-blur-xl z-50 border-b border-white/5">
@@ -67,7 +67,7 @@
                     <span id="live-price" class="text-sm font-mono text-red-500 loading-shimmer">$---</span>
                 </div>
                 <div class="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
-                    <div class="h-full bg-red-600" style="width: 45%;"></div>
+                    <div class="h-full bg-red-600 shadow-[0_0_10px_#dc2626]" style="width: 45%;"></div>
                 </div>
             </div>
         </div>
@@ -79,7 +79,7 @@
                         <h3 class="text-sm font-black uppercase" data-ar="المكافأة اليومية" data-en="Daily Reward">المكافأة اليومية</h3>
                         <p class="text-[9px] text-gray-400" data-ar="احصل على 1,000 نقطة مجاناً" data-en="Claim 1,000 free pts">احصل على 1,000 نقطة مجاناً</p>
                     </div>
-                    <button onclick="claimDaily()" id="dailyBtn" class="bg-yellow-500 text-black px-5 py-2 rounded-xl text-[10px] font-black">CLAIM</button>
+                    <button onclick="claimDaily()" id="dailyBtn" class="bg-yellow-500 text-black px-5 py-2 rounded-xl text-[10px] font-black uppercase">Claim</button>
                 </div>
             </div>
             <div id="tasks-container" class="space-y-3"></div>
@@ -99,7 +99,7 @@
                     </div>
                 </div>
             </div>
-            <button onclick="shareReferral()" class="w-full py-4 dragon-card border-dashed border-red-600/50 flex items-center justify-center gap-3">
+            <button onclick="shareReferral()" class="w-full py-4 dragon-card border-dashed border-red-600/50 flex items-center justify-center gap-3 active:scale-95 transition-transform">
                 <i class="fas fa-user-plus text-red-500"></i>
                 <span class="text-[10px] font-black uppercase" data-ar="دعوة الأصدقاء (+5000)" data-en="Invite Friends (+5000)">دعوة الأصدقاء (+5000)</span>
             </button>
@@ -109,17 +109,29 @@
         <div id="leaderboard" class="tab-content space-y-4">
             <div class="text-center py-6">
                 <i class="fas fa-crown text-yellow-500 text-3xl mb-2"></i>
-                <h2 class="text-lg font-black uppercase">Top 10 Dragons</h2>
+                <h2 class="text-lg font-black uppercase" data-ar="أقوى 10 تنانين" data-en="Top 10 Dragons">أقوى 10 تنانين</h2>
             </div>
             <div id="leaderboard-list" class="space-y-2"></div>
         </div>
     </main>
 
     <nav class="fixed bottom-0 left-0 right-0 bg-black/95 border-t border-white/5 flex justify-around p-3 z-50 backdrop-blur-xl">
-        <button onclick="showTab('home')" class="nav-btn active" id="n-home"><i class="fas fa-home text-sm mb-1"></i><p class="text-[8px] font-black uppercase">Home</p></button>
-        <button onclick="showTab('missions')" class="nav-btn" id="n-missions"><i class="fas fa-tasks text-sm mb-1"></i><p class="text-[8px] font-black uppercase">Tasks</p></button>
-        <button onclick="showTab('leaderboard')" class="nav-btn" id="n-leaderboard"><i class="fas fa-trophy text-sm mb-1"></i><p class="text-[8px] font-black uppercase">Top</p></button>
-        <button onclick="showTab('wallet')" class="nav-btn" id="n-wallet"><i class="fas fa-wallet text-sm mb-1"></i><p class="text-[8px] font-black uppercase">Wallet</p></button>
+        <button onclick="showTab('home')" class="nav-btn active" id="n-home">
+            <i class="fas fa-home text-sm mb-1"></i>
+            <p class="text-[8px] font-black uppercase" data-ar="الرئيسية" data-en="Home">الرئيسية</p>
+        </button>
+        <button onclick="showTab('missions')" class="nav-btn" id="n-missions">
+            <i class="fas fa-tasks text-sm mb-1"></i>
+            <p class="text-[8px] font-black uppercase" data-ar="المهام" data-en="Tasks">المهام</p>
+        </button>
+        <button onclick="showTab('leaderboard')" class="nav-btn" id="n-leaderboard">
+            <i class="fas fa-trophy text-sm mb-1"></i>
+            <p class="text-[8px] font-black uppercase" data-ar="الأبطال" data-en="Top">الأبطال</p>
+        </button>
+        <button onclick="showTab('wallet')" class="nav-btn" id="n-wallet">
+            <i class="fas fa-wallet text-sm mb-1"></i>
+            <p class="text-[8px] font-black uppercase" data-ar="المحفظة" data-en="Wallet">المحفظة</p>
+        </button>
     </nav>
 
     <script>
@@ -130,6 +142,7 @@
         
         let appData = { points: 0, doneTasks: [], lang: localStorage.getItem('d_lang') || 'ar' };
 
+        // مزامنة البيانات
         async function syncData() {
             const user = tg.initDataUnsafe.user;
             if (!user) return;
@@ -137,16 +150,24 @@
                 const res = await fetch(`${WORKER_URL}/sync`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ userId: user.id, username: user.first_name, referrerId: tg.initDataUnsafe.start_param })
+                    body: JSON.stringify({ 
+                        userId: user.id, 
+                        username: user.first_name, 
+                        referrerId: tg.initDataUnsafe.start_param 
+                    })
                 });
                 const data = await res.json();
                 appData.points = data.points;
                 appData.doneTasks = data.doneTasks;
                 updateUI();
-                document.getElementById('app-loader').style.display = 'none';
-            } catch (e) { console.error(e); }
+                setTimeout(() => {
+                    document.getElementById('app-loader').style.opacity = '0';
+                    setTimeout(() => document.getElementById('app-loader').style.display = 'none', 500);
+                }, 1000);
+            } catch (e) { console.error("Sync Error"); }
         }
 
+        // تحديث بيانات السوق
         async function updateMarketData() {
             try {
                 const res = await fetch(`https://api.dexscreener.com/latest/dex/pools/bsc/${pool}`);
@@ -160,6 +181,7 @@
             } catch (e) {}
         }
 
+        // المطالبة بالمكافأة اليومية
         async function claimDaily() {
             const btn = document.getElementById('dailyBtn');
             btn.disabled = true;
@@ -173,7 +195,8 @@
                 if (result.success) {
                     appData.points = result.newPoints;
                     updateUI();
-                    tg.showAlert(`+${result.reward} Points!`);
+                    tg.showAlert(appData.lang === 'ar' ? `مبروك! حصلت على ${result.reward} نقطة!` : `Congrats! +${result.reward} Pts!`);
+                    tg.HapticFeedback.notificationOccurred('success');
                 } else {
                     tg.showAlert(result.message);
                 }
@@ -181,65 +204,113 @@
             btn.disabled = false;
         }
 
+        // تحميل قائمة المتصدرين
         async function loadLeaderboard() {
             const list = document.getElementById('leaderboard-list');
-            list.innerHTML = '<p class="text-center py-5 text-[10px] opacity-50">Loading...</p>';
+            list.innerHTML = '<p class="text-center py-5 text-[10px] opacity-50 uppercase">Loading Champions...</p>';
             try {
                 const res = await fetch(`${WORKER_URL}/leaderboard`);
                 const top = await res.json();
                 list.innerHTML = '';
                 top.forEach((u, i) => {
+                    const isTop3 = i < 3;
+                    const colors = ['text-yellow-400', 'text-gray-300', 'text-orange-400'];
                     list.innerHTML += `
-                        <div class="dragon-card p-4 flex justify-between items-center ${i < 3 ? 'border-yellow-500/30 bg-yellow-500/5' : ''}">
+                        <div class="dragon-card p-4 flex justify-between items-center ${isTop3 ? 'border-yellow-500/20 bg-yellow-500/5' : 'border-white/5'}">
                             <div class="flex items-center gap-3">
-                                <span class="text-[10px] font-black w-4">#${i+1}</span>
+                                <span class="text-[10px] font-black w-4 ${isTop3 ? colors[i] : 'text-gray-600'}">#${i+1}</span>
                                 <span class="text-xs font-bold">${u.username}</span>
                             </div>
-                            <span class="text-xs font-black text-yellow-500">${u.points.toLocaleString()}</span>
+                            <span class="text-xs font-black ${isTop3 ? colors[i] : 'text-white'}">${u.points.toLocaleString()}</span>
                         </div>`;
                 });
             } catch (e) {}
         }
 
+        // تحميل المهام (تليجرام + X + تيك توك)
         async function loadMissions() {
             const container = document.getElementById('tasks-container');
-            container.innerHTML = '<p class="text-center py-5 opacity-50 text-[10px]">Loading Tasks...</p>';
-            // مثال لمهام ثابتة (يمكن جلبها من RSS كما فعلنا سابقاً)
-            const tasks = [
-                { id: 't1', title: 'Follow Dragon X', link: 'https://x.com/dragon', reward: 1000 },
-                { id: 't2', title: 'Join Channel', link: 'https://t.me/dragon', reward: 1000 }
+            container.innerHTML = '<p class="text-center py-5 opacity-50 text-[10px] uppercase">Fetching Missions...</p>';
+            
+            const staticTasks = [
+                { id: 'tg_chan', title: 'Join Official Channel', link: 'https://t.me/Dragon_Coin_Official', reward: 2000, icon: 'fa-telegram' }
             ];
+
+            const feeds = [
+                { id: 'X', url: "https://rss.app/feeds/v1.1/tYaEQs8TqBTzCA29.json", icon: 'fa-twitter' },
+                { id: 'TikTok', url: "https://rss.app/feeds/v1.1/L4M8dUSeMhVKhLS2.json", icon: 'fa-tiktok' }
+            ];
+
+            let dynamicTasks = [];
+            for (let f of feeds) {
+                try {
+                    const res = await fetch(f.url);
+                    const d = await res.json();
+                    d.items.slice(0, 3).forEach(item => {
+                        dynamicTasks.push({
+                            id: btoa(item.link).substring(0, 10),
+                            title: `${f.id}: Mission`,
+                            link: item.link,
+                            reward: 1000,
+                            icon: f.icon
+                        });
+                    });
+                } catch (e) {}
+            }
+
+            const allTasks = [...staticTasks, ...dynamicTasks];
             container.innerHTML = '';
-            tasks.forEach(t => {
+            allTasks.forEach(t => {
                 const isDone = appData.doneTasks.includes(t.id);
                 container.innerHTML += `
-                    <div class="dragon-card p-4 flex justify-between items-center ${isDone ? 'completed-task' : ''}">
-                        <span class="text-[10px] font-black">${t.title}</span>
-                        <button onclick="executeTask('${t.id}', '${t.link}')" class="bg-white text-black px-4 py-1.5 rounded-lg text-[9px] font-black">${isDone ? 'DONE' : 'GO'}</button>
+                    <div class="dragon-card p-4 flex justify-between items-center border-l-2 ${isDone ? 'border-gray-800 opacity-50' : 'border-red-600'}">
+                        <div class="flex items-center gap-3">
+                            <i class="fab ${t.icon} ${isDone ? 'text-gray-600' : 'text-red-500'} text-lg"></i>
+                            <div>
+                                <p class="text-[10px] font-black uppercase">${t.title}</p>
+                                <p class="text-[8px] text-yellow-500 font-bold">+${t.reward.toLocaleString()} PTS</p>
+                            </div>
+                        </div>
+                        <button onclick="executeTask('${t.id}', '${t.link}', ${t.reward})" class="px-5 py-2 rounded-xl text-[9px] font-black uppercase ${isDone ? 'bg-black text-gray-700' : 'bg-white text-black'}">
+                            ${isDone ? 'DONE' : 'GO'}
+                        </button>
                     </div>`;
             });
         }
 
-        async function executeTask(id, url) {
+        async function executeTask(id, url, reward) {
+            if (appData.doneTasks.includes(id)) return;
             tg.openLink(url);
-            tg.showConfirm("Done?", async (ok) => {
-                if(ok) {
-                    const res = await fetch(`${WORKER_URL}/complete-task`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ userId: tg.initDataUnsafe.user.id, taskId: id, reward: 1000 })
-                    });
-                    const r = await res.json();
-                    if(r.success) { appData.points = r.newPoints; appData.doneTasks.push(id); updateUI(); loadMissions(); }
-                }
-            });
+            setTimeout(() => {
+                tg.showConfirm(appData.lang === 'ar' ? "هل أكملت المهمة؟" : "Task Completed?", async (ok) => {
+                    if(ok) {
+                        const res = await fetch(`${WORKER_URL}/complete-task`, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ userId: tg.initDataUnsafe.user.id, taskId: id, reward: reward })
+                        });
+                        const r = await res.json();
+                        if(r.success) { 
+                            appData.points = r.newPoints; 
+                            appData.doneTasks.push(id); 
+                            updateUI(); 
+                            loadMissions();
+                            tg.HapticFeedback.notificationOccurred('success');
+                        }
+                    }
+                });
+            }, 2000);
         }
 
+        // الإحالات
         function shareReferral() {
-            const link = `https://t.me/${BOT_USERNAME}?start=${tg.initDataUnsafe.user.id}`;
-            tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=Join Dragon!`);
+            const userId = tg.initDataUnsafe.user?.id || "0";
+            const link = `https://t.me/${BOT_USERNAME}?start=${userId}`;
+            const text = appData.lang === 'ar' ? "انضم إلي في Dragon VIP واحصل على 5000 نقطة مجانية! 🐲🔥" : "Join me on Dragon VIP and get 5000 free points! 🐲🔥";
+            tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`);
         }
 
+        // التبديل بين التبويبات
         function showTab(id) {
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -247,8 +318,10 @@
             document.getElementById('n-' + id).classList.add('active');
             if(id === 'leaderboard') loadLeaderboard();
             if(id === 'missions') loadMissions();
+            tg.HapticFeedback.impactOccurred('light');
         }
 
+        // نظام المستويات
         function updateTierUI(pts) {
             const tiers = [
                 { name: 'Bronze', min: 0, max: 100000, color: '#b45309' },
@@ -256,7 +329,7 @@
                 { name: 'Gold', min: 500000, max: 1000000, color: '#f59e0b' },
                 { name: 'Legend', min: 1000000, max: 10000000, color: '#6366f1' }
             ];
-            let tier = tiers.find((t, i) => pts >= t.min && (tiers[i+1] ? pts < tiers[i+1].min : true));
+            let tier = tiers.find((t, i) => pts >= t.min && (tiers[i+1] ? pts < tiers[i+1].min : true)) || tiers[0];
             const badge = document.getElementById('tier-badge');
             badge.innerText = tier.name;
             badge.style.backgroundColor = tier.color;
@@ -266,10 +339,17 @@
             document.getElementById('tier-progress-bar').style.backgroundColor = tier.color;
         }
 
+        // تحديث الواجهة واللغة
         function updateUI() {
             const isAr = appData.lang === 'ar';
             document.getElementById('htmlTag').dir = isAr ? 'rtl' : 'ltr';
-            document.querySelectorAll('[data-ar]').forEach(el => el.innerText = isAr ? el.getAttribute('data-ar') : el.getAttribute('data-en'));
+            document.getElementById('langBtn').innerText = isAr ? 'EN' : 'AR';
+            
+            // تحديث كافة العناصر التي تحمل بيانات اللغة
+            document.querySelectorAll('[data-ar]').forEach(el => {
+                el.innerText = isAr ? el.getAttribute('data-ar') : el.getAttribute('data-en');
+            });
+
             document.getElementById('wallet-pts').innerText = appData.points.toLocaleString();
             updateTierUI(appData.points);
         }
@@ -280,11 +360,13 @@
             updateUI();
         }
 
+        // تهيئة TON Connect
         const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
             manifestUrl: 'https://raw.githubusercontent.com/ton-community/tutorials/main/03-client/test/public/tonconnect-manifest.json',
             buttonRootId: 'ton-connect-button'
         });
 
+        // بدء التشغيل
         tg.expand();
         syncData();
         updateMarketData();
