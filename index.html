@@ -3,110 +3,169 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>The Dragon Hub</title>
+    <title>The Dragon Hub - Tasks & Rewards</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         body { background-color: #050505; color: #fff; font-family: sans-serif; overflow-x: hidden; }
-        .dragon-card { background: linear-gradient(145deg, #1a1a1a, #0a0a0a); border: 1px solid #222; }
+        .dragon-card { background: linear-gradient(145deg, #161616, #0a0a0a); border: 1px solid #222; }
         .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        .nav-item.active { color: #ff4d4d; }
-        #toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: #ff4d4d; padding: 10px 20px; border-radius: 20px; opacity: 0; transition: 0.3s; z-index: 1000; font-size: 12px; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .nav-item.active { color: #ff4d4d; filter: drop-shadow(0 0 5px rgba(255, 77, 77, 0.5)); }
+        #toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: #ff4d4d; padding: 10px 25px; border-radius: 50px; opacity: 0; transition: 0.3s; z-index: 1000; font-size: 13px; font-weight: bold; }
         #toast.show { opacity: 1; }
+        .task-done { opacity: 0.5; pointer-events: none; border-color: #111 !important; }
     </style>
 </head>
 <body class="pb-32">
 
-    <header class="p-4 flex justify-between items-center sticky top-0 bg-[#050505]/90 backdrop-blur-md z-50 border-b border-white/5">
-        <div class="flex items-center gap-2">
-            <div class="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center"><i class="fas fa-dragon"></i></div>
-            <span class="font-black text-lg uppercase gold-text">DRAGON<span class="text-red-600">HUB</span></span>
+    <header class="p-4 flex justify-between items-center sticky top-0 bg-[#050505]/95 backdrop-blur-md z-50 border-b border-white/5">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-red-600 rounded-xl flex items-center justify-center shadow-lg shadow-red-900/20">
+                <i class="fas fa-dragon text-white text-xl"></i>
+            </div>
+            <div>
+                <span class="font-black text-lg uppercase tracking-tighter italic">DRAGON<span class="text-red-600">HUB</span></span>
+                <p id="userScoreDisplay" class="text-[9px] text-yellow-500 font-bold uppercase tracking-widest">Points: 0</p>
+            </div>
         </div>
-        <button id="walletBtn" onclick="smartConnect()" class="bg-white text-black text-[10px] font-bold px-4 py-2 rounded-full uppercase">Connect</button>
+        <button id="walletBtn" onclick="smartConnect()" class="bg-white text-black text-[10px] font-black px-5 py-2 rounded-full uppercase transition-all active:scale-90">
+            Connect
+        </button>
     </header>
 
-    <div id="home-tab" class="tab-content active animate-in fade-in transition-all">
-        <div class="p-4">
-            <div class="dragon-card p-5 rounded-3xl mb-4">
-                <div class="flex justify-between mb-2"><span class="text-xs text-gray-400">معدل الحرق</span> <span id="burnPercent" class="text-red-500 font-bold">0%</span></div>
-                <div class="w-full bg-gray-800 h-2 rounded-full overflow-hidden"><div id="burnFill" class="bg-red-600 h-full w-0 transition-all duration-1000"></div></div>
-            </div>
-            
-            <h3 class="text-xs font-bold text-gray-500 mb-3 uppercase px-1">آخر المواجهات ⚔️</h3>
-            <div class="dragon-card rounded-3xl overflow-hidden mb-6">
-                <div class="aspect-video bg-gray-900 flex items-center justify-center relative">
-                    <img src="https://via.placeholder.com/400x225/111/fff?text=Dragon+Sport+TikTok" class="opacity-40">
-                    <a href="https://www.tiktok.com/@thedragonsport" target="_blank" class="absolute bg-white/10 p-4 rounded-full backdrop-blur-md"><i class="fas fa-play"></i></a>
+    <div id="home-tab" class="tab-content active p-4 space-y-4">
+        <h3 class="text-[10px] font-black text-gray-500 uppercase tracking-widest px-2">مهام تعزيز العرين ⚔️</h3>
+        
+        <div class="space-y-3">
+            <div id="task-tiktok" class="dragon-card p-5 rounded-3xl flex items-center justify-between border-r-4 border-red-600 transition-all">
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 bg-black rounded-full flex items-center justify-center border border-white/10">
+                        <i class="fab fa-tiktok text-white"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs font-black">دعم @thedragonsport</p>
+                        <p class="text-[9px] text-gray-500">+1,000 Point</p>
+                    </div>
                 </div>
+                <button onclick="doTask('tiktok', 1000)" class="bg-red-600 text-[10px] font-black px-4 py-2 rounded-xl shadow-lg">نفذ</button>
+            </div>
+
+            <div id="task-x" class="dragon-card p-5 rounded-3xl flex items-center justify-between border-r-4 border-blue-500 transition-all">
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 bg-black rounded-full flex items-center justify-center border border-white/10">
+                        <i class="fab fa-twitter text-blue-400"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs font-black">متابعة @XY_signals</p>
+                        <p class="text-[9px] text-gray-500">+500 Point</p>
+                    </div>
+                </div>
+                <button onclick="doTask('x', 500)" class="bg-blue-600 text-[10px] font-black px-4 py-2 rounded-xl shadow-lg">متابعة</button>
+            </div>
+        </div>
+
+        <div class="dragon-card p-6 rounded-[2.5rem] mt-4">
+            <div class="flex justify-between items-end mb-3">
+                <h3 class="text-[10px] font-black text-gray-400 uppercase tracking-widest">تضحية الحرق 🔥</h3>
+                <span id="burnPercent" class="text-red-500 font-black text-xs font-mono">0.00%</span>
+            </div>
+            <div class="w-full bg-[#111] h-2.5 rounded-full overflow-hidden">
+                <div id="burnFill" class="bg-red-600 h-full w-0 transition-all duration-[2s] shadow-[0_0_10px_#ff0000]"></div>
             </div>
         </div>
     </div>
 
-    <div id="data-tab" class="tab-content p-4">
-        <h2 class="text-xl font-bold mb-4 text-center">إحصائيات الشبكة 📊</h2>
-        <div class="space-y-3">
-            <div class="dragon-card p-4 rounded-2xl flex justify-between"><span>العدد الإجمالي:</span> <span class="text-red-500">1,000,000,000</span></div>
-            <div class="dragon-card p-4 rounded-2xl flex justify-between"><span>الشبكة:</span> <span class="text-yellow-500">BSC (BEP-20)</span></div>
-            <div id="burnTotalDisplay" class="dragon-card p-4 rounded-2xl flex justify-between font-mono text-xs">جاري جلب البيانات...</div>
+    <div id="data-tab" class="tab-content p-4 space-y-4">
+        <div class="dragon-card p-6 rounded-[2rem] text-center">
+            <p class="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1">Total Supply</p>
+            <p class="text-2xl font-black italic tracking-tighter">1,000,000,000 <span class="text-red-600 text-sm">$DRGN</span></p>
+        </div>
+        <div class="dragon-card p-5 rounded-2xl flex justify-between">
+            <span class="text-xs text-gray-400">الشبكة:</span>
+            <span class="text-xs font-bold text-yellow-500 uppercase">Binance Smart Chain</span>
         </div>
     </div>
 
     <div id="ranks-tab" class="tab-content p-4">
-        <div id="rankSection" class="dragon-card p-8 rounded-3xl text-center border-yellow-600/30">
+        <div class="dragon-card p-10 rounded-[3rem] text-center">
             <div id="rankIcon" class="text-7xl mb-4">🥚</div>
-            <h2 id="rankTitle" class="text-2xl font-black">اربط المحفظة</h2>
-            <p id="rankBadge" class="text-gray-500 mt-2">لم يتم الكشف عن الرتبة بعد</p>
+            <h2 id="rankTitle" class="text-2xl font-black uppercase tracking-tighter">Dragon Egg</h2>
+            <p id="rankBadge" class="text-gray-500 text-[10px] font-bold uppercase mt-2">Verified Rank</p>
         </div>
     </div>
 
-    <div id="assets-tab" class="tab-content p-4 text-center">
-        <i class="fas fa-wallet text-5xl mb-4 text-gray-700"></i>
-        <h2 class="text-xl font-bold mb-2">محفظة التنين</h2>
-        <p class="text-gray-500 text-sm">سيتم عرض رصيدك من $DRGN هنا فور الربط</p>
+    <div id="assets-tab" class="tab-content p-4">
+        <div class="dragon-card p-8 rounded-[2rem] text-center bg-white/5">
+            <p class="text-xs text-gray-500 mb-1">Your $DRGN Balance</p>
+            <div id="userBalance" class="text-4xl font-black font-mono">0.00</div>
+            <a href="https://pancakeswap.finance/swap?outputCurrency=0x84606890ad8d13e5a092c25abe59e2ec8ade7805" target="_blank" class="block mt-6 w-full bg-red-600 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest">Buy $DRGN</a>
+        </div>
     </div>
 
-    <nav class="fixed bottom-0 left-0 right-0 bg-black/90 border-t border-white/5 flex justify-around p-4 z-50">
+    <nav class="fixed bottom-0 left-0 right-0 bg-black/95 border-t border-white/5 flex justify-around p-4 z-50 backdrop-blur-md">
         <button onclick="switchTab('home')" class="nav-item flex flex-col items-center active" id="nav-home">
-            <i class="fas fa-home"></i><span class="text-[9px] mt-1">HOME</span>
+            <i class="fas fa-home"></i><span class="text-[8px] mt-1 font-black">HOME</span>
         </button>
         <button onclick="switchTab('data')" class="nav-item flex flex-col items-center text-gray-500" id="nav-data">
-            <i class="fas fa-chart-pie"></i><span class="text-[9px] mt-1">DATA</span>
+            <i class="fas fa-chart-line"></i><span class="text-[8px] mt-1 font-black">DATA</span>
         </button>
         <button onclick="switchTab('ranks')" class="nav-item flex flex-col items-center text-gray-500" id="nav-ranks">
-            <i class="fas fa-trophy"></i><span class="text-[9px] mt-1">RANKS</span>
+            <i class="fas fa-fire"></i><span class="text-[8px] mt-1 font-black">RANKS</span>
         </button>
         <button onclick="switchTab('assets')" class="nav-item flex flex-col items-center text-gray-500" id="nav-assets">
-            <i class="fas fa-wallet"></i><span class="text-[9px] mt-1">ASSETS</span>
+            <i class="fas fa-wallet"></i><span class="text-[8px] mt-1 font-black">ASSETS</span>
         </button>
     </nav>
 
     <div id="toast"></div>
 
     <script>
-        // وظيفة التنقل بين التبويبات
-        function switchTab(tabName) {
-            // إخفاء كل المحتوى
-            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-            // إزالة اللون الأحمر من كل الأزرار
-            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('text-red-500', 'active'));
-            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.add('text-gray-500'));
-
-            // إظهار المحتوى المختار
-            document.getElementById(tabName + '-tab').classList.add('active');
-            // تلوين الزر المختار
-            const activeNav = document.getElementById('nav-' + tabName);
-            activeNav.classList.remove('text-gray-500');
-            activeNav.classList.add('text-red-500', 'active');
-        }
-
-        // المنطق البرمجي (نفس الكود السابق مع ربط البيانات)
         const RPC = "https://bsc-dataseed.binance.org/";
         const CONTRACT = "0x84606890ad8d13e5a092c25abe59e2ec8ade7805";
         const DEAD = "0x000000000000000000000000000000000000dEaD";
 
-        async function fetchMarketData() {
+        // منطق النقاط والمهام
+        let score = parseInt(localStorage.getItem('dragonScore')) || 0;
+        document.getElementById('userScoreDisplay').innerText = `Points: ${score.toLocaleString()}`;
+
+        function doTask(type, points) {
+            if (localStorage.getItem('task_' + type)) {
+                showToast("لقد نفذت هذه المهمة بالفعل! 🐲");
+                return;
+            }
+            
+            const urls = {
+                'tiktok': 'https://www.tiktok.com/@thedragonsport',
+                'x': 'https://x.com/XY_signals'
+            };
+
+            window.open(urls[type], '_blank');
+            
+            setTimeout(() => {
+                score += points;
+                localStorage.setItem('dragonScore', score);
+                localStorage.setItem('task_' + type, 'done');
+                document.getElementById('userScoreDisplay').innerText = `Points: ${score.toLocaleString()}`;
+                document.getElementById('task-' + type).classList.add('task-done');
+                showToast(`أحسنت! +${points} نقطة تنين 🔥`);
+            }, 2000);
+        }
+
+        // تفقد المهام المنفذة عند الفتح
+        if(localStorage.getItem('task_tiktok')) document.getElementById('task-tiktok').classList.add('task-done');
+        if(localStorage.getItem('task_x')) document.getElementById('task-x').classList.add('task-done');
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+            document.getElementById(tabName + '-tab').classList.add('active');
+            document.getElementById('nav-' + tabName).classList.add('active');
+        }
+
+        async function initData() {
             try {
                 const provider = new ethers.providers.JsonRpcProvider(RPC);
                 const abi = ["function balanceOf(address) view returns (uint256)"];
@@ -114,37 +173,41 @@
                 const deadBal = await contract.balanceOf(DEAD);
                 const burned = parseFloat(ethers.utils.formatUnits(deadBal, 18));
                 const burnP = ((burned / 1000000000) * 100).toFixed(4);
-
                 document.getElementById('burnFill').style.width = burnP + "%";
                 document.getElementById('burnPercent').innerText = burnP + "%";
-                if(document.getElementById('burnTotalDisplay')) {
-                    document.getElementById('burnTotalDisplay').innerText = "المحروق: " + burned.toLocaleString() + " DRGN";
-                }
-            } catch(e) { console.log("Blockchain Error"); }
+            } catch(e) { console.log("Chain Error"); }
         }
 
-        // استدعاء البيانات عند الفتح
-        fetchMarketData();
-        setInterval(fetchMarketData, 30000);
-
-        function showToast(m) {
-            const t = document.getElementById('toast');
-            t.innerText = m; t.classList.add('show');
-            setTimeout(() => t.classList.remove('show'), 3000);
-        }
-
-        // ذكاء اصطناعي بسيط لربط المحفظة
         function smartConnect() {
             if (window.ethereum) {
                 window.ethereum.request({ method: 'eth_requestAccounts' }).then(acc => {
                     document.getElementById('walletBtn').innerText = acc[0].substring(0,6) + "...";
-                    showToast("تم ربط المحفظة بنجاح 🐉");
-                    switchTab('ranks'); // نقله لصفحة الرتب فور الربط
+                    showToast("تم ربط العرين بنجاح! 🐉");
+                    updateBalance(acc[0]);
                 });
             } else {
-                showToast("يرجى استخدام متصفح المحفظة");
+                showToast("يرجى فتح التطبيق من متصفح محفظة آمنة");
             }
         }
+
+        async function updateBalance(addr) {
+            const provider = new ethers.providers.JsonRpcProvider(RPC);
+            const contract = new ethers.Contract(CONTRACT, ["function balanceOf(address) view returns (uint256)"], provider);
+            const bal = await contract.balanceOf(addr);
+            const fmt = parseFloat(ethers.utils.formatUnits(bal, 18));
+            document.getElementById('userBalance').innerText = fmt.toLocaleString(undefined, {minimumFractionDigits:2});
+            
+            if (fmt >= 1000000) { document.getElementById('rankIcon').innerText = "👑"; document.getElementById('rankTitle').innerText = "Dragon King"; }
+            else if (fmt >= 100000) { document.getElementById('rankIcon').innerText = "⚔️"; document.getElementById('rankTitle').innerText = "Warrior Dragon"; }
+        }
+
+        function showToast(m) {
+            const t = document.getElementById('toast'); t.innerText = m; t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+
+        initData();
+        setInterval(initData, 30000);
     </script>
 </body>
 </html>
