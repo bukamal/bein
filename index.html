@@ -3,119 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dragon Ultimate</title>
+    <title>Dragon Elite App</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { background-color: #020202; color: #fff; font-family: 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; }
-        .dragon-card { background: linear-gradient(145deg, #0f0f0f, #050505); border: 1px solid #1a1a1a; border-radius: 20px; }
+        body { background-color: #020202; color: #fff; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .dragon-card { background: #0a0a0a; border: 1px solid #1a1a1a; border-radius: 20px; transition: 0.3s; }
         .tab-content { display: none; }
-        .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .nav-btn { color: #444; transition: 0.3s; }
-        .nav-btn.active { color: #ff4d4d; }
-        .nav-btn.active i { transform: scale(1.2); color: #ff4d4d; }
-        .wallet-gradient { background: linear-gradient(135deg, #ff4d4d 0%, #991b1b 100%); }
+        .tab-content.active { display: block; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .nav-btn { color: #444; }
+        .nav-btn.active { color: #ff4d4d; border-top: 2px solid #ff4d4d; background: linear-gradient(to bottom, rgba(255,77,77,0.05), transparent); }
+        .wallet-banner { background: linear-gradient(135deg, #1e1e1e 0%, #000 100%); border: 1px solid #333; position: relative; overflow: hidden; }
+        .wallet-banner::after { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255,77,77,0.05) 0%, transparent 70%); }
     </style>
 </head>
 <body class="pb-28">
 
-    <header class="p-4 flex justify-between items-center border-b border-white/5 sticky top-0 bg-black/90 backdrop-blur-md z-50">
+    <header class="p-4 border-b border-white/5 sticky top-0 bg-black/90 backdrop-blur-md z-50 flex justify-between items-center">
         <div class="flex items-center gap-2">
-            <div class="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center shadow-lg shadow-red-600/20">
-                <i class="fas fa-dragon text-white text-sm"></i>
-            </div>
-            <h1 class="text-[10px] font-black uppercase tracking-widest">DRAGON <span class="text-red-600">APP</span></h1>
+            <i class="fas fa-dragon text-red-600 text-lg"></i>
+            <h1 class="text-[10px] font-black uppercase tracking-tighter">DRAGON <span class="text-red-600">PRO</span></h1>
         </div>
-        <button onclick="toggleLang()" class="text-[9px] font-bold bg-white/5 px-3 py-1 rounded border border-white/10" id="langBtn">EN</button>
+        <button onclick="toggleLang()" class="text-[9px] font-bold bg-white/5 px-3 py-1.5 rounded border border-white/10 uppercase" id="langBtn">EN</button>
     </header>
 
     <main class="p-4">
         
         <div id="home-tab" class="tab-content active space-y-4">
             <div class="grid grid-cols-2 gap-3">
-                <div class="dragon-card p-4 border-b-2 border-green-500/30 text-center">
+                <div class="dragon-card p-4 border-l-4 border-green-600">
                     <p class="text-[8px] text-gray-500 font-bold uppercase mb-1" data-ar="السيولة" data-en="Liquidity">السيولة</p>
-                    <p id="live-liq" class="text-xs font-black text-green-500">$0.00</p>
+                    <p id="live-liq" class="text-xs font-black text-green-500 tracking-tighter">FETCHING...</p>
                 </div>
-                <div class="dragon-card p-4 border-b-2 border-red-500/30 text-center">
-                    <p class="text-[8px] text-gray-500 font-bold uppercase mb-1" data-ar="القيمة السوقية" data-en="Market Cap">القيمة السوقية</p>
-                    <p id="live-mcap" class="text-xs font-black text-white">$0.00</p>
+                <div class="dragon-card p-4 border-l-4 border-red-600">
+                    <p class="text-[8px] text-gray-500 font-bold uppercase mb-1" data-ar="الماركت كاب" data-en="Market Cap">الماركت كاب</p>
+                    <p id="live-mcap" class="text-xs font-black text-white tracking-tighter">FETCHING...</p>
                 </div>
             </div>
-            <div class="dragon-card p-5 relative overflow-hidden">
-                <div class="flex justify-between items-center relative z-10">
+            <div class="dragon-card p-5 border-t border-white/5">
+                <div class="flex justify-between items-center mb-4">
                     <span class="text-[10px] text-gray-400 font-bold uppercase" data-ar="السعر المباشر" data-en="Live Price">السعر المباشر</span>
-                    <span id="live-price" class="text-xs font-mono font-bold text-red-500">$0.00000000</span>
+                    <span id="live-price" class="text-xs font-mono font-bold text-red-500 tracking-widest">$0.00</span>
                 </div>
-                <div class="mt-4 pt-4 border-t border-white/5 flex justify-between items-center">
-                    <div class="text-[9px] font-bold uppercase text-orange-500" data-ar="نسبة الحرق" data-en="Burn Rate">نسبة الحرق</div>
-                    <div class="text-[9px] font-bold">45.8%</div>
+                <div class="flex justify-between items-center pt-4 border-t border-white/5">
+                    <span class="text-[9px] text-orange-500 font-bold uppercase" data-ar="نسبة الحرق" data-en="Burn Rate">نسبة الحرق</span>
+                    <span class="text-[10px] font-black">45.8%</span>
                 </div>
             </div>
         </div>
 
         <div id="trade-tab" class="tab-content space-y-4">
-            <div class="dragon-card p-6 border-red-600/20 bg-red-600/5">
-                <h3 class="text-[10px] font-black uppercase mb-4 text-red-500 flex items-center gap-2">
-                    <i class="fas fa-exclamation-triangle"></i> <span data-ar="تنبيه السيولة" data-en="Liquidity Alert">تنبيه السيولة</span>
-                </h3>
+            <div class="dragon-card p-6 border-red-600/30 bg-red-600/5">
+                <div class="flex items-center gap-2 mb-4">
+                    <i class="fas fa-shield-alt text-red-500"></i>
+                    <h3 class="text-[10px] font-black uppercase" data-ar="نظام حماية السيولة" data-en="Liquidity Protection">نظام حماية السيولة</h3>
+                </div>
                 <div class="space-y-4">
-                    <div class="flex justify-between">
-                        <span class="text-[9px] text-gray-400 uppercase font-bold" data-ar="الحد الأقصى للشراء الآمن" data-en="Safe Buy Limit">الحد الأقصى للشراء الآمن</span>
+                    <div class="flex justify-between items-center bg-black/40 p-3 rounded-lg">
+                        <span class="text-[8px] text-gray-400 uppercase font-bold" data-ar="أقصى شراء آمن" data-en="Max Safe Buy">أقصى شراء آمن</span>
                         <span id="safe-buy-val" class="text-xs font-black text-green-500">$0.00</span>
                     </div>
-                    <p class="text-[8px] text-gray-500 leading-relaxed italic" data-ar="* تم حساب هذا المبلغ بناءً على 3% من السيولة الفعلية للعملة لمنع الانزلاق السعري الكبير وتأمين صفقتك." data-en="* This amount is calculated based on 3% of the live liquidity to prevent high slippage and secure your trade.">
-                        * تم حساب هذا المبلغ بناءً على 3% من السيولة الفعلية للعملة لمنع الانزلاق السعري الكبير وتأمين صفقتك.
-                    </p>
+                    <p id="trade-advice" class="text-[9px] text-gray-400 leading-relaxed italic" data-ar="يتم حساب الحد الأقصى بناءً على 3% من السيولة الحقيقية." data-en="Max buy limit is calculated based on 3% of live liquidity."></p>
                 </div>
             </div>
-            <a href="https://pancakeswap.finance/swap?outputCurrency=0x583787E29Bb2D92FcBc713389FD66807602c72F3" target="_blank" class="block w-full py-4 bg-white text-black text-center rounded-xl font-black uppercase text-xs">PancakeSwap <i class="fas fa-external-link-alt ml-1"></i></a>
+            <a href="https://pancakeswap.finance/swap?outputCurrency=0x583787E29Bb2D92FcBc713389FD66807602c72F3" target="_blank" class="block w-full py-4 bg-white text-black text-center rounded-xl font-black uppercase text-[10px] shadow-lg shadow-white/5">TRADE ON PANCAKESWAP</a>
         </div>
 
-        <div id="wallet-tab" class="tab-content space-y-5">
-            <div class="wallet-gradient p-6 rounded-[25px] shadow-xl shadow-red-900/20 relative overflow-hidden">
-                <i class="fas fa-dragon absolute -right-4 -bottom-4 text-6xl text-black/10"></i>
-                <p class="text-[9px] font-bold uppercase opacity-60 mb-1" data-ar="إجمالي الرصيد" data-en="Total Balance">إجمالي الرصيد</p>
-                <h2 class="text-2xl font-black mb-6">$0.00</h2>
-                <div class="flex justify-between items-end">
-                    <p class="text-[8px] font-mono tracking-widest opacity-80">DRAGON USER WALLET</p>
-                    <i class="fas fa-rss text-xs opacity-50"></i>
+        <div id="wallet-tab" class="tab-content space-y-4">
+            <div class="wallet-banner p-6 rounded-[25px] border border-white/10 shadow-2xl">
+                <div class="flex justify-between items-start mb-8">
+                    <div class="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center"><i class="fas fa-dragon text-white"></i></div>
+                    <span class="text-[8px] font-black bg-white/10 px-2 py-1 rounded">DRAGON NETWORK</span>
+                </div>
+                <p class="text-[9px] text-gray-400 uppercase font-bold mb-1" data-ar="رصيد المحفظة التقديري" data-en="Estimated Wallet Balance">رصيد المحفظة التقديري</p>
+                <h2 class="text-3xl font-black tracking-tighter mb-6">$0.00</h2>
+                <div class="flex gap-2">
+                    <div class="h-1 w-12 bg-red-600 rounded-full"></div>
+                    <div class="h-1 w-4 bg-white/20 rounded-full"></div>
                 </div>
             </div>
-            
-            <div class="dragon-card p-4 space-y-4">
-                <div class="flex items-center justify-between">
+
+            <div class="dragon-card p-2 space-y-1">
+                <div class="p-3 flex justify-between items-center">
                     <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-full bg-yellow-500/10 flex items-center justify-center text-yellow-500"><i class="fas fa-coins text-sm"></i></div>
+                        <div class="w-8 h-8 bg-yellow-500/10 rounded-lg flex items-center justify-center text-yellow-500"><i class="fas fa-coins text-sm"></i></div>
                         <div>
-                            <p class="text-[10px] font-bold">DRAGON COIN</p>
-                            <p class="text-[8px] text-gray-500" id="pointsDisplay">0 PTS</p>
+                            <p class="text-[10px] font-black">DRAGON POINTS</p>
+                            <p class="text-[8px] text-gray-500" id="wallet-pts">0 PTS</p>
                         </div>
                     </div>
-                    <div class="text-right">
-                        <p class="text-[10px] font-bold">0.00</p>
-                        <p class="text-[8px] text-green-500">+$0.00</p>
-                    </div>
+                    <i class="fas fa-chevron-right text-[8px] text-gray-700"></i>
                 </div>
             </div>
 
-            <div id="ton-connect-button" class="flex justify-center mt-6"></div>
+            <div id="ton-connect-button" class="flex justify-center mt-4"></div>
         </div>
 
-        <div id="missions-tab" class="tab-content space-y-3">
+        <div id="missions-tab" class="tab-content">
             <div id="tasks-list" class="space-y-3"></div>
         </div>
 
     </main>
 
     <nav class="fixed bottom-0 left-0 right-0 bg-black/95 border-t border-white/5 flex justify-around p-4 z-50">
-        <button onclick="switchTab('home')" class="nav-btn flex flex-col items-center gap-1 active" id="n-home"><i class="fas fa-th-large text-xs"></i><span class="text-[8px] font-bold uppercase" data-ar="الرئيسية" data-en="HOME">الرئيسية</span></button>
-        <button onclick="switchTab('missions')" class="nav-btn flex flex-col items-center gap-1" id="n-missions"><i class="fas fa-bolt text-xs"></i><span class="text-[8px] font-bold uppercase" data-ar="المهام" data-en="TASKS">المهام</span></button>
-        <button onclick="switchTab('trade')" class="nav-btn flex flex-col items-center gap-1" id="n-trade"><i class="fas fa-exchange-alt text-xs"></i><span class="text-[8px] font-bold uppercase" data-ar="تداول" data-en="TRADE">تداول</span></button>
-        <button onclick="switchTab('wallet')" class="nav-btn flex flex-col items-center gap-1" id="n-wallet"><i class="fas fa-wallet text-xs"></i><span class="text-[8px] font-bold uppercase" data-ar="المحفظة" data-en="WALLET">المحفظة</span></button>
+        <button onclick="switchTab('home')" class="nav-btn flex flex-col items-center gap-1 active" id="btn-home">
+            <i class="fas fa-th-large text-xs"></i>
+            <span class="text-[8px] font-bold uppercase" data-ar="الرئيسية" data-en="HOME">الرئيسية</span>
+        </button>
+        <button onclick="switchTab('missions')" class="nav-btn flex flex-col items-center gap-1" id="btn-missions">
+            <i class="fas fa-bolt text-xs"></i>
+            <span class="text-[8px] font-bold uppercase" data-ar="المهام" data-en="TASKS">المهام</span>
+        </button>
+        <button onclick="switchTab('trade')" class="nav-btn flex flex-col items-center gap-1" id="btn-trade">
+            <i class="fas fa-random text-xs"></i>
+            <span class="text-[8px] font-bold uppercase" data-ar="تداول" data-en="TRADE">تداول</span>
+        </button>
+        <button onclick="switchTab('wallet')" class="nav-btn flex flex-col items-center gap-1" id="btn-wallet">
+            <i class="fas fa-wallet text-xs"></i>
+            <span class="text-[8px] font-bold uppercase" data-ar="المحفظة" data-en="WALLET">المحفظة</span>
+        </button>
     </nav>
 
     <script>
@@ -124,52 +133,57 @@
         let points = parseInt(localStorage.getItem('d_pts')) || 0;
         let currentLang = localStorage.getItem('d_lang') || 'ar';
 
-        // تهيئة المحفظة
         const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
             manifestUrl: 'https://raw.githubusercontent.com/ton-community/tutorials/main/03-client/test/public/tonconnect-manifest.json',
             buttonRootId: 'ton-connect-button'
         });
 
-        // محاولة جلب البيانات باستخدام وسيط مختلف
-        async function getStats() {
+        // محرك الجلب النهائي باستخدام بروكسي خارجي لتجاوز حظر تليجرام
+        async function getLiveData() {
             try {
-                // استخدام وسيط لتجاوز قيود المتصفح
-                const res = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${CA}`);
-                const data = await res.json();
+                // استخدام AllOrigins لجلب البيانات وتجاوز CORS
+                const proxy = "https://api.allorigins.win/get?url=";
+                const target = encodeURIComponent(`https://api.dexscreener.com/latest/dex/tokens/${CA}`);
                 
+                const response = await fetch(proxy + target);
+                const json = await response.json();
+                const data = JSON.parse(json.contents);
+
                 if (data.pairs && data.pairs[0]) {
                     const p = data.pairs[0];
                     const liq = parseFloat(p.liquidity.usd);
+                    
                     document.getElementById('live-price').innerText = `$${p.priceUsd}`;
                     document.getElementById('live-liq').innerText = `$${liq.toLocaleString()}`;
                     document.getElementById('live-mcap').innerText = `$${parseFloat(p.fdv || 0).toLocaleString()}`;
                     
-                    // حساب الشراء الآمن (3% من السيولة)
                     const safe = liq * 0.03;
                     document.getElementById('safe-buy-val').innerText = `$${safe.toLocaleString(undefined, {maximumFractionDigits: 0})}`;
+                    
+                    const advAr = `بناءً على سيولة $${liq.toLocaleString()}، الحد الأقصى للشراء الآمن هو $${safe.toLocaleString()}.`;
+                    const advEn = `With $${liq.toLocaleString()} liquidity, max safe buy is $${safe.toLocaleString()}.`;
+                    document.getElementById('trade-advice').innerText = currentLang === 'ar' ? advAr : advEn;
                 }
-            } catch (e) {
-                console.log("Fetch delay or error");
-            }
+            } catch (e) { console.log("Fetching live data..."); }
         }
 
         async function loadMissions() {
             const list = document.getElementById('tasks-list');
-            const urls = [
+            const feeds = [
                 {p: 'twitter', u: "https://rss.app/feeds/v1.1/tYaEQs8TqBTzCA29.json"},
                 {p: 'tiktok', u: "https://rss.app/feeds/v1.1/L4M8dUSeMhVKhLS2.json"}
             ];
             list.innerHTML = '';
-            for(let x of urls) {
+            for(let f of feeds) {
                 try {
-                    const res = await fetch(x.u);
+                    const res = await fetch(f.u);
                     const d = await res.json();
-                    d.items.slice(0, 2).forEach((item, i) => {
+                    d.items.slice(0, 2).forEach((item) => {
                         list.innerHTML += `
                             <div class="dragon-card p-4 flex justify-between items-center">
                                 <div class="flex items-center gap-3">
-                                    <i class="fab fa-${x.p} text-red-500"></i>
-                                    <div><p class="text-[9px] font-black uppercase">${x.p} TASK</p><p class="text-[7px] text-yellow-500">+1000</p></div>
+                                    <i class="fab fa-${f.p} text-red-500"></i>
+                                    <div><p class="text-[9px] font-black uppercase">${f.p} TASK</p><p class="text-[7px] text-yellow-500">+1000</p></div>
                                 </div>
                                 <button onclick="tg.openLink('${item.url}')" class="bg-white text-black text-[9px] font-bold px-4 py-2 rounded-lg">GO</button>
                             </div>`;
@@ -182,7 +196,7 @@
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(t + '-tab').classList.add('active');
-            document.getElementById('n-' + t).classList.add('active');
+            document.getElementById('btn-' + t).classList.add('active');
             tg.HapticFeedback.impactOccurred('light');
         }
 
@@ -190,6 +204,7 @@
             currentLang = currentLang === 'ar' ? 'en' : 'ar';
             localStorage.setItem('d_lang', currentLang);
             updateUI();
+            getLiveData();
         }
 
         function updateUI() {
@@ -203,11 +218,10 @@
 
         tg.expand();
         updateUI();
-        getStats();
+        getLiveData();
         loadMissions();
-        document.getElementById('pointsHeader').innerText = points.toLocaleString();
-        document.getElementById('pointsDisplay').innerText = points.toLocaleString() + " PTS";
-        setInterval(getStats, 15000);
+        document.getElementById('wallet-pts').innerText = points.toLocaleString() + " PTS";
+        setInterval(getLiveData, 15000);
     </script>
 </body>
 </html>
