@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dragon Coin Hub</title>
+    <title>Dragon Coin Hub - Cloudflare Edition</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
@@ -39,32 +39,33 @@
     </header>
 
     <div id="home-tab" class="tab-content active p-4 space-y-5">
+        
         <div class="bg-red-600/10 border border-red-600/30 p-4 rounded-2xl flex gap-3 items-start animate-pulse">
             <i class="fas fa-shield-alt text-red-500 mt-1"></i>
             <div>
                 <p class="text-[11px] font-black text-red-500 uppercase mb-1" data-en="Trading Security" data-ar="أمان التداول">أمان التداول</p>
-                <p class="text-[10px] text-gray-300 leading-relaxed" data-en="Slippage 15%+. Max buy $1-$2." data-ar="الانزلاق 15%+. أقصى شراء $1-$2.">الانزلاق 15%+. أقصى شراء $1-$2.</p>
+                <p class="text-[10px] text-gray-300 leading-relaxed" data-en="Use 15% Slippage. Buy $1-$2 per transaction." data-ar="استخدم انزلاق 15%+. بحد أقصى $1-$2 لكل عملية شراء.">استخدم انزلاق 15%+. بحد أقصى $1-$2 لكل عملية شراء.</p>
             </div>
         </div>
 
         <div class="dragon-card p-5 rounded-[2rem] border-dashed border-red-900/50">
-            <h3 class="text-[11px] font-black text-red-500 uppercase mb-3" data-en="Referral Link" data-ar="رابط الإحالة">رابط الإحالة</h3>
+            <h3 class="text-[11px] font-black text-red-500 uppercase mb-3" data-en="Your Invite Link" data-ar="رابط دعوتك">رابط دعوتك</h3>
             <div class="flex gap-2">
                 <input id="refUrl" readonly class="bg-black/50 border border-white/5 rounded-xl px-3 py-2 text-[10px] flex-1 text-gray-400 font-mono">
                 <button onclick="copyRef()" class="bg-white text-black px-4 py-2 rounded-xl text-[10px] font-bold uppercase" data-en="Copy" data-ar="نسخ">نسخ</button>
             </div>
-            <p class="text-[9px] text-gray-500 mt-2" data-en="+2000 Points per invite!" data-ar="+2000 نقطة لكل دعوة!"></p>
+            <p class="text-[9px] text-gray-500 mt-2" data-en="+2000 points for every new dragon!" data-ar="+2000 نقطة لكل تنين جديد!">+2000 نقطة لكل تنين جديد!</p>
         </div>
 
         <div class="space-y-3">
             <h3 class="text-[11px] font-black text-gray-500 uppercase px-1" data-en="Daily Missions" data-ar="المهام اليومية">المهام اليومية</h3>
             <div id="task-tiktok" class="dragon-card p-4 rounded-2xl flex items-center justify-between">
                 <div class="flex items-center gap-3"><i class="fab fa-tiktok"></i><span class="text-xs font-bold">TikTok Support</span></div>
-                <button onclick="executeTask('tiktok', 1000, 'https://tiktok.com/@thedragonsport')" class="bg-red-600 text-[10px] font-bold px-4 py-2 rounded-lg">GO</button>
+                <button onclick="executeTask('tiktok', 1000, 'https://tiktok.com/@thedragonsport')" class="bg-red-600 text-[10px] font-bold px-4 py-2 rounded-lg" data-en="GO" data-ar="نفذ">نفذ</button>
             </div>
             <div id="task-x" class="dragon-card p-4 rounded-2xl flex items-center justify-between">
-                <div class="flex items-center gap-3"><i class="fab fa-twitter text-blue-400"></i><span class="text-xs font-bold">Follow X</span></div>
-                <button onclick="executeTask('x', 500, 'https://x.com/XY_signals')" class="bg-blue-500 text-[10px] font-bold px-4 py-2 rounded-lg">GO</button>
+                <div class="flex items-center gap-3"><i class="fab fa-twitter text-blue-400"></i><span class="text-xs font-bold">Follow X Account</span></div>
+                <button onclick="executeTask('x', 500, 'https://x.com/XY_signals')" class="bg-blue-500 text-[10px] font-bold px-4 py-2 rounded-lg" data-en="GO" data-ar="نفذ">نفذ</button>
             </div>
         </div>
     </div>
@@ -81,7 +82,7 @@
             </div>
         </div>
         <div class="dragon-card p-5 rounded-2xl">
-            <h3 class="text-[10px] font-black text-gray-400 uppercase mb-3" data-en="Burn Status" data-ar="حالة الحرق">حالة الحرق</h3>
+            <h3 class="text-[10px] font-black text-gray-400 uppercase mb-3">Live Burn 🔥</h3>
             <div class="burn-bar"><div class="burn-fill h-full"></div></div>
             <p class="text-[9px] text-gray-500 mt-2 font-mono">15.5% Burned</p>
         </div>
@@ -90,7 +91,7 @@
     <div id="ranks-tab" class="tab-content p-4 text-center">
         <div class="dragon-card p-12 rounded-[3rem] mt-10">
             <div id="rankIcon" class="text-8xl mb-6">🥚</div>
-            <h2 id="rankTitle" class="text-2xl font-black uppercase italic">Dragon Egg</h2>
+            <h2 id="rankTitle" class="text-2xl font-black uppercase italic" data-en="Dragon Egg" data-ar="بيضة التنين">بيضة التنين</h2>
             <p id="rankNext" class="text-gray-500 text-[10px] font-bold mt-4 uppercase"></p>
         </div>
     </div>
@@ -99,13 +100,13 @@
         <div class="dragon-card p-8 rounded-[2.5rem] mt-10">
             <i class="fas fa-wallet text-4xl mb-4 text-gray-700"></i>
             <p id="walletAddrDisplay" class="text-[9px] text-gray-500 font-mono mb-4 truncate italic">Not Connected</p>
-            <button onclick="smartConnect()" class="w-full bg-white text-black py-4 rounded-2xl text-[11px] font-black uppercase shadow-lg">Link Wallet</button>
+            <button onclick="smartConnect()" class="w-full bg-white text-black py-4 rounded-2xl text-[11px] font-black uppercase shadow-lg" data-en="Link Wallet" data-ar="ربط المحفظة">ربط المحفظة</button>
             <hr class="my-6 border-white/5">
             <a href="https://pancakeswap.finance/swap?outputCurrency=0x583787E29Bb2D92FcBc713389FD66807602c72F3" target="_blank" class="block w-full border border-red-600/30 text-red-500 py-3 rounded-xl text-[10px] font-bold">BUY $DRGN</a>
         </div>
     </div>
 
-    <nav class="fixed bottom-0 left-0 right-0 bg-black border-t border-white/5 flex justify-around p-4 z-50">
+    <nav class="fixed bottom-0 left-0 right-0 bg-black/95 border-t border-white/5 flex justify-around p-4 z-50">
         <button onclick="switchTab('home')" class="nav-item flex flex-col items-center active" id="nav-home">
             <i class="fas fa-home"></i><span class="text-[8px] mt-1 font-bold">HOME</span>
         </button>
@@ -123,49 +124,54 @@
     <div id="toast"></div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxICS0i_qt6L4odP5kMdpozGT1vxmnOEk08imgb3PWwh9jed0cZxStI-NP8KwPOi7Z7/exec";
+        // *** رابط الـ Cloudflare Worker الخاص بك ***
+        const API_URL = "https://noisy-moon-4289.manhal-almasrillll199119.workers.dev";
+        
         const tg = window.Telegram.WebApp;
-        const userId = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : "test_user";
+        const userId = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : "788903767";
         const startParam = tg.initDataUnsafe.start_param || null;
 
         let currentLang = 'ar';
         let userPoints = 0;
         let userFriends = 0;
 
-        async function syncCloud(action, amount = 0) {
+        async function syncCloud(action = "load", amount = 0) {
             try {
-                const url = `${SCRIPT_URL}?userId=${userId}&action=${action}&amount=${amount}&referrer=${startParam || ''}`;
-                const response = await fetch(url);
+                const response = await fetch(`${API_URL}?userId=${userId}&action=${action}&amount=${amount}&referrer=${startParam || ''}`);
                 const data = await response.json();
                 if (data) {
                     userPoints = data.points;
                     userFriends = data.friends;
                     updateUI();
                 }
-            } catch (e) { console.error(e); }
+            } catch (e) { console.error("Sync Error:", e); }
         }
 
         function updateUI() {
             document.getElementById('pointsHeader').innerText = userPoints.toLocaleString();
             document.getElementById('friendsStats').innerText = userFriends;
-            updateRanks();
+            updateRankLogic();
         }
 
-        function updateRanks() {
+        function updateRankLogic() {
             const icon = document.getElementById('rankIcon');
             const title = document.getElementById('rankTitle');
             const next = document.getElementById('rankNext');
-            if (userPoints >= 10000) {
+
+            if (userPoints >= 50000) {
+                icon.innerText = "👑"; title.innerText = currentLang === 'ar' ? "ملك التنانين" : "Dragon King";
+                next.innerText = "MAX RANK";
+            } else if (userPoints >= 10000) {
                 icon.innerText = "🐉"; title.innerText = currentLang === 'ar' ? "تنين شاب" : "Young Dragon";
-                next.innerText = "";
+                next.innerText = currentLang === 'ar' ? "التالي: ملك عند 50 ألف" : "Next: King at 50k";
             } else {
                 icon.innerText = "🥚"; title.innerText = currentLang === 'ar' ? "بيضة التنين" : "Dragon Egg";
-                next.innerText = currentLang === 'ar' ? "التالي: تنين شاب عند 10 آلاف" : "Next: Young Dragon at 10k";
+                next.innerText = currentLang === 'ar' ? "التالي: شاب عند 10 آلاف" : "Next: Young at 10k";
             }
         }
 
         function executeTask(id, reward, url) {
-            if(localStorage.getItem('done_'+id)) return showToast("Mission Complete!");
+            if(localStorage.getItem('done_'+id)) return showToast("Mission Done!");
             window.open(url, '_blank');
             setTimeout(() => {
                 syncCloud("addPoints", reward);
@@ -175,21 +181,33 @@
             }, 5000);
         }
 
+        async function smartConnect() {
+            if (window.ethereum) {
+                const accs = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                document.getElementById('walletAddrDisplay').innerText = accs[0];
+                showToast("Connected!");
+            } else { showToast("Use DApp Browser"); }
+        }
+
         function copyRef() {
-            navigator.clipboard.writeText(document.getElementById('refUrl').value);
-            showToast("Copied!");
+            const el = document.getElementById('refUrl');
+            navigator.clipboard.writeText(el.value);
+            showToast(currentLang === 'ar' ? "تم النسخ!" : "Copied!");
         }
 
         function toggleLang() {
             currentLang = currentLang === 'ar' ? 'en' : 'ar';
             applyLang();
-            updateRanks();
+            updateRankLogic();
         }
 
         function applyLang() {
             const isEn = currentLang === 'en';
             document.getElementById('mainHtml').dir = isEn ? 'ltr' : 'rtl';
-            document.querySelectorAll('[data-en]').forEach(el => el.innerText = isEn ? el.getAttribute('data-en') : el.getAttribute('data-ar'));
+            document.getElementById('langSwitch').innerText = isEn ? 'AR' : 'EN';
+            document.querySelectorAll('[data-en]').forEach(el => {
+                el.innerText = isEn ? el.getAttribute('data-en') : el.getAttribute('data-ar');
+            });
         }
 
         function switchTab(t) {
@@ -204,17 +222,9 @@
             setTimeout(() => t.classList.remove('show'), 3000);
         }
 
-        async function smartConnect() {
-            if (window.ethereum) {
-                const accs = await window.ethereum.request({ method: 'eth_requestAccounts' });
-                document.getElementById('walletAddrDisplay').innerText = accs[0];
-                showToast("Wallet Linked!");
-            } else { showToast("Use DApp Browser"); }
-        }
-
-        // Init
+        // Initialize
         document.getElementById('refUrl').value = `https://t.me/Drgncoin_bot?start=${userId}`;
-        syncCloud("load");
+        syncCloud();
         tg.expand();
         applyLang();
     </script>
