@@ -3,25 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dragon Coin - Real Time Missions</title>
+    <title>Dragon Coin - Final Fix</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { background-color: #050505; color: #fff; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
-        .dragon-card { background: linear-gradient(145deg, #161616, #0a0a0a); border: 1px solid #222; transition: 0.3s; }
+        body { background-color: #050505; color: #fff; font-family: sans-serif; }
+        .dragon-card { background: linear-gradient(145deg, #161616, #0a0a0a); border: 1px solid #222; }
         .done-task { opacity: 0.2; filter: grayscale(1); pointer-events: none; }
         #toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: #ff4d4d; padding: 12px 25px; border-radius: 50px; font-weight: bold; opacity: 0; z-index: 1000; transition: 0.3s; }
         #toast.show { opacity: 1; }
-        .loading-shimmer { background: linear-gradient(90deg, #111 25%, #222 50%, #111 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
-        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
     </style>
 </head>
 <body class="pb-24">
 
     <header class="p-4 sticky top-0 bg-[#050505]/95 backdrop-blur-md z-50 border-b border-white/5 flex justify-between items-center">
         <div class="flex items-center gap-2">
-            <div class="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center shadow-lg shadow-red-900/40">
+            <div class="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center">
                 <i class="fas fa-dragon text-white text-sm"></i>
             </div>
             <h1 class="text-xs font-black italic uppercase">DRAGON<span class="text-red-600">COIN</span></h1>
@@ -36,14 +34,14 @@
         <section>
             <h3 class="text-blue-400 text-[10px] font-black mb-3 flex items-center gap-2 uppercase tracking-widest"><i class="fab fa-twitter"></i> X Missions</h3>
             <div id="x-tasks" class="space-y-3">
-                <div class="h-16 rounded-2xl loading-shimmer opacity-20"></div>
+                <div class="text-center py-4 text-[9px] text-gray-700 animate-pulse">DRAGON IS SEARCHING...</div>
             </div>
         </section>
 
         <section>
             <h3 class="text-pink-500 text-[10px] font-black mb-3 flex items-center gap-2 uppercase tracking-widest"><i class="fab fa-tiktok"></i> TikTok Missions</h3>
             <div id="tk-tasks" class="space-y-3">
-                <div class="h-16 rounded-2xl loading-shimmer opacity-20"></div>
+                <div class="text-center py-4 text-[9px] text-gray-700 animate-pulse">DRAGON IS SEARCHING...</div>
             </div>
         </section>
     </main>
@@ -55,38 +53,39 @@
         let points = parseInt(localStorage.getItem('pts')) || 0;
         let doneTasks = JSON.parse(localStorage.getItem('done')) || [];
 
-        // الروابط الجديدة التي أحضرتها
         const JSON_X = "https://rss.app/feeds/v1.1/tYaEQs8TqBTzCA29.json";
         const JSON_TK = "https://rss.app/feeds/v1.1/L4M8dUSeMhVKhLS2.json";
 
         async function init() {
             document.getElementById('pointsHeader').innerText = points.toLocaleString();
-            fetchJSON('x', JSON_X, 'x-tasks');
-            fetchJSON('tk', JSON_TK, 'tk-tasks');
+            // استخدام وسيط مختلف فائق السرعة
+            loadFeed('x', JSON_X, 'x-tasks');
+            loadFeed('tk', JSON_TK, 'tk-tasks');
         }
 
-        async function fetchJSON(platform, url, containerId) {
+        async function loadFeed(platform, url, containerId) {
             const container = document.getElementById(containerId);
             try {
-                // استخدام وسيط AllOrigins لضمان عدم الحجب
-                const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}&t=${Date.now()}`;
-                const response = await fetch(proxyUrl);
+                // وسيط AllOrigins مع معالجة الاستجابة كـ JSON مباشر
+                const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
+                if (!response.ok) throw new Error('Network error');
+                
                 const result = await response.json();
-                const data = JSON.parse(result.contents); // استخراج البيانات
+                const data = JSON.parse(result.contents); // هنا يتم فك البيانات المستلمة
 
-                if (data.items && data.items.length > 0) {
+                if (data && data.items && data.items.length > 0) {
                     container.innerHTML = '';
                     data.items.slice(0, 4).forEach((item, index) => {
-                        const taskId = `${platform}_${item.id || index}`;
+                        const taskId = `${platform}_${index}`;
                         const isDone = doneTasks.includes(taskId);
                         const icon = platform === 'x' ? 'fab fa-twitter text-blue-400' : 'fab fa-tiktok text-pink-500';
                         
                         container.innerHTML += `
-                            <div class="dragon-card p-4 rounded-2xl flex justify-between items-center mb-3 ${isDone ? 'done-task' : ''}">
+                            <div class="dragon-card p-4 rounded-2xl flex justify-between items-center ${isDone ? 'done-task' : ''}">
                                 <div class="flex items-center gap-3">
                                     <i class="${icon} text-lg"></i>
                                     <div>
-                                        <p class="text-[10px] font-bold uppercase">${platform} New Post</p>
+                                        <p class="text-[10px] font-bold uppercase">${platform} MISSION</p>
                                         <p class="text-[9px] text-yellow-500 font-black">+1,000 PTS</p>
                                     </div>
                                 </div>
@@ -94,16 +93,17 @@
                             </div>`;
                     });
                 } else {
-                    container.innerHTML = '<p class="text-center py-4 text-[9px] text-gray-600">NO ACTIVE MISSIONS</p>';
+                    container.innerHTML = '<p class="text-center py-4 text-[9px] text-gray-800 uppercase">No Missions Today</p>';
                 }
             } catch (e) {
-                container.innerHTML = '<p class="text-center py-4 text-[9px] text-gray-600 italic">Syncing...</p>';
+                console.error(e);
+                container.innerHTML = '<p class="text-center py-4 text-[9px] text-red-900 uppercase">Connection Retrying...</p>';
             }
         }
 
         function doTask(id, reward, url) {
             window.open(url, '_blank');
-            showToast("Verifying Support...");
+            showToast("VERIFYING...");
             setTimeout(() => {
                 if(!doneTasks.includes(id)) {
                     points += reward;
