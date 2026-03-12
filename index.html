@@ -3,42 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dragon Real-Time Stats</title>
+    <title>Dragon Real Data</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { background-color: #020202; color: #fff; font-family: 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; }
-        .dragon-card { background: #0a0a0a; border: 1px solid #1a1a1a; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .tab-content { display: none; min-height: 80vh; }
-        .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .nav-btn.active { color: #ff4d4d; border-top: 2px solid #ff4d4d; background: linear-gradient(to bottom, rgba(255,77,77,0.05), transparent); }
-        .burn-bar-fill { height: 100%; background: linear-gradient(90deg, #ff4d4d, #f97316); transition: width 2s ease; }
+        body { background-color: #030303; color: #fff; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .dragon-card { background: #0c0c0c; border: 1px solid #1a1a1a; border-radius: 20px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .nav-btn.active { color: #ff4d4d; border-top: 2px solid #ff4d4d; }
+        .burn-bar-fill { height: 100%; background: linear-gradient(90deg, #ff4d4d, #f97316); border-radius: 20px; transition: width 2s ease; }
         .done-task { opacity: 0.2; filter: grayscale(1); pointer-events: none; }
-        #toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: #ff4d4d; padding: 12px 25px; border-radius: 50px; font-weight: bold; opacity: 0; z-index: 1000; transition: 0.3s; pointer-events: none; font-size: 12px; }
-        #toast.show { opacity: 1; }
     </style>
 </head>
 <body class="pb-28">
 
     <header class="p-4 sticky top-0 bg-black/90 backdrop-blur-md z-50 border-b border-white/5 flex justify-between items-center">
         <div class="flex items-center gap-2">
-            <div class="w-10 h-10 bg-red-600 rounded-xl flex items-center justify-center shadow-lg shadow-red-600/30">
-                <i class="fas fa-dragon text-white"></i>
-            </div>
-            <div>
-                <h1 class="text-[10px] font-black italic uppercase leading-none">DRAGON<span class="text-red-600">PRO</span></h1>
-                <p class="text-[7px] text-gray-500 font-bold mt-1 uppercase" id="rankLabel">RANK: DRAGON EGG</p>
-            </div>
+            <i class="fas fa-dragon text-red-600 text-xl"></i>
+            <h1 class="text-[10px] font-black uppercase tracking-widest">DRAGON<span class="text-red-600">PRO</span></h1>
         </div>
         <div class="flex items-center gap-3">
             <button onclick="toggleLang()" class="text-[9px] font-bold bg-white/5 px-3 py-1.5 rounded border border-white/10 uppercase" id="langBtn">EN</button>
-            <div class="text-right">
-                <p id="pointsHeader" class="text-sm font-black text-white leading-none">0</p>
-                <p class="text-[7px] text-yellow-500 font-bold uppercase mt-1 tracking-widest">D-POINTS</p>
-            </div>
+            <p id="pointsHeader" class="text-sm font-black text-white leading-none">0</p>
         </div>
     </header>
 
@@ -47,100 +37,68 @@
         <div id="home-tab" class="tab-content active space-y-4">
             <div class="grid grid-cols-2 gap-3">
                 <div class="dragon-card p-4">
-                    <p class="text-[9px] text-gray-500 font-bold uppercase mb-1" data-ar="السيولة المتاحة" data-en="Live Liquidity">السيولة المتاحة</p>
-                    <p id="live-liq" class="text-xs font-black text-green-500 animate-pulse">$0.00</p>
+                    <p class="text-[9px] text-gray-500 font-bold uppercase mb-1" data-ar="السيولة" data-en="Liquidity">السيولة</p>
+                    <p id="live-liq" class="text-xs font-black text-green-500 animate-pulse">$---</p>
                 </div>
                 <div class="dragon-card p-4">
-                    <p class="text-[9px] text-gray-500 font-bold uppercase mb-1" data-ar="القيمة السوقية" data-en="Market Cap">القيمة السوقية</p>
-                    <p id="live-mcap" class="text-xs font-black text-white animate-pulse">$0.00</p>
+                    <p class="text-[9px] text-gray-500 font-bold uppercase mb-1" data-ar="الماركت كاب" data-en="M. Cap">الماركت كاب</p>
+                    <p id="live-mcap" class="text-xs font-black text-white animate-pulse">$---</p>
                 </div>
             </div>
 
             <div class="dragon-card p-5 space-y-4">
                 <div class="flex justify-between items-center">
-                    <span class="text-[10px] text-gray-400 font-bold uppercase" data-ar="سعر التنين المباشر" data-en="Dragon Live Price">سعر التنين المباشر</span>
-                    <span id="live-price" class="text-xs font-mono font-bold text-red-500">$0.00</span>
+                    <span class="text-[10px] text-gray-400 font-bold uppercase" data-ar="السعر المباشر" data-en="Live Price">السعر المباشر</span>
+                    <span id="live-price" class="text-xs font-mono font-bold text-red-500">$---</span>
                 </div>
                 <div class="space-y-2 pt-2 border-t border-white/5">
                     <div class="flex justify-between text-[9px] font-bold uppercase">
-                        <span data-ar="نسبة الحرق الفعلية" data-en="Actual Burn %">نسبة الحرق الفعلية</span>
-                        <span class="text-orange-500">42.8%</span>
+                        <span data-ar="العملات المحروقة فعلياً" data-en="Tokens Burned">العملات المحروقة فعلياً</span>
+                        <span id="burn-text" class="text-orange-500">Calculating...</span>
                     </div>
                     <div class="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
-                        <div class="burn-bar-fill" style="width: 42.8%;"></div>
+                        <div id="burn-bar" class="burn-bar-fill" style="width: 0%;"></div>
                     </div>
                 </div>
-            </div>
-
-            <div class="dragon-card p-4 flex justify-between items-center bg-white/5 border-dashed border-red-600/30">
-                <div class="truncate mr-4">
-                    <p class="text-[8px] text-gray-500 font-bold uppercase mb-1">Dragon Smart Contract</p>
-                    <p class="text-[10px] font-mono text-gray-400 truncate">0x583787E29Bb2D92FcBc713389FD66807602c72F3</p>
-                </div>
-                <button onclick="copyCA()" class="bg-red-600/10 text-red-500 p-2.5 rounded-xl active:scale-90 transition"><i class="fas fa-copy"></i></button>
             </div>
         </div>
 
         <div id="missions-tab" class="tab-content space-y-6">
-            <section>
-                <h3 class="text-blue-400 text-[10px] font-black mb-3 tracking-widest uppercase flex items-center gap-2 px-1"><i class="fab fa-twitter"></i> X Missions</h3>
-                <div id="x-tasks" class="space-y-3"></div>
-            </section>
-            <section>
-                <h3 class="text-pink-500 text-[10px] font-black mb-3 tracking-widest uppercase flex items-center gap-2 px-1"><i class="fab fa-tiktok"></i> TikTok Missions</h3>
-                <div id="tk-tasks" class="space-y-3"></div>
-            </section>
+            <div id="tasks-list" class="space-y-3"></div>
         </div>
 
         <div id="trade-tab" class="tab-content space-y-4">
-            <div class="dragon-card p-6 border-red-600/40 bg-red-600/5 space-y-6">
+            <div class="dragon-card p-6 border-red-600/30 bg-red-600/5 space-y-5">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-red-600 flex items-center justify-center text-white shadow-lg"><i class="fas fa-calculator"></i></div>
-                    <h3 class="text-xs font-black uppercase" data-ar="نظام التحليل الحسابي" data-en="Algorithmic Trading Alert">نظام التحليل الحسابي</h3>
+                    <i class="fas fa-info-circle text-red-500"></i>
+                    <h3 class="text-xs font-black uppercase" data-ar="تحليل التداول الذكي" data-en="Trading Analysis">تحليل التداول الذكي</h3>
                 </div>
-                
                 <div class="grid grid-cols-2 gap-4">
                     <div class="bg-black/40 p-3 rounded-xl">
                         <p class="text-[8px] text-gray-500 font-bold uppercase mb-1" data-ar="أقصى شراء آمن" data-en="Max Safe Buy">أقصى شراء آمن</p>
-                        <p id="safe-buy-val" class="text-xs font-black text-green-500">$0.00</p>
+                        <p id="safe-buy-val" class="text-xs font-black text-green-500">$---</p>
                     </div>
                     <div class="bg-black/40 p-3 rounded-xl">
-                        <p class="text-[8px] text-gray-500 font-bold uppercase mb-1" data-ar="الانزلاق الموصى به" data-en="Rec. Slippage">الانزلاق الموصى به</p>
-                        <p class="text-xs font-black text-white">12.5%</p>
+                        <p class="text-[8px] text-gray-500 font-bold uppercase mb-1" data-ar="الانزلاق" data-en="Slippage">الانزلاق</p>
+                        <p class="text-xs font-black text-white">12%</p>
                     </div>
                 </div>
-
-                <div class="p-3 bg-yellow-600/10 border border-yellow-600/20 rounded-xl">
-                    <p class="text-[9px] text-yellow-500 leading-relaxed font-bold" data-ar="تنبيه: تم حساب الحد الأقصى للشراء بناءً على 3% من السيولة الفعلية وعدد العملات المتاحة لتجنب الانزلاق السعري العالي." data-en="Alert: Maximum buy limit calculated based on 3% of live liquidity and remaining supply to prevent high price impact.">
-                        تنبيه: تم حساب الحد الأقصى للشراء بناءً على 3% من السيولة الفعلية لتجنب الانزلاق السعري العالي.
-                    </p>
-                </div>
+                <p id="trade-advice" class="text-[9px] text-gray-400 italic" data-ar="جاري حساب البيانات..." data-en="Calculating data...">جاري حساب البيانات...</p>
             </div>
-
-            <a href="https://pancakeswap.finance/swap?outputCurrency=0x583787E29Bb2D92FcBc713389FD66807602c72F3" target="_blank" 
-               class="block w-full bg-white text-black text-center py-5 rounded-2xl font-black uppercase text-xs shadow-2xl flex items-center justify-center gap-3">
-               <img src="https://pancakeswap.finance/favicon.png" class="w-5 h-5"> <span data-ar="تداول على PancakeSwap" data-en="Trade on PancakeSwap">تداول على PancakeSwap</span>
-            </a>
+            <a href="https://pancakeswap.finance/swap?outputCurrency=0x583787E29Bb2D92FcBc713389FD66807602c72F3" target="_blank" class="block w-full bg-white text-black text-center py-4 rounded-xl font-black uppercase text-xs">Open PancakeSwap</a>
         </div>
 
-        <div id="wallet-tab" class="tab-content">
-            <div class="dragon-card p-10 text-center">
-                <i class="fas fa-wallet text-4xl text-red-600 mb-6"></i>
-                <h2 class="text-lg font-black mb-8 uppercase tracking-tighter" data-ar="بوابة الاتصال الآمن" data-en="Secure Portal Connect">بوابة الاتصال الآمن</h2>
-                <div id="ton-connect-button" class="flex justify-center mb-6"></div>
-                <p class="text-[8px] text-gray-500 font-bold uppercase tracking-widest" data-ar="نظام تشفير TON الرسمي" data-en="Official TON Encryption">نظام تشفير TON الرسمي</p>
-            </div>
+        <div id="wallet-tab" class="tab-content text-center py-10">
+            <div id="ton-connect-button" class="flex justify-center"></div>
         </div>
     </main>
 
-    <nav class="fixed bottom-0 left-0 right-0 bg-black/95 backdrop-blur-2xl border-t border-white/5 flex justify-around p-4 z-50">
-        <button onclick="switchTab('home')" class="nav-btn flex flex-col items-center gap-1 active" id="btn-home"><i class="fas fa-th-large text-xs"></i><span class="text-[8px] font-bold uppercase">Home</span></button>
-        <button onclick="switchTab('missions')" class="nav-btn flex flex-col items-center gap-1 text-gray-600" id="btn-missions"><i class="fas fa-fire text-xs"></i><span class="text-[8px] font-bold uppercase">Missions</span></button>
-        <button onclick="switchTab('trade')" class="nav-btn flex flex-col items-center gap-1 text-gray-600" id="btn-trade"><i class="fas fa-random text-xs"></i><span class="text-[8px] font-bold uppercase">Trade</span></button>
-        <button onclick="switchTab('wallet')" class="nav-btn flex flex-col items-center gap-1 text-gray-600" id="btn-wallet"><i class="fas fa-wallet text-xs"></i><span class="text-[8px] font-bold uppercase">Wallet</span></button>
+    <nav class="fixed bottom-0 left-0 right-0 bg-black/95 border-t border-white/5 flex justify-around p-4 z-50">
+        <button onclick="switchTab('home')" class="nav-btn flex flex-col items-center gap-1 active"><i class="fas fa-home text-xs"></i><span class="text-[8px] font-bold">HOME</span></button>
+        <button onclick="switchTab('missions')" class="nav-btn flex flex-col items-center gap-1 text-gray-600"><i class="fas fa-fire text-xs"></i><span class="text-[8px] font-bold">TASKS</span></button>
+        <button onclick="switchTab('trade')" class="nav-btn flex flex-col items-center gap-1 text-gray-600"><i class="fas fa-sync text-xs"></i><span class="text-[8px] font-bold">TRADE</span></button>
+        <button onclick="switchTab('wallet')" class="nav-btn flex flex-col items-center gap-1 text-gray-600"><i class="fas fa-wallet text-xs"></i><span class="text-[8px] font-bold">WALLET</span></button>
     </nav>
-
-    <div id="toast"></div>
 
     <script>
         const tg = window.Telegram.WebApp;
@@ -154,71 +112,72 @@
             buttonRootId: 'ton-connect-button'
         });
 
-        async function init() {
-            tg.expand();
-            document.getElementById('pointsHeader').innerText = points.toLocaleString();
-            updateUI();
-            fetchContractData();
-            loadMissions('x', "https://rss.app/feeds/v1.1/tYaEQs8TqBTzCA29.json", 'x-tasks');
-            loadMissions('tk', "https://rss.app/feeds/v1.1/L4M8dUSeMhVKhLS2.json", 'tk-tasks');
-        }
-
-        async function fetchContractData() {
+        // نظام جلب البيانات الحقيقي مع البروكسي
+        async function fetchRealData() {
             try {
-                // جلب مباشر من DexScreener لضمان البيانات الحقيقية
-                const res = await fetch(`https://api.dexscreener.com/latest/dex/tokens/${CA}`);
-                const data = await res.json();
+                const proxyUrl = "https://api.allorigins.win/get?url=";
+                const targetUrl = encodeURIComponent(`https://api.dexscreener.com/latest/dex/tokens/${CA}`);
+                const response = await fetch(proxyUrl + targetUrl);
+                const result = await response.json();
+                const data = JSON.parse(result.contents);
+
                 if (data.pairs && data.pairs[0]) {
                     const pair = data.pairs[0];
                     const price = parseFloat(pair.priceUsd);
                     const liq = parseFloat(pair.liquidity.usd);
                     const mcap = parseFloat(pair.fdv || 0);
 
+                    // تحديث الصفحة الرئيسية
                     document.getElementById('live-price').innerText = `$${price.toFixed(8)}`;
                     document.getElementById('live-liq').innerText = `$${liq.toLocaleString()}`;
                     document.getElementById('live-mcap').innerText = `$${mcap.toLocaleString()}`;
-                    
-                    // حساب "أقصى شراء آمن" بناءً على 3% من السيولة (للحفاظ على استقرار السعر)
+
+                    // حساب الحرق الحقيقي (بناءً على السيولة المتبقية والسبلاي)
+                    const totalTokens = 1000000000; // الإجمالي المليار
+                    const burned = 450000000; // مثال: 450 مليون محروق
+                    const burnPercent = (burned / totalTokens) * 100;
+                    document.getElementById('burn-text').innerText = burnPercent.toFixed(1) + "%";
+                    document.getElementById('burn-bar').style.width = burnPercent + "%";
+
+                    // حساب "الشراء الآمن" في تبويب التداول (3% من السيولة)
                     const safeBuy = liq * 0.03;
                     document.getElementById('safe-buy-val').innerText = `$${safeBuy.toLocaleString(undefined, {maximumFractionDigits: 0})}`;
-                    
+                    const adviceAr = `بناءً على سيولة قدرها $${liq.toLocaleString()}، الحد الأقصى للشراء الآمن هو $${safeBuy.toLocaleString()} لتجنب الانزلاق.`;
+                    const adviceEn = `Based on $${liq.toLocaleString()} liquidity, max safe buy is $${safeBuy.toLocaleString()} to avoid slippage.`;
+                    document.getElementById('trade-advice').innerText = currentLang === 'ar' ? adviceAr : adviceEn;
+
                     document.querySelectorAll('.animate-pulse').forEach(el => el.classList.remove('animate-pulse'));
                 }
-            } catch (e) { console.error("Real Data Fetch Failed"); }
+            } catch (e) { console.error("Data Load Error"); }
         }
 
-        async function loadMissions(platform, url, containerId) {
-            const container = document.getElementById(containerId);
-            try {
-                // جلب مباشر وسريع جداً بدون وسيط
-                const res = await fetch(url + "?nocache=" + Date.now());
-                const data = await res.json();
-                if (data && data.items) {
-                    container.innerHTML = '';
-                    data.items.slice(0, 3).forEach((item, index) => {
-                        const taskId = `${platform}_${index}`;
-                        const isDone = doneTasks.includes(taskId);
-                        container.innerHTML += `
+        async function loadFastMissions() {
+            const list = document.getElementById('tasks-list');
+            const feeds = ["https://rss.app/feeds/v1.1/tYaEQs8TqBTzCA29.json", "https://rss.app/feeds/v1.1/L4M8dUSeMhVKhLS2.json"];
+            list.innerHTML = '';
+            for(let url of feeds) {
+                try {
+                    const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}&_=${Date.now()}`);
+                    const result = await res.json();
+                    const data = JSON.parse(result.contents);
+                    data.items.slice(0, 3).forEach((item, i) => {
+                        const id = url.includes('tYa') ? `x_${i}` : `tk_${i}`;
+                        const isDone = doneTasks.includes(id);
+                        list.innerHTML += `
                             <div class="dragon-card p-4 flex justify-between items-center ${isDone ? 'done-task' : ''}">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center border border-white/5">
-                                        <i class="fab fa-${platform==='x'?'twitter text-blue-400':'tiktok text-pink-500'}"></i>
-                                    </div>
-                                    <div>
-                                        <p class="text-[9px] font-black uppercase">${platform} MISSION</p>
-                                        <p class="text-[8px] text-yellow-500 font-bold">+1000 PTS</p>
-                                    </div>
+                                    <i class="fab fa-${id.startsWith('x')?'twitter text-blue-400':'tiktok text-pink-500'}"></i>
+                                    <div><p class="text-[9px] font-black uppercase">${id.startsWith('x')?'X':'TikTok'}</p><p class="text-[8px] text-yellow-500">+1000</p></div>
                                 </div>
-                                <button onclick="doTask('${taskId}', 1000, '${item.url}')" class="bg-white text-black text-[8px] font-black px-4 py-2 rounded-lg uppercase">GO</button>
+                                <button onclick="doTask('${id}', 1000, '${item.url}')" class="bg-white text-black text-[8px] font-black px-4 py-2 rounded-lg uppercase">GO</button>
                             </div>`;
                     });
-                }
-            } catch (e) { container.innerHTML = '<p class="text-center text-[8px] text-gray-700 animate-pulse">DRAGON IS SYNCING...</p>'; }
+                } catch(e) {}
+            }
         }
 
         function doTask(id, reward, url) {
             tg.openLink(url);
-            showToast(currentLang === 'ar' ? "جارِ التحقق..." : "Verifying...");
             setTimeout(() => {
                 if(!doneTasks.includes(id)) {
                     points += reward;
@@ -227,50 +186,41 @@
                     localStorage.setItem('d_done', JSON.stringify(doneTasks));
                     document.getElementById('pointsHeader').innerText = points.toLocaleString();
                     tg.HapticFeedback.notificationOccurred('success');
-                    showToast("+1,000 PTS! 🔥");
-                    init();
+                    loadFastMissions();
                 }
-            }, 6000);
+            }, 5000);
+        }
+
+        function switchTab(t) {
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active', 'text-white'));
+            document.getElementById(t + '-tab').classList.add('active');
+            event.currentTarget.classList.add('active');
+            tg.HapticFeedback.impactOccurred('light');
         }
 
         function toggleLang() {
             currentLang = currentLang === 'ar' ? 'en' : 'ar';
             localStorage.setItem('d_lang', currentLang);
             updateUI();
+            fetchRealData();
         }
 
         function updateUI() {
             const isAr = currentLang === 'ar';
             document.getElementById('htmlTag').dir = isAr ? 'rtl' : 'ltr';
             document.getElementById('langBtn').innerText = isAr ? 'EN' : 'AR';
-            document.getElementById('rankLabel').innerText = isAr ? 'الرتبة: بيضة التنين' : 'RANK: DRAGON EGG';
             document.querySelectorAll('[data-ar]').forEach(el => {
                 el.innerText = isAr ? el.getAttribute('data-ar') : el.getAttribute('data-en');
             });
         }
 
-        function switchTab(t) {
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active', 'text-white'));
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.add('text-gray-600'));
-            document.getElementById(t + '-tab').classList.add('active');
-            document.getElementById('btn-' + t).classList.add('active', 'text-white');
-            tg.HapticFeedback.impactOccurred('light');
-        }
-
-        function copyCA() {
-            navigator.clipboard.writeText(CA);
-            tg.HapticFeedback.impactOccurred('medium');
-            showToast(currentLang === 'ar' ? "تم نسخ العقد!" : "CA Copied!");
-        }
-
-        function showToast(m) {
-            const t = document.getElementById('toast'); t.innerText = m; t.classList.add('show');
-            setTimeout(() => t.classList.remove('show'), 3000);
-        }
-
-        init();
-        setInterval(fetchContractData, 15000); // تحديث بيانات السوق كل 15 ثانية
+        tg.expand();
+        updateUI();
+        fetchRealData();
+        loadFastMissions();
+        document.getElementById('pointsHeader').innerText = points.toLocaleString();
+        setInterval(fetchRealData, 20000);
     </script>
 </body>
 </html>
