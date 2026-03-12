@@ -10,21 +10,34 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@900&family=Tajawal:wght@400;900&display=swap');
+        
         body { background: #000; color: #fff; font-family: 'Tajawal', sans-serif; overflow-x: hidden; -webkit-tap-highlight-color: transparent; }
         .dragon-card { background: #0a0a0a; border: 1px solid #1a1a1a; border-radius: 24px; position: relative; overflow: hidden; transition: all 0.3s ease; }
         .tab-content { display: none; padding-bottom: 120px; }
         .tab-content.active { display: block; animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
         .nav-btn { color: #444; transition: 0.3s; flex: 1; text-align: center; padding: 12px 0; border: none; background: none; outline: none; }
         .nav-btn.active { color: #ff4d4d; border-top: 3px solid #ff4d4d; background: linear-gradient(to bottom, rgba(255,77,77,0.1), transparent); }
-        .loading-shimmer { background: linear-gradient(90deg, #0a0a0a 25%, #1a1a1a 50%, #0a0a0a 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; color: transparent !important; border-radius: 4px; }
+        
+        .loading-shimmer { background: linear-gradient(90deg, #0a0a0a 25%, #1a1a1a 50%, #0a0a0a 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; color: transparent !important; }
         @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-        .burn-bar { height: 100%; background: linear-gradient(90deg, #ff4d4d, #f97316); border-radius: 20px; box-shadow: 0 0 10px rgba(255,77,77,0.5); transition: width 1.5s ease; }
-        .completed-task { opacity: 0.5; filter: grayscale(1); pointer-events: none; }
+
+        #app-loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s; }
+        .loader-dragon { font-size: 50px; animation: pulse 1.5s infinite; color: #ff4d4d; }
+        @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.5; } 50% { transform: scale(1.2); opacity: 1; } }
+
         .wallet-gradient { background: linear-gradient(135deg, #1a0000 0%, #050505 100%); border: 1px solid #300; }
+        .completed-task { opacity: 0.5; filter: grayscale(1); pointer-events: none; }
     </style>
 </head>
 <body>
+
+    <div id="app-loader">
+        <i class="fas fa-dragon loader-dragon"></i>
+        <p class="mt-4 text-[10px] font-black tracking-widest uppercase text-gray-500">Syncing with Dragon Chain...</p>
+    </div>
 
     <header class="p-5 flex justify-between items-center sticky top-0 bg-black/95 backdrop-blur-xl z-50 border-b border-white/5">
         <div class="flex items-center gap-2">
@@ -49,70 +62,64 @@
                 </div>
             </div>
             <div class="dragon-card p-6 border-t-2 border-red-600/40">
-                <div class="flex justify-between items-center mb-6">
-                    <span class="text-[10px] text-gray-400 font-bold uppercase" data-ar="سعر التنين المباشر" data-en="Live Dragon Price">سعر التنين المباشر</span>
-                    <span id="live-price" class="text-sm font-mono font-bold text-red-500 loading-shimmer">$---</span>
+                <div class="flex justify-between items-center mb-6 text-[10px] font-bold uppercase">
+                    <span data-ar="سعر التنين" data-en="Dragon Price">سعر التنين</span>
+                    <span id="live-price" class="text-sm font-mono text-red-500 loading-shimmer">$---</span>
                 </div>
-                <div class="space-y-3">
-                    <div class="flex justify-between items-center">
-                        <span class="text-[10px] text-orange-500 font-black uppercase" data-ar="العملات المحروقة" data-en="Tokens Burned">العملات المحروقة</span>
-                        <span id="burn-text" class="text-[10px] font-black">458,291,000 (45.8%)</span>
-                    </div>
-                    <div class="w-full h-2.5 bg-white/5 rounded-full border border-white/5">
-                        <div id="burn-progress" class="burn-bar" style="width: 45.8%;"></div>
-                    </div>
+                <div class="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
+                    <div class="h-full bg-red-600" style="width: 45%;"></div>
                 </div>
             </div>
         </div>
 
-        <div id="trade" class="tab-content space-y-4">
-            <div class="dragon-card p-6 border-orange-600/30 bg-orange-600/5">
-                <div class="flex items-center gap-2 mb-5">
-                    <i class="fas fa-shield-virus text-orange-500"></i>
-                    <h3 class="text-[10px] font-black uppercase" data-ar="توصيات التداول الآمن" data-en="Safe Trade Protocol">توصيات التداول الآمن</h3>
-                </div>
-                <div class="space-y-3">
-                    <div class="flex justify-between items-center bg-black/60 p-4 rounded-2xl border border-white/5">
-                        <span class="text-[9px] text-gray-400 font-bold uppercase" data-ar="المبلغ المستحسن" data-en="Safe Buy">المبلغ المستحسن</span>
-                        <span id="safe-buy" class="text-xs font-black text-green-500 loading-shimmer">$---</span>
+        <div id="missions" class="tab-content space-y-3">
+            <div class="dragon-card p-6 border-b-4 border-yellow-500 bg-yellow-500/5">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h3 class="text-sm font-black uppercase" data-ar="المكافأة اليومية" data-en="Daily Reward">المكافأة اليومية</h3>
+                        <p class="text-[9px] text-gray-400" data-ar="احصل على 1,000 نقطة مجاناً" data-en="Claim 1,000 free pts">احصل على 1,000 نقطة مجاناً</p>
                     </div>
+                    <button onclick="claimDaily()" id="dailyBtn" class="bg-yellow-500 text-black px-5 py-2 rounded-xl text-[10px] font-black">CLAIM</button>
                 </div>
             </div>
-            <button onclick="tg.openLink('https://pancakeswap.finance/swap?outputCurrency=0x583787E29Bb2D92FcBc713389FD66807602c72F3')" class="w-full py-5 bg-white text-black rounded-2xl font-black text-[11px] uppercase tracking-wider active:scale-95 transition-transform">Trade on PancakeSwap</button>
+            <div id="tasks-container" class="space-y-3"></div>
         </div>
 
         <div id="wallet" class="tab-content space-y-5">
-            <div class="dragon-card wallet-gradient p-8 relative overflow-hidden">
-                <div class="absolute top-0 right-0 p-4 opacity-10"><i class="fas fa-dragon text-8xl"></i></div>
+            <div id="tier-card" class="dragon-card wallet-gradient p-8 relative border-2 border-white/5">
                 <div class="relative z-10">
-                    <div class="flex justify-between items-center mb-10">
-                        <span class="bg-red-600 text-[8px] font-black px-3 py-1 rounded-full uppercase">Dragon VIP</span>
-                        <i class="fas fa-wifi text-green-500 text-[8px] animate-pulse"> ONLINE</i>
-                    </div>
-                    <p class="text-[10px] text-gray-500 font-bold uppercase mb-1" data-ar="رصيد نقاط المهام" data-en="Task Points Balance">رصيد نقاط المهام</p>
-                    <div class="flex items-baseline gap-2">
+                    <span id="tier-badge" class="text-[8px] font-black px-3 py-1 rounded-full uppercase mb-4 inline-block">Bronze</span>
+                    <p class="text-[10px] text-gray-500 font-bold uppercase mb-1" data-ar="الرصيد الكلي" data-en="Total Balance">الرصيد الكلي</p>
+                    <div class="flex items-baseline gap-2 mb-6">
                         <h2 id="wallet-pts" class="text-5xl font-black tracking-tighter">0</h2>
-                        <span class="text-sm text-yellow-500 font-black uppercase">Pts</span>
+                        <span class="text-xs text-yellow-500 font-black">PTS</span>
+                    </div>
+                    <div class="w-full h-1 bg-white/10 rounded-full overflow-hidden">
+                        <div id="tier-progress-bar" class="h-full bg-red-600 transition-all duration-1000" style="width: 0%"></div>
                     </div>
                 </div>
             </div>
-            <button onclick="shareReferral()" class="w-full py-4 dragon-card border-dashed border-red-600/50 flex items-center justify-center gap-3 active:scale-95 transition-all">
+            <button onclick="shareReferral()" class="w-full py-4 dragon-card border-dashed border-red-600/50 flex items-center justify-center gap-3">
                 <i class="fas fa-user-plus text-red-500"></i>
                 <span class="text-[10px] font-black uppercase" data-ar="دعوة الأصدقاء (+5000)" data-en="Invite Friends (+5000)">دعوة الأصدقاء (+5000)</span>
             </button>
             <div id="ton-connect-button" class="flex justify-center"></div>
         </div>
 
-        <div id="missions" class="tab-content space-y-3">
-            <div id="tasks-container" class="space-y-3"></div>
+        <div id="leaderboard" class="tab-content space-y-4">
+            <div class="text-center py-6">
+                <i class="fas fa-crown text-yellow-500 text-3xl mb-2"></i>
+                <h2 class="text-lg font-black uppercase">Top 10 Dragons</h2>
+            </div>
+            <div id="leaderboard-list" class="space-y-2"></div>
         </div>
     </main>
 
     <nav class="fixed bottom-0 left-0 right-0 bg-black/95 border-t border-white/5 flex justify-around p-3 z-50 backdrop-blur-xl">
-        <button onclick="showTab('home')" class="nav-btn active" id="n-home"><i class="fas fa-th-large text-sm mb-1"></i><p class="text-[8px] font-black uppercase" data-ar="الرئيسية" data-en="HOME">الرئيسية</p></button>
-        <button onclick="showTab('missions')" class="nav-btn" id="n-missions"><i class="fas fa-bolt text-sm mb-1"></i><p class="text-[8px] font-black uppercase" data-ar="المهام" data-en="TASKS">المهام</p></button>
-        <button onclick="showTab('trade')" class="nav-btn" id="n-trade"><i class="fas fa-sync text-sm mb-1"></i><p class="text-[8px] font-black uppercase" data-ar="تداول" data-en="TRADE">تداول</p></button>
-        <button onclick="showTab('wallet')" class="nav-btn" id="n-wallet"><i class="fas fa-wallet text-sm mb-1"></i><p class="text-[8px] font-black uppercase" data-ar="المحفظة" data-en="WALLET">المحفظة</p></button>
+        <button onclick="showTab('home')" class="nav-btn active" id="n-home"><i class="fas fa-home text-sm mb-1"></i><p class="text-[8px] font-black uppercase">Home</p></button>
+        <button onclick="showTab('missions')" class="nav-btn" id="n-missions"><i class="fas fa-tasks text-sm mb-1"></i><p class="text-[8px] font-black uppercase">Tasks</p></button>
+        <button onclick="showTab('leaderboard')" class="nav-btn" id="n-leaderboard"><i class="fas fa-trophy text-sm mb-1"></i><p class="text-[8px] font-black uppercase">Top</p></button>
+        <button onclick="showTab('wallet')" class="nav-btn" id="n-wallet"><i class="fas fa-wallet text-sm mb-1"></i><p class="text-[8px] font-black uppercase">Wallet</p></button>
     </nav>
 
     <script>
@@ -123,123 +130,148 @@
         
         let appData = { points: 0, doneTasks: [], lang: localStorage.getItem('d_lang') || 'ar' };
 
-        // 1. مزامنة البيانات الحقيقية من السيرفر عند البدء
         async function syncData() {
             const user = tg.initDataUnsafe.user;
             if (!user) return;
-
             try {
                 const res = await fetch(`${WORKER_URL}/sync`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        userId: user.id,
-                        username: user.username || "Anonymous",
-                        referrerId: tg.initDataUnsafe.start_param || null
-                    })
+                    body: JSON.stringify({ userId: user.id, username: user.first_name, referrerId: tg.initDataUnsafe.start_param })
                 });
                 const data = await res.json();
                 appData.points = data.points;
                 appData.doneTasks = data.doneTasks;
                 updateUI();
-                if(document.getElementById('missions').classList.contains('active')) loadMissions();
-            } catch (e) { console.error("Database connection failed"); }
+                document.getElementById('app-loader').style.display = 'none';
+            } catch (e) { console.error(e); }
         }
 
-        // 2. جلب بيانات السوق المباشرة
         async function updateMarketData() {
             try {
                 const res = await fetch(`https://api.dexscreener.com/latest/dex/pools/bsc/${pool}`);
                 const data = await res.json();
                 if (data.pair) {
-                    const p = data.pair;
-                    document.getElementById('live-price').innerText = `$${parseFloat(p.priceUsd).toFixed(10)}`;
-                    document.getElementById('live-liq').innerText = `$${parseFloat(p.liquidity.usd).toLocaleString()}`;
-                    document.getElementById('live-mcap').innerText = `$${parseFloat(p.fdv).toLocaleString()}`;
-                    document.getElementById('safe-buy').innerText = `$${(parseFloat(p.liquidity.usd) * 0.03).toFixed(2)}`;
-                    ['live-price', 'live-liq', 'live-mcap', 'safe-buy'].forEach(id => document.getElementById(id).classList.remove('loading-shimmer'));
+                    document.getElementById('live-price').innerText = `$${parseFloat(data.pair.priceUsd).toFixed(10)}`;
+                    document.getElementById('live-liq').innerText = `$${parseFloat(data.pair.liquidity.usd).toLocaleString()}`;
+                    document.getElementById('live-mcap').innerText = `$${parseFloat(data.pair.fdv).toLocaleString()}`;
+                    ['live-price', 'live-liq', 'live-mcap'].forEach(id => document.getElementById(id).classList.remove('loading-shimmer'));
                 }
             } catch (e) {}
         }
 
-        // 3. نظام المهام الحقيقي
+        async function claimDaily() {
+            const btn = document.getElementById('dailyBtn');
+            btn.disabled = true;
+            try {
+                const res = await fetch(`${WORKER_URL}/daily-claim`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ userId: tg.initDataUnsafe.user.id })
+                });
+                const result = await res.json();
+                if (result.success) {
+                    appData.points = result.newPoints;
+                    updateUI();
+                    tg.showAlert(`+${result.reward} Points!`);
+                } else {
+                    tg.showAlert(result.message);
+                }
+            } catch (e) {}
+            btn.disabled = false;
+        }
+
+        async function loadLeaderboard() {
+            const list = document.getElementById('leaderboard-list');
+            list.innerHTML = '<p class="text-center py-5 text-[10px] opacity-50">Loading...</p>';
+            try {
+                const res = await fetch(`${WORKER_URL}/leaderboard`);
+                const top = await res.json();
+                list.innerHTML = '';
+                top.forEach((u, i) => {
+                    list.innerHTML += `
+                        <div class="dragon-card p-4 flex justify-between items-center ${i < 3 ? 'border-yellow-500/30 bg-yellow-500/5' : ''}">
+                            <div class="flex items-center gap-3">
+                                <span class="text-[10px] font-black w-4">#${i+1}</span>
+                                <span class="text-xs font-bold">${u.username}</span>
+                            </div>
+                            <span class="text-xs font-black text-yellow-500">${u.points.toLocaleString()}</span>
+                        </div>`;
+                });
+            } catch (e) {}
+        }
+
         async function loadMissions() {
             const container = document.getElementById('tasks-container');
-            const feeds = [
-                {id: 'X', url: "https://rss.app/feeds/v1.1/tYaEQs8TqBTzCA29.json", icon: 'twitter'},
-                {id: 'TikTok', url: "https://rss.app/feeds/v1.1/L4M8dUSeMhVKhLS2.json", icon: 'tiktok'}
+            container.innerHTML = '<p class="text-center py-5 opacity-50 text-[10px]">Loading Tasks...</p>';
+            // مثال لمهام ثابتة (يمكن جلبها من RSS كما فعلنا سابقاً)
+            const tasks = [
+                { id: 't1', title: 'Follow Dragon X', link: 'https://x.com/dragon', reward: 1000 },
+                { id: 't2', title: 'Join Channel', link: 'https://t.me/dragon', reward: 1000 }
             ];
-            container.innerHTML = '<p class="text-center text-[10px] py-10 opacity-50">Fetching Missions...</p>';
-            
-            let all = [];
-            for(let f of feeds) {
-                try {
-                    const res = await fetch(f.url);
-                    const d = await res.json();
-                    d.items.slice(0, 3).forEach(item => {
-                        all.push({ ...item, platform: f.id, icon: f.icon, taskId: btoa(item.link).substring(0, 10) });
-                    });
-                } catch(e) {}
-            }
             container.innerHTML = '';
-            all.forEach(task => {
-                const isDone = appData.doneTasks.includes(task.taskId);
+            tasks.forEach(t => {
+                const isDone = appData.doneTasks.includes(t.id);
                 container.innerHTML += `
-                    <div class="dragon-card p-4 flex justify-between items-center border-l-4 ${isDone ? 'border-gray-800' : 'border-red-600'} ${isDone ? 'completed-task' : ''}">
-                        <div class="flex items-center gap-4">
-                            <i class="fab fa-${task.icon} ${isDone ? 'text-gray-600' : 'text-red-500'} text-lg"></i>
-                            <div>
-                                <p class="text-[10px] font-black uppercase">${task.platform} MISSION</p>
-                                <p class="text-[8px] text-yellow-500 font-bold">+1,000 PTS</p>
-                            </div>
-                        </div>
-                        <button onclick="executeTask('${task.taskId}', '${task.link}')" class="px-6 py-2 rounded-xl text-[9px] font-black uppercase ${isDone ? 'bg-black text-gray-600' : 'bg-white text-black'}">
-                            ${isDone ? 'DONE' : 'GO'}
-                        </button>
+                    <div class="dragon-card p-4 flex justify-between items-center ${isDone ? 'completed-task' : ''}">
+                        <span class="text-[10px] font-black">${t.title}</span>
+                        <button onclick="executeTask('${t.id}', '${t.link}')" class="bg-white text-black px-4 py-1.5 rounded-lg text-[9px] font-black">${isDone ? 'DONE' : 'GO'}</button>
                     </div>`;
             });
         }
 
         async function executeTask(id, url) {
-            if (appData.doneTasks.includes(id)) return;
             tg.openLink(url);
-            tg.showConfirm("هل أكملت المهمة فعلياً؟", async (ok) => {
-                if (ok) {
-                    tg.showScanQrPopup({ text: "Verifying Mission..." });
+            tg.showConfirm("Done?", async (ok) => {
+                if(ok) {
                     const res = await fetch(`${WORKER_URL}/complete-task`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ userId: tg.initDataUnsafe.user.id, taskId: id, reward: 1000 })
                     });
-                    const result = await res.json();
-                    tg.closeScanQrPopup();
-                    if (result.success) {
-                        appData.points = result.newPoints;
-                        appData.doneTasks.push(id);
-                        updateUI();
-                        loadMissions();
-                        tg.HapticFeedback.notificationOccurred('success');
-                    }
+                    const r = await res.json();
+                    if(r.success) { appData.points = r.newPoints; appData.doneTasks.push(id); updateUI(); loadMissions(); }
                 }
             });
         }
 
-        // 4. نظام الإحالات الحقيقي (رابط البوت المباشر)
         function shareReferral() {
-            const userId = tg.initDataUnsafe.user.id;
-            const link = `https://t.me/${BOT_USERNAME}?start=${userId}`;
-            const text = "انضم إلي في Dragon VIP واحصل على 5000 نقطة مجانية! 🐲🔥";
-            tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`);
+            const link = `https://t.me/${BOT_USERNAME}?start=${tg.initDataUnsafe.user.id}`;
+            tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=Join Dragon!`);
         }
 
-        // التبديل بين التبويبات
         function showTab(id) {
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             document.getElementById('n-' + id).classList.add('active');
+            if(id === 'leaderboard') loadLeaderboard();
             if(id === 'missions') loadMissions();
-            tg.HapticFeedback.impactOccurred('light');
+        }
+
+        function updateTierUI(pts) {
+            const tiers = [
+                { name: 'Bronze', min: 0, max: 100000, color: '#b45309' },
+                { name: 'Silver', min: 100000, max: 500000, color: '#94a3b8' },
+                { name: 'Gold', min: 500000, max: 1000000, color: '#f59e0b' },
+                { name: 'Legend', min: 1000000, max: 10000000, color: '#6366f1' }
+            ];
+            let tier = tiers.find((t, i) => pts >= t.min && (tiers[i+1] ? pts < tiers[i+1].min : true));
+            const badge = document.getElementById('tier-badge');
+            badge.innerText = tier.name;
+            badge.style.backgroundColor = tier.color;
+            document.getElementById('tier-card').style.borderColor = tier.color + '44';
+            let percent = ((pts - tier.min) / (tier.max - tier.min)) * 100;
+            document.getElementById('tier-progress-bar').style.width = Math.min(percent, 100) + '%';
+            document.getElementById('tier-progress-bar').style.backgroundColor = tier.color;
+        }
+
+        function updateUI() {
+            const isAr = appData.lang === 'ar';
+            document.getElementById('htmlTag').dir = isAr ? 'rtl' : 'ltr';
+            document.querySelectorAll('[data-ar]').forEach(el => el.innerText = isAr ? el.getAttribute('data-ar') : el.getAttribute('data-en'));
+            document.getElementById('wallet-pts').innerText = appData.points.toLocaleString();
+            updateTierUI(appData.points);
         }
 
         function toggleLang() {
@@ -248,23 +280,11 @@
             updateUI();
         }
 
-        function updateUI() {
-            const isAr = appData.lang === 'ar';
-            document.getElementById('htmlTag').dir = isAr ? 'rtl' : 'ltr';
-            document.getElementById('langBtn').innerText = isAr ? 'EN' : 'AR';
-            document.querySelectorAll('[data-ar]').forEach(el => {
-                el.innerText = isAr ? el.getAttribute('data-ar') : el.getAttribute('data-en');
-            });
-            document.getElementById('wallet-pts').innerText = appData.points.toLocaleString();
-        }
-
-        // تهيئة TON Connect
         const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
             manifestUrl: 'https://raw.githubusercontent.com/ton-community/tutorials/main/03-client/test/public/tonconnect-manifest.json',
             buttonRootId: 'ton-connect-button'
         });
 
-        // بدء التشغيل
         tg.expand();
         syncData();
         updateMarketData();
