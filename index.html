@@ -3,49 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dragon Real Data</title>
+    <title>Dragon Elite</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { background-color: #030303; color: #fff; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
-        .dragon-card { background: #0c0c0c; border: 1px solid #1a1a1a; border-radius: 20px; }
+        body { background-color: #050505; color: #fff; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
+        .dragon-card { background: #111; border: 1px solid #222; border-radius: 18px; }
         .tab-content { display: none; }
-        .tab-content.active { display: block; animation: fadeIn 0.4s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .tab-content.active { display: block; }
         .nav-btn.active { color: #ff4d4d; border-top: 2px solid #ff4d4d; }
-        .burn-bar-fill { height: 100%; background: linear-gradient(90deg, #ff4d4d, #f97316); border-radius: 20px; transition: width 2s ease; }
+        .burn-bar-fill { height: 100%; background: linear-gradient(90deg, #ff4d4d, #f97316); transition: width 2s ease; border-radius: 10px; }
         .done-task { opacity: 0.2; filter: grayscale(1); pointer-events: none; }
     </style>
 </head>
 <body class="pb-28">
 
-    <header class="p-4 sticky top-0 bg-black/90 backdrop-blur-md z-50 border-b border-white/5 flex justify-between items-center">
+    <header class="p-4 sticky top-0 bg-black/95 border-b border-white/5 flex justify-between items-center z-50">
         <div class="flex items-center gap-2">
             <i class="fas fa-dragon text-red-600 text-xl"></i>
-            <h1 class="text-[10px] font-black uppercase tracking-widest">DRAGON<span class="text-red-600">PRO</span></h1>
+            <h1 class="text-[10px] font-black uppercase">DRAGON<span class="text-red-600">PRO</span></h1>
         </div>
         <div class="flex items-center gap-3">
-            <button onclick="toggleLang()" class="text-[9px] font-bold bg-white/5 px-3 py-1.5 rounded border border-white/10 uppercase" id="langBtn">EN</button>
-            <p id="pointsHeader" class="text-sm font-black text-white leading-none">0</p>
+            <button onclick="toggleLang()" class="text-[9px] font-bold bg-white/5 px-2 py-1 rounded border border-white/10 uppercase" id="langBtn">EN</button>
+            <p id="pointsHeader" class="text-sm font-black text-white">0</p>
         </div>
     </header>
 
     <main class="p-4">
-        
         <div id="home-tab" class="tab-content active space-y-4">
             <div class="grid grid-cols-2 gap-3">
-                <div class="dragon-card p-4">
-                    <p class="text-[9px] text-gray-500 font-bold uppercase mb-1" data-ar="السيولة" data-en="Liquidity">السيولة</p>
-                    <p id="live-liq" class="text-xs font-black text-green-500 animate-pulse">$---</p>
+                <div class="dragon-card p-4 text-center">
+                    <p class="text-[9px] text-gray-500 font-bold uppercase" data-ar="السيولة" data-en="Liquidity">السيولة</p>
+                    <p id="live-liq" class="text-xs font-black text-green-500 tracking-tighter">FETCHING...</p>
                 </div>
-                <div class="dragon-card p-4">
-                    <p class="text-[9px] text-gray-500 font-bold uppercase mb-1" data-ar="الماركت كاب" data-en="M. Cap">الماركت كاب</p>
-                    <p id="live-mcap" class="text-xs font-black text-white animate-pulse">$---</p>
+                <div class="dragon-card p-4 text-center">
+                    <p class="text-[9px] text-gray-500 font-bold uppercase" data-ar="الماركت كاب" data-en="Market Cap">الماركت كاب</p>
+                    <p id="live-mcap" class="text-xs font-black text-white tracking-tighter">FETCHING...</p>
                 </div>
             </div>
-
             <div class="dragon-card p-5 space-y-4">
                 <div class="flex justify-between items-center">
                     <span class="text-[10px] text-gray-400 font-bold uppercase" data-ar="السعر المباشر" data-en="Live Price">السعر المباشر</span>
@@ -53,39 +50,39 @@
                 </div>
                 <div class="space-y-2 pt-2 border-t border-white/5">
                     <div class="flex justify-between text-[9px] font-bold uppercase">
-                        <span data-ar="العملات المحروقة فعلياً" data-en="Tokens Burned">العملات المحروقة فعلياً</span>
-                        <span id="burn-text" class="text-orange-500">Calculating...</span>
+                        <span data-ar="نسبة الحرق" data-en="Burn Rate">نسبة الحرق</span>
+                        <span id="burn-text" class="text-orange-500">42.8%</span>
                     </div>
                     <div class="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
-                        <div id="burn-bar" class="burn-bar-fill" style="width: 0%;"></div>
+                        <div id="burn-bar" class="burn-bar-fill" style="width: 42.8%;"></div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div id="missions-tab" class="tab-content space-y-6">
+        <div id="missions-tab" class="tab-content space-y-4">
             <div id="tasks-list" class="space-y-3"></div>
         </div>
 
         <div id="trade-tab" class="tab-content space-y-4">
-            <div class="dragon-card p-6 border-red-600/30 bg-red-600/5 space-y-5">
-                <div class="flex items-center gap-3">
-                    <i class="fas fa-info-circle text-red-500"></i>
-                    <h3 class="text-xs font-black uppercase" data-ar="تحليل التداول الذكي" data-en="Trading Analysis">تحليل التداول الذكي</h3>
+            <div class="dragon-card p-6 border-red-600/20 bg-red-600/5 space-y-4">
+                <div class="flex items-center gap-2 text-red-500">
+                    <i class="fas fa-shield-alt"></i>
+                    <h3 class="text-xs font-black uppercase" data-ar="تنبيه التداول الآمن" data-en="Safe Trade Alert">تنبيه التداول الآمن</h3>
                 </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <div class="bg-black/40 p-3 rounded-xl">
-                        <p class="text-[8px] text-gray-500 font-bold uppercase mb-1" data-ar="أقصى شراء آمن" data-en="Max Safe Buy">أقصى شراء آمن</p>
+                <div class="bg-black/40 p-4 rounded-xl space-y-3">
+                    <div class="flex justify-between items-center">
+                        <p class="text-[9px] text-gray-400 uppercase font-bold" data-ar="أقصى شراء موصى به" data-en="Max Safe Buy">أقصى شراء موصى به</p>
                         <p id="safe-buy-val" class="text-xs font-black text-green-500">$---</p>
                     </div>
-                    <div class="bg-black/40 p-3 rounded-xl">
-                        <p class="text-[8px] text-gray-500 font-bold uppercase mb-1" data-ar="الانزلاق" data-en="Slippage">الانزلاق</p>
+                    <div class="flex justify-between items-center border-t border-white/5 pt-2">
+                        <p class="text-[9px] text-gray-400 uppercase font-bold" data-ar="الانزلاق المقترح" data-en="Suggested Slippage">الانزلاق المقترح</p>
                         <p class="text-xs font-black text-white">12%</p>
                     </div>
                 </div>
-                <p id="trade-advice" class="text-[9px] text-gray-400 italic" data-ar="جاري حساب البيانات..." data-en="Calculating data...">جاري حساب البيانات...</p>
+                <p id="trade-advice" class="text-[9px] text-gray-500 italic leading-relaxed" data-ar="يتم الحساب بناءً على عمق السيولة الحالية لتجنب تأثر السعر الكبير." data-en="Calculated based on current liquidity depth to avoid high price impact."></p>
             </div>
-            <a href="https://pancakeswap.finance/swap?outputCurrency=0x583787E29Bb2D92FcBc713389FD66807602c72F3" target="_blank" class="block w-full bg-white text-black text-center py-4 rounded-xl font-black uppercase text-xs">Open PancakeSwap</a>
+            <a href="https://pancakeswap.finance/swap?outputCurrency=0x583787E29Bb2D92FcBc713389FD66807602c72F3" target="_blank" class="block w-full bg-white text-black text-center py-4 rounded-xl font-black uppercase text-xs">Swap on PancakeSwap</a>
         </div>
 
         <div id="wallet-tab" class="tab-content text-center py-10">
@@ -112,64 +109,55 @@
             buttonRootId: 'ton-connect-button'
         });
 
-        // نظام جلب البيانات الحقيقي مع البروكسي
-        async function fetchRealData() {
+        // جلب البيانات باستخدام وسيط مختلف وأسرع (corsproxy.io)
+        async function fetchTokenStats() {
             try {
-                const proxyUrl = "https://api.allorigins.win/get?url=";
-                const targetUrl = encodeURIComponent(`https://api.dexscreener.com/latest/dex/tokens/${CA}`);
-                const response = await fetch(proxyUrl + targetUrl);
-                const result = await response.json();
-                const data = JSON.parse(result.contents);
-
+                const response = await fetch(`https://corsproxy.io/?https://api.dexscreener.com/latest/dex/tokens/${CA}`);
+                const data = await response.json();
+                
                 if (data.pairs && data.pairs[0]) {
                     const pair = data.pairs[0];
-                    const price = parseFloat(pair.priceUsd);
                     const liq = parseFloat(pair.liquidity.usd);
-                    const mcap = parseFloat(pair.fdv || 0);
-
-                    // تحديث الصفحة الرئيسية
-                    document.getElementById('live-price').innerText = `$${price.toFixed(8)}`;
+                    
+                    document.getElementById('live-price').innerText = `$${pair.priceUsd}`;
                     document.getElementById('live-liq').innerText = `$${liq.toLocaleString()}`;
-                    document.getElementById('live-mcap').innerText = `$${mcap.toLocaleString()}`;
+                    document.getElementById('live-mcap').innerText = `$${parseFloat(pair.fdv || 0).toLocaleString()}`;
 
-                    // حساب الحرق الحقيقي (بناءً على السيولة المتبقية والسبلاي)
-                    const totalTokens = 1000000000; // الإجمالي المليار
-                    const burned = 450000000; // مثال: 450 مليون محروق
-                    const burnPercent = (burned / totalTokens) * 100;
-                    document.getElementById('burn-text').innerText = burnPercent.toFixed(1) + "%";
-                    document.getElementById('burn-bar').style.width = burnPercent + "%";
-
-                    // حساب "الشراء الآمن" في تبويب التداول (3% من السيولة)
+                    // حساب الشراء الآمن (3% من السيولة الحقيقية)
                     const safeBuy = liq * 0.03;
                     document.getElementById('safe-buy-val').innerText = `$${safeBuy.toLocaleString(undefined, {maximumFractionDigits: 0})}`;
-                    const adviceAr = `بناءً على سيولة قدرها $${liq.toLocaleString()}، الحد الأقصى للشراء الآمن هو $${safeBuy.toLocaleString()} لتجنب الانزلاق.`;
-                    const adviceEn = `Based on $${liq.toLocaleString()} liquidity, max safe buy is $${safeBuy.toLocaleString()} to avoid slippage.`;
+                    
+                    const adviceAr = `بناءً على سيولة $${liq.toLocaleString()}، لا ينصح بتجاوز شراء $${safeBuy.toLocaleString()} في العملية الواحدة.`;
+                    const adviceEn = `Based on $${liq.toLocaleString()} liquidity, do not exceed $${safeBuy.toLocaleString()} per trade.`;
                     document.getElementById('trade-advice').innerText = currentLang === 'ar' ? adviceAr : adviceEn;
-
-                    document.querySelectorAll('.animate-pulse').forEach(el => el.classList.remove('animate-pulse'));
                 }
-            } catch (e) { console.error("Data Load Error"); }
+            } catch (e) {
+                console.error("Stats Error");
+            }
         }
 
-        async function loadFastMissions() {
+        // جلب المهام (مباشر بدون وسيط)
+        async function loadMissionsDirect() {
             const list = document.getElementById('tasks-list');
-            const feeds = ["https://rss.app/feeds/v1.1/tYaEQs8TqBTzCA29.json", "https://rss.app/feeds/v1.1/L4M8dUSeMhVKhLS2.json"];
+            const feeds = [
+                {p: 'x', url: "https://rss.app/feeds/v1.1/tYaEQs8TqBTzCA29.json"},
+                {p: 'tk', url: "https://rss.app/feeds/v1.1/L4M8dUSeMhVKhLS2.json"}
+            ];
             list.innerHTML = '';
-            for(let url of feeds) {
+            for(let f of feeds) {
                 try {
-                    const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}&_=${Date.now()}`);
-                    const result = await res.json();
-                    const data = JSON.parse(result.contents);
+                    const res = await fetch(f.url + "?cache=" + Date.now());
+                    const data = await res.json();
                     data.items.slice(0, 3).forEach((item, i) => {
-                        const id = url.includes('tYa') ? `x_${i}` : `tk_${i}`;
+                        const id = `${f.p}_${i}`;
                         const isDone = doneTasks.includes(id);
                         list.innerHTML += `
                             <div class="dragon-card p-4 flex justify-between items-center ${isDone ? 'done-task' : ''}">
                                 <div class="flex items-center gap-3">
-                                    <i class="fab fa-${id.startsWith('x')?'twitter text-blue-400':'tiktok text-pink-500'}"></i>
-                                    <div><p class="text-[9px] font-black uppercase">${id.startsWith('x')?'X':'TikTok'}</p><p class="text-[8px] text-yellow-500">+1000</p></div>
+                                    <i class="fab fa-${f.p==='x'?'twitter text-blue-400':'tiktok text-pink-500'}"></i>
+                                    <div><p class="text-[10px] font-black uppercase">${f.p.toUpperCase()}</p><p class="text-[8px] text-yellow-500">+1000 PTS</p></div>
                                 </div>
-                                <button onclick="doTask('${id}', 1000, '${item.url}')" class="bg-white text-black text-[8px] font-black px-4 py-2 rounded-lg uppercase">GO</button>
+                                <button onclick="doTask('${id}', 1000, '${item.url}')" class="bg-white text-black text-[9px] font-black px-4 py-2 rounded-lg">GO</button>
                             </div>`;
                     });
                 } catch(e) {}
@@ -186,7 +174,7 @@
                     localStorage.setItem('d_done', JSON.stringify(doneTasks));
                     document.getElementById('pointsHeader').innerText = points.toLocaleString();
                     tg.HapticFeedback.notificationOccurred('success');
-                    loadFastMissions();
+                    loadMissionsDirect();
                 }
             }, 5000);
         }
@@ -203,7 +191,6 @@
             currentLang = currentLang === 'ar' ? 'en' : 'ar';
             localStorage.setItem('d_lang', currentLang);
             updateUI();
-            fetchRealData();
         }
 
         function updateUI() {
@@ -217,10 +204,10 @@
 
         tg.expand();
         updateUI();
-        fetchRealData();
-        loadFastMissions();
+        fetchTokenStats();
+        loadMissionsDirect();
         document.getElementById('pointsHeader').innerText = points.toLocaleString();
-        setInterval(fetchRealData, 20000);
+        setInterval(fetchTokenStats, 20000);
     </script>
 </body>
 </html>
