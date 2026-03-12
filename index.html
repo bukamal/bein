@@ -29,7 +29,6 @@
         @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 0.5; } 50% { transform: scale(1.2); opacity: 1; } }
 
         .wallet-gradient { background: linear-gradient(135deg, #1a0000 0%, #050505 100%); border: 1px solid #300; }
-        .completed-task { opacity: 0.5; filter: grayscale(1); pointer-events: none; }
         
         .swap-btn { background: linear-gradient(90deg, #f3ba2f, #f0b90b); color: #000; font-weight: 900; box-shadow: 0 4px 15px rgba(243, 186, 47, 0.3); }
     </style>
@@ -161,16 +160,16 @@
         const tg = window.Telegram.WebApp;
         const WORKER_URL = "https://noisy-moon-4289.manhal-almasriiii199119.workers.dev";
         const BOT_USERNAME = "Drgncoin_bot";
-        // تم تصحيح رابط الـ API ليجلب بيانات زوج التداول مباشرة
-        const DEX_API = "https://api.dexscreener.com/latest/dex/pairs/bsc/0x84606890ad8d13e5a092c25abe59e2ec8ade7805";
+        // استخدام GeckoTerminal API كبديل مستقر
+        const GECKO_API = "https://api.geckoterminal.com/api/v2/networks/bsc/pools/0x84606890ad8d13e5a092c25abe59e2ec8ade7805";
         const swapUrl = "https://pancakeswap.finance/swap?outputCurrency=0x583787E29Bb2D92FcBc713389FD66807602c72F3";
         
         let appData = { points: 0, doneTasks: [], lang: localStorage.getItem('d_lang') || 'ar' };
 
         function openSwapWithWarning() {
             const msg = appData.lang === 'ar' ? 
-                "⚠️ تنبيه التداول: العملات الرقمية متقلبة. يرجى ضبط الانزلاق (Slippage) يدوياً إلى 12% لضمان إتمام الصفقة. هل تريد الذهاب لـ PancakeSwap؟" : 
-                "⚠️ Trade Alert: Crypto is volatile. Set Slippage to 12% manually for a successful swap. Continue to PancakeSwap?";
+                "⚠️ تنبيه: تأكد من ضبط الإنزلاق (Slippage) لـ 12%. هل تريد المتابعة؟" : 
+                "⚠️ Alert: Set Slippage to 12% to trade. Continue?";
             tg.showConfirm(msg, (ok) => { if (ok) tg.openLink(swapUrl); });
         }
 
@@ -192,28 +191,28 @@
                     setTimeout(() => document.getElementById('app-loader').style.display = 'none', 500);
                 }, 1000);
             } catch (e) {
-                // إخفاء اللودر حتى لو فشل الاتصال بالووركر ليتمكن المستخدم من رؤية البيانات العامة
                 document.getElementById('app-loader').style.display = 'none';
             }
         }
 
         async function updateMarketData() {
             try {
-                const res = await fetch(DEX_API);
-                const data = await res.json();
-                if (data.pair || (data.pairs && data.pairs[0])) {
-                    const pair = data.pair || data.pairs[0];
-                    document.getElementById('live-price').innerText = `$${parseFloat(pair.priceUsd).toFixed(10)}`;
-                    document.getElementById('live-liq').innerText = `$${parseFloat(pair.liquidity.usd).toLocaleString()}`;
-                    document.getElementById('live-mcap').innerText = `$${parseFloat(pair.fdv || pair.marketCap).toLocaleString()}`;
+                const res = await fetch(GECKO_API);
+                const json = await res.json();
+                if (json.data && json.data.attributes) {
+                    const attr = json.data.attributes;
                     
-                    const change = parseFloat(pair.priceChange.h24);
+                    document.getElementById('live-price').innerText = `$${parseFloat(attr.base_token_price_usd).toFixed(10)}`;
+                    document.getElementById('live-liq').innerText = `$${parseFloat(attr.reserve_in_usd).toLocaleString()}`;
+                    document.getElementById('live-mcap').innerText = `$${parseFloat(attr.fdv_usd).toLocaleString()}`;
+                    
+                    const change = parseFloat(attr.price_change_percentage.h24);
                     const changeEl = document.getElementById('change-24h');
-                    changeEl.innerText = (change > 0 ? '+' : '') + change + '%';
+                    changeEl.innerText = (change > 0 ? '+' : '') + change.toFixed(2) + '%';
                     changeEl.className = `text-[10px] font-black tracking-tighter ${change >= 0 ? 'text-green-500' : 'text-red-500'}`;
                     
-                    document.getElementById('vol-24h').innerText = `$${parseFloat(pair.volume.h24).toLocaleString()}`;
-                    document.getElementById('txns-24h').innerText = (pair.txns.h24.buys + pair.txns.h24.sells).toLocaleString();
+                    document.getElementById('vol-24h').innerText = `$${parseFloat(attr.volume_usd.h24).toLocaleString()}`;
+                    document.getElementById('txns-24h').innerText = (attr.transactions.h24.buys + attr.transactions.h24.sells).toLocaleString();
 
                     const barWidth = Math.min(Math.max(50 + change, 5), 100);
                     document.getElementById('price-bar').style.width = barWidth + '%';
@@ -222,9 +221,10 @@
                         document.getElementById(id).classList.remove('loading-shimmer');
                     });
                 }
-            } catch (e) { console.error("Market Data Fetch Error"); }
+            } catch (e) { console.error("Market API Error"); }
         }
 
+        // الوظائف الباقية مستمرة بنفس المنطق دون تغيير
         async function claimDaily() {
             const btn = document.getElementById('dailyBtn');
             btn.disabled = true;
@@ -238,61 +238,50 @@
                 if (result.success) {
                     appData.points = result.newPoints;
                     updateUI();
-                    tg.showAlert(appData.lang === 'ar' ? `رائع! حصلت على ${result.reward} نقطة!` : `Awesome! +${result.reward} Pts!`);
+                    tg.showAlert(appData.lang === 'ar' ? `+${result.reward} نقطة!` : `+${result.reward} Pts!`);
                     tg.HapticFeedback.notificationOccurred('success');
-                } else {
-                    tg.showAlert(result.message);
-                }
+                } else { tg.showAlert(result.message); }
             } catch (e) {}
             btn.disabled = false;
         }
 
         async function loadLeaderboard() {
             const list = document.getElementById('leaderboard-list');
-            list.innerHTML = '<p class="text-center py-5 text-[10px] opacity-50 uppercase">Loading Rankings...</p>';
+            list.innerHTML = '<p class="text-center py-5 text-[10px] opacity-50">LOADING...</p>';
             try {
                 const res = await fetch(`${WORKER_URL}/leaderboard`);
                 const top = await res.json();
                 list.innerHTML = '';
                 top.forEach((u, i) => {
                     const colors = ['text-yellow-400', 'text-gray-300', 'text-orange-400'];
-                    list.innerHTML += `
-                        <div class="dragon-card p-4 flex justify-between items-center ${i < 3 ? 'border-yellow-500/20 bg-yellow-500/5' : 'border-white/5'}">
-                            <div class="flex items-center gap-3">
-                                <span class="text-[10px] font-black w-4 ${i < 3 ? colors[i] : 'text-gray-600'}">#${i+1}</span>
-                                <span class="text-xs font-bold">${u.username}</span>
-                            </div>
-                            <span class="text-xs font-black ${i < 3 ? colors[i] : 'text-white'}">${u.points.toLocaleString()}</span>
-                        </div>`;
+                    list.innerHTML += `<div class="dragon-card p-4 flex justify-between items-center ${i < 3 ? 'border-yellow-500/20 bg-yellow-500/5' : 'border-white/5'}">
+                        <div class="flex items-center gap-3"><span class="text-[10px] font-black w-4 ${i < 3 ? colors[i] : 'text-gray-600'}">#${i+1}</span>
+                        <span class="text-xs font-bold">${u.username}</span></div>
+                        <span class="text-xs font-black">${u.points.toLocaleString()}</span></div>`;
                 });
             } catch (e) {}
         }
 
         async function loadMissions() {
             const container = document.getElementById('tasks-container');
-            container.innerHTML = '<p class="text-center py-5 opacity-50 text-[10px] uppercase">Fetching Missions...</p>';
-            const staticTasks = [{ id: 'tg_chan', title: 'Join Official Channel', link: 'https://t.me/Dragon_Coin_Official', reward: 2000, icon: 'fa-telegram' }];
+            container.innerHTML = '<p class="text-center py-5 opacity-50 text-[10px]">FETCHING...</p>';
+            const staticTasks = [{ id: 'tg_chan', title: 'Join Channel', link: 'https://t.me/Dragon_Coin_Official', reward: 2000, icon: 'fa-telegram' }];
             const feeds = [{ id: 'X', url: "https://rss.app/feeds/v1.1/tYaEQs8TqBTzCA29.json", icon: 'fa-twitter' }, { id: 'TikTok', url: "https://rss.app/feeds/v1.1/L4M8dUSeMhVKhLS2.json", icon: 'fa-tiktok' }];
             let dynamicTasks = [];
             for (let f of feeds) {
                 try {
                     const res = await fetch(f.url);
                     const d = await res.json();
-                    d.items.slice(0, 3).forEach(item => {
-                        dynamicTasks.push({ id: btoa(item.link).substring(0, 10), title: `${f.id}: Mission`, link: item.link, reward: 1000, icon: f.icon });
-                    });
+                    d.items.slice(0, 3).forEach(item => { dynamicTasks.push({ id: btoa(item.link).substring(0, 10), title: `${f.id} Mission`, link: item.link, reward: 1000, icon: f.icon }); });
                 } catch (e) {}
             }
-            const allTasks = [...staticTasks, ...dynamicTasks];
             container.innerHTML = '';
-            allTasks.forEach(t => {
+            [...staticTasks, ...dynamicTasks].forEach(t => {
                 const isDone = appData.doneTasks.includes(t.id);
-                container.innerHTML += `
-                    <div class="dragon-card p-4 flex justify-between items-center border-l-2 ${isDone ? 'border-gray-800 opacity-50' : 'border-red-600'}">
-                        <div class="flex items-center gap-3"><i class="fab ${t.icon} ${isDone ? 'text-gray-600' : 'text-red-500'} text-lg"></i>
-                        <div><p class="text-[10px] font-black uppercase">${t.title}</p><p class="text-[8px] text-yellow-500 font-bold">+${t.reward.toLocaleString()} PTS</p></div></div>
-                        <button onclick="executeTask('${t.id}', '${t.link}', ${t.reward})" class="px-5 py-2 rounded-xl text-[9px] font-black uppercase ${isDone ? 'bg-black text-gray-700' : 'bg-white text-black'}">${isDone ? 'DONE' : 'GO'}</button>
-                    </div>`;
+                container.innerHTML += `<div class="dragon-card p-4 flex justify-between items-center border-l-2 ${isDone ? 'border-gray-800 opacity-50' : 'border-red-600'}">
+                    <div class="flex items-center gap-3"><i class="fab ${t.icon} text-lg ${isDone ? 'text-gray-600' : 'text-red-500'}"></i>
+                    <div><p class="text-[10px] font-black uppercase">${t.title}</p><p class="text-[8px] text-yellow-500 font-bold">+${t.reward} PTS</p></div></div>
+                    <button onclick="executeTask('${t.id}', '${t.link}', ${t.reward})" class="px-5 py-2 rounded-xl text-[9px] font-black ${isDone ? 'bg-black text-gray-700' : 'bg-white text-black'}">${isDone ? 'DONE' : 'GO'}</button></div>`;
             });
         }
 
@@ -300,7 +289,7 @@
             if (appData.doneTasks.includes(id)) return;
             tg.openLink(url);
             setTimeout(() => {
-                tg.showConfirm(appData.lang === 'ar' ? "هل أكملت المهمة بنجاح؟" : "Did you complete the task?", async (ok) => {
+                tg.showConfirm(appData.lang === 'ar' ? "هل أكملت المهمة؟" : "Task Done?", async (ok) => {
                     if(ok) {
                         const res = await fetch(`${WORKER_URL}/complete-task`, {
                             method: "POST",
@@ -308,17 +297,15 @@
                             body: JSON.stringify({ userId: tg.initDataUnsafe.user.id, taskId: id, reward: reward })
                         });
                         const r = await res.json();
-                        if(r.success) { appData.points = r.newPoints; appData.doneTasks.push(id); updateUI(); loadMissions(); tg.HapticFeedback.notificationOccurred('success'); }
+                        if(r.success) { appData.points = r.newPoints; appData.doneTasks.push(id); updateUI(); loadMissions(); }
                     }
                 });
             }, 3000);
         }
 
         function shareReferral() {
-            const userId = tg.initDataUnsafe.user?.id || "0";
-            const link = `https://t.me/${BOT_USERNAME}?start=${userId}`;
-            const text = appData.lang === 'ar' ? "انضم لعشيرة التنين واحصل على 5000 نقطة مجانية! 🐲🔥" : "Join the Dragon Clan and get 5000 free points! 🐲🔥";
-            tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`);
+            const link = `https://t.me/${BOT_USERNAME}?start=${tg.initDataUnsafe.user?.id || "0"}`;
+            tg.openTelegramLink(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent("Join Dragon VIP! 🐲")}`);
         }
 
         function showTab(id) {
@@ -334,9 +321,8 @@
         function updateTierUI(pts) {
             const tiers = [{ name: 'Bronze', min: 0, max: 100000, color: '#b45309' }, { name: 'Silver', min: 100000, max: 500000, color: '#94a3b8' }, { name: 'Gold', min: 500000, max: 1000000, color: '#f59e0b' }, { name: 'Legend', min: 1000000, max: 10000000, color: '#6366f1' }];
             let tier = tiers.find((t, i) => pts >= t.min && (tiers[i+1] ? pts < tiers[i+1].min : true)) || tiers[0];
-            const badge = document.getElementById('tier-badge');
-            badge.innerText = tier.name; badge.style.backgroundColor = tier.color;
-            document.getElementById('tier-card').style.borderColor = tier.color + '44';
+            document.getElementById('tier-badge').innerText = tier.name;
+            document.getElementById('tier-badge').style.backgroundColor = tier.color;
             let percent = ((pts - tier.min) / (tier.max - tier.min)) * 100;
             document.getElementById('tier-progress-bar').style.width = Math.min(percent, 100) + '%';
             document.getElementById('tier-progress-bar').style.backgroundColor = tier.color;
@@ -365,8 +351,7 @@
         tg.expand();
         syncData();
         updateMarketData();
-        // تحديث البيانات كل 20 ثانية لضمان دقة السعر
-        setInterval(updateMarketData, 20000);
+        setInterval(updateMarketData, 30000);
     </script>
 </body>
 </html>
