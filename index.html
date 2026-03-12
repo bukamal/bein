@@ -3,211 +3,210 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>The Dragon Hub - Tasks & Rewards</title>
+    <title>The Dragon Hub</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
     <style>
-        body { background-color: #050505; color: #fff; font-family: sans-serif; overflow-x: hidden; }
+        body { background-color: #050505; color: #fff; font-family: 'Segoe UI', system-ui; overflow-x: hidden; }
         .dragon-card { background: linear-gradient(145deg, #161616, #0a0a0a); border: 1px solid #222; }
         .tab-content { display: none; }
-        .tab-content.active { display: block; animation: fadeIn 0.3s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .nav-item.active { color: #ff4d4d; filter: drop-shadow(0 0 5px rgba(255, 77, 77, 0.5)); }
-        #toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: #ff4d4d; padding: 10px 25px; border-radius: 50px; opacity: 0; transition: 0.3s; z-index: 1000; font-size: 13px; font-weight: bold; }
+        .tab-content.active { display: block; animation: slideUp 0.3s ease-out; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .nav-item.active { color: #ff4d4d; }
+        .burn-fill { background: linear-gradient(90deg, #ff1a1a, #800000); transition: width 1.5s ease-in-out; }
+        #toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: #ff4d4d; padding: 10px 20px; border-radius: 50px; opacity: 0; transition: 0.3s; z-index: 1000; font-size: 12px; font-weight: bold; }
         #toast.show { opacity: 1; }
-        .task-done { opacity: 0.5; pointer-events: none; border-color: #111 !important; }
     </style>
 </head>
 <body class="pb-32">
 
     <header class="p-4 flex justify-between items-center sticky top-0 bg-[#050505]/95 backdrop-blur-md z-50 border-b border-white/5">
-        <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-red-600 rounded-xl flex items-center justify-center shadow-lg shadow-red-900/20">
-                <i class="fas fa-dragon text-white text-xl"></i>
+        <div class="flex items-center gap-2">
+            <div class="w-9 h-9 bg-red-600 rounded-xl flex items-center justify-center shadow-lg shadow-red-900/40">
+                <i class="fas fa-dragon text-white"></i>
             </div>
             <div>
-                <span class="font-black text-lg uppercase tracking-tighter italic">DRAGON<span class="text-red-600">HUB</span></span>
-                <p id="userScoreDisplay" class="text-[9px] text-yellow-500 font-bold uppercase tracking-widest">Points: 0</p>
+                <span class="font-black text-lg uppercase">DRAGON<span class="text-red-600 font-italic italic">COIN</span></span>
             </div>
         </div>
-        <button id="walletBtn" onclick="smartConnect()" class="bg-white text-black text-[10px] font-black px-5 py-2 rounded-full uppercase transition-all active:scale-90">
-            Connect
+        <button id="walletBtn" onclick="smartConnect()" class="bg-white text-black text-[10px] font-black px-5 py-2 rounded-full uppercase shadow-md active:scale-95 transition-transform">
+            Connect Wallet
         </button>
     </header>
 
-    <div id="home-tab" class="tab-content active p-4 space-y-4">
-        <h3 class="text-[10px] font-black text-gray-500 uppercase tracking-widest px-2">مهام تعزيز العرين ⚔️</h3>
-        
-        <div class="space-y-3">
-            <div id="task-tiktok" class="dragon-card p-5 rounded-3xl flex items-center justify-between border-r-4 border-red-600 transition-all">
-                <div class="flex items-center gap-4">
-                    <div class="w-10 h-10 bg-black rounded-full flex items-center justify-center border border-white/10">
-                        <i class="fab fa-tiktok text-white"></i>
-                    </div>
-                    <div>
-                        <p class="text-xs font-black">دعم @thedragonsport</p>
-                        <p class="text-[9px] text-gray-500">+1,000 Point</p>
-                    </div>
-                </div>
-                <button onclick="doTask('tiktok', 1000)" class="bg-red-600 text-[10px] font-black px-4 py-2 rounded-xl shadow-lg">نفذ</button>
-            </div>
-
-            <div id="task-x" class="dragon-card p-5 rounded-3xl flex items-center justify-between border-r-4 border-blue-500 transition-all">
-                <div class="flex items-center gap-4">
-                    <div class="w-10 h-10 bg-black rounded-full flex items-center justify-center border border-white/10">
-                        <i class="fab fa-twitter text-blue-400"></i>
-                    </div>
-                    <div>
-                        <p class="text-xs font-black">متابعة @XY_signals</p>
-                        <p class="text-[9px] text-gray-500">+500 Point</p>
-                    </div>
-                </div>
-                <button onclick="doTask('x', 500)" class="bg-blue-600 text-[10px] font-black px-4 py-2 rounded-xl shadow-lg">متابعة</button>
-            </div>
-        </div>
-
-        <div class="dragon-card p-6 rounded-[2.5rem] mt-4">
-            <div class="flex justify-between items-end mb-3">
-                <h3 class="text-[10px] font-black text-gray-400 uppercase tracking-widest">تضحية الحرق 🔥</h3>
+    <div id="home-tab" class="tab-content active p-4 space-y-5">
+        <div class="dragon-card p-6 rounded-[2rem]">
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="text-[10px] font-black text-gray-400 uppercase tracking-widest">معدل الحرق المباشر 🔥</h3>
                 <span id="burnPercent" class="text-red-500 font-black text-xs font-mono">0.00%</span>
             </div>
-            <div class="w-full bg-[#111] h-2.5 rounded-full overflow-hidden">
-                <div id="burnFill" class="bg-red-600 h-full w-0 transition-all duration-[2s] shadow-[0_0_10px_#ff0000]"></div>
+            <div class="w-full bg-[#111] h-3 rounded-full overflow-hidden border border-white/5 shadow-inner">
+                <div id="burnFill" class="burn-fill h-full w-0 shadow-[0_0_15px_rgba(255,0,0,0.4)]"></div>
+            </div>
+            <p id="burnValue" class="text-[9px] text-gray-500 mt-3 font-mono">0 $DRGN Burned</p>
+        </div>
+
+        <div class="space-y-3">
+            <h3 class="text-[10px] font-black text-gray-500 uppercase tracking-widest px-1">مهام تعزيز العرين ⚔️</h3>
+            <div class="dragon-card p-4 rounded-2xl flex items-center justify-between border-r-4 border-red-600">
+                <div class="flex items-center gap-3">
+                    <i class="fab fa-tiktok text-lg"></i>
+                    <div>
+                        <p class="text-xs font-bold">دعم @thedragonsport</p>
+                        <p class="text-[9px] text-gray-500">+1000 Point</p>
+                    </div>
+                </div>
+                <button onclick="window.open('https://www.tiktok.com/@thedragonsport', '_blank')" class="bg-red-600 text-[9px] font-bold px-4 py-2 rounded-lg">تنفيذ</button>
             </div>
         </div>
     </div>
 
     <div id="data-tab" class="tab-content p-4 space-y-4">
-        <div class="dragon-card p-6 rounded-[2rem] text-center">
-            <p class="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1">Total Supply</p>
-            <p class="text-2xl font-black italic tracking-tighter">1,000,000,000 <span class="text-red-600 text-sm">$DRGN</span></p>
+        <div class="dragon-card p-6 rounded-[2rem] text-center border-b-4 border-red-600">
+            <p class="text-gray-500 text-[10px] font-bold uppercase tracking-widest mb-1">Contract Address</p>
+            <p id="contractShort" class="text-[10px] font-mono text-white bg-black/50 p-2 rounded-lg break-all">0x583787E29Bb2D92FcBc713389FD66807602c72F3</p>
         </div>
-        <div class="dragon-card p-5 rounded-2xl flex justify-between">
-            <span class="text-xs text-gray-400">الشبكة:</span>
-            <span class="text-xs font-bold text-yellow-500 uppercase">Binance Smart Chain</span>
+        <div class="grid grid-cols-2 gap-3">
+            <div class="dragon-card p-4 rounded-2xl">
+                <p class="text-[9px] text-gray-500 uppercase">الشبكة</p>
+                <p class="text-xs font-bold text-yellow-500">BSC (BEP20)</p>
+            </div>
+            <div class="dragon-card p-4 rounded-2xl">
+                <p class="text-[9px] text-gray-500 uppercase">العملة</p>
+                <p class="text-xs font-bold text-white">$DRGN</p>
+            </div>
         </div>
     </div>
 
     <div id="ranks-tab" class="tab-content p-4">
-        <div class="dragon-card p-10 rounded-[3rem] text-center">
-            <div id="rankIcon" class="text-7xl mb-4">🥚</div>
-            <h2 id="rankTitle" class="text-2xl font-black uppercase tracking-tighter">Dragon Egg</h2>
-            <p id="rankBadge" class="text-gray-500 text-[10px] font-bold uppercase mt-2">Verified Rank</p>
+        <div class="dragon-card p-10 rounded-[3rem] text-center bg-gradient-to-b from-[#1a1a1a] to-black">
+            <div id="rankIcon" class="text-8xl mb-4 drop-shadow-[0_0_20px_rgba(255,255,255,0.1)]">🥚</div>
+            <h2 id="rankTitle" class="text-2xl font-black italic uppercase tracking-tighter">Dragon Egg</h2>
+            <p id="rankBadge" class="text-gray-500 text-[10px] font-black uppercase mt-2 tracking-widest">Connect to Reveal Rank</p>
         </div>
     </div>
 
     <div id="assets-tab" class="tab-content p-4">
-        <div class="dragon-card p-8 rounded-[2rem] text-center bg-white/5">
-            <p class="text-xs text-gray-500 mb-1">Your $DRGN Balance</p>
-            <div id="userBalance" class="text-4xl font-black font-mono">0.00</div>
-            <a href="https://pancakeswap.finance/swap?outputCurrency=0x84606890ad8d13e5a092c25abe59e2ec8ade7805" target="_blank" class="block mt-6 w-full bg-red-600 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest">Buy $DRGN</a>
+        <div class="dragon-card p-8 rounded-[2.5rem] text-center">
+            <p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-2">رصيدك الحالي</p>
+            <div id="userBalance" class="text-4xl font-black font-mono tracking-tighter">0.00</div>
+            <p class="text-[10px] text-red-600 font-bold mt-1">$DRGN Coins</p>
+            
+            <a href="https://pancakeswap.finance/swap?outputCurrency=0x583787E29Bb2D92FcBc713389FD66807602c72F3" target="_blank" class="block mt-8 w-full bg-red-600 py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest shadow-lg shadow-red-900/40 active:scale-95 transition-transform">
+                شراء $DRGN الآن
+            </a>
         </div>
     </div>
 
-    <nav class="fixed bottom-0 left-0 right-0 bg-black/95 border-t border-white/5 flex justify-around p-4 z-50 backdrop-blur-md">
+    <nav class="fixed bottom-0 left-0 right-0 bg-[#050505]/95 backdrop-blur-xl border-t border-white/5 flex justify-around p-4 z-50">
         <button onclick="switchTab('home')" class="nav-item flex flex-col items-center active" id="nav-home">
-            <i class="fas fa-home"></i><span class="text-[8px] mt-1 font-black">HOME</span>
+            <i class="fas fa-home text-lg"></i><span class="text-[8px] mt-1 font-bold">HOME</span>
         </button>
         <button onclick="switchTab('data')" class="nav-item flex flex-col items-center text-gray-500" id="nav-data">
-            <i class="fas fa-chart-line"></i><span class="text-[8px] mt-1 font-black">DATA</span>
+            <i class="fas fa-chart-bar text-lg"></i><span class="text-[8px] mt-1 font-bold">DATA</span>
         </button>
         <button onclick="switchTab('ranks')" class="nav-item flex flex-col items-center text-gray-500" id="nav-ranks">
-            <i class="fas fa-fire"></i><span class="text-[8px] mt-1 font-black">RANKS</span>
+            <i class="fas fa-shield-alt text-lg"></i><span class="text-[8px] mt-1 font-bold">RANKS</span>
         </button>
         <button onclick="switchTab('assets')" class="nav-item flex flex-col items-center text-gray-500" id="nav-assets">
-            <i class="fas fa-wallet"></i><span class="text-[8px] mt-1 font-black">ASSETS</span>
+            <i class="fas fa-wallet text-lg"></i><span class="text-[8px] mt-1 font-bold">WALLET</span>
         </button>
     </nav>
 
     <div id="toast"></div>
 
     <script>
-        const RPC = "https://bsc-dataseed.binance.org/";
-        const CONTRACT = "0x84606890ad8d13e5a092c25abe59e2ec8ade7805";
+        // تهيئة Telegram Web App
+        const tg = window.Telegram.WebApp;
+        tg.expand(); // توسيع التطبيق لملء الشاشة
+        tg.ready();
+
+        const RPC = "https://bsc-dataseed1.binance.org/";
+        const CONTRACT = "0x583787E29Bb2D92FcBc713389FD66807602c72F3";
         const DEAD = "0x000000000000000000000000000000000000dEaD";
-
-        // منطق النقاط والمهام
-        let score = parseInt(localStorage.getItem('dragonScore')) || 0;
-        document.getElementById('userScoreDisplay').innerText = `Points: ${score.toLocaleString()}`;
-
-        function doTask(type, points) {
-            if (localStorage.getItem('task_' + type)) {
-                showToast("لقد نفذت هذه المهمة بالفعل! 🐲");
-                return;
-            }
-            
-            const urls = {
-                'tiktok': 'https://www.tiktok.com/@thedragonsport',
-                'x': 'https://x.com/XY_signals'
-            };
-
-            window.open(urls[type], '_blank');
-            
-            setTimeout(() => {
-                score += points;
-                localStorage.setItem('dragonScore', score);
-                localStorage.setItem('task_' + type, 'done');
-                document.getElementById('userScoreDisplay').innerText = `Points: ${score.toLocaleString()}`;
-                document.getElementById('task-' + type).classList.add('task-done');
-                showToast(`أحسنت! +${points} نقطة تنين 🔥`);
-            }, 2000);
-        }
-
-        // تفقد المهام المنفذة عند الفتح
-        if(localStorage.getItem('task_tiktok')) document.getElementById('task-tiktok').classList.add('task-done');
-        if(localStorage.getItem('task_x')) document.getElementById('task-x').classList.add('task-done');
+        const TOTAL_SUPPLY = 1000000000;
 
         function switchTab(tabName) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active', 'text-red-500'));
+            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.add('text-gray-500'));
+            
             document.getElementById(tabName + '-tab').classList.add('active');
-            document.getElementById('nav-' + tabName).classList.add('active');
+            const currentNav = document.getElementById('nav-' + tabName);
+            currentNav.classList.add('active', 'text-red-500');
+            currentNav.classList.remove('text-gray-500');
+            
+            // اهتزاز خفيف عند التنقل (Telegram Haptic Feedback)
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
         }
 
-        async function initData() {
+        async function fetchRealStats() {
             try {
                 const provider = new ethers.providers.JsonRpcProvider(RPC);
                 const abi = ["function balanceOf(address) view returns (uint256)"];
                 const contract = new ethers.Contract(CONTRACT, abi, provider);
+                
                 const deadBal = await contract.balanceOf(DEAD);
                 const burned = parseFloat(ethers.utils.formatUnits(deadBal, 18));
-                const burnP = ((burned / 1000000000) * 100).toFixed(4);
+                const burnP = ((burned / TOTAL_SUPPLY) * 100).toFixed(4);
+
                 document.getElementById('burnFill').style.width = burnP + "%";
                 document.getElementById('burnPercent').innerText = burnP + "%";
-            } catch(e) { console.log("Chain Error"); }
+                document.getElementById('burnValue').innerText = burned.toLocaleString() + " $DRGN Burned";
+            } catch(e) { console.error("Data Fetch Error"); }
+        }
+
+        async function updateUserData(address) {
+            try {
+                const provider = new ethers.providers.JsonRpcProvider(RPC);
+                const abi = ["function balanceOf(address) view returns (uint256)"];
+                const contract = new ethers.Contract(CONTRACT, abi, provider);
+                
+                const balance = await contract.balanceOf(address);
+                const fmt = parseFloat(ethers.utils.formatUnits(balance, 18));
+                
+                document.getElementById('userBalance').innerText = fmt.toLocaleString(undefined, {minimumFractionDigits: 2});
+                
+                // تحديث الرتبة
+                const rIcon = document.getElementById('rankIcon');
+                const rTitle = document.getElementById('rankTitle');
+                const rBadge = document.getElementById('rankBadge');
+                
+                if (fmt >= 1000000) { rIcon.innerText = "👑"; rTitle.innerText = "Dragon King"; rBadge.innerText = "Top Tier Holder"; }
+                else if (fmt >= 100000) { rIcon.innerText = "⚔️"; rTitle.innerText = "Warrior Dragon"; rBadge.innerText = "Verified Warrior"; }
+                else { rIcon.innerText = "🥚"; rTitle.innerText = "Dragon Egg"; rBadge.innerText = "Young Dragon"; }
+                
+            } catch(e) { console.error(e); }
         }
 
         function smartConnect() {
+            // محاولة الربط عبر Provider (مثل MetaMask أو Telegram Wallet)
             if (window.ethereum) {
                 window.ethereum.request({ method: 'eth_requestAccounts' }).then(acc => {
-                    document.getElementById('walletBtn').innerText = acc[0].substring(0,6) + "...";
-                    showToast("تم ربط العرين بنجاح! 🐉");
-                    updateBalance(acc[0]);
-                });
+                    const addr = acc[0];
+                    document.getElementById('walletBtn').innerText = addr.substring(0,6) + "...";
+                    showToast("تم ربط العرين بنجاح 🐉");
+                    updateUserData(addr);
+                    if (tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+                }).catch(() => showToast("فشل الربط"));
             } else {
-                showToast("يرجى فتح التطبيق من متصفح محفظة آمنة");
+                showToast("افتح التطبيق من داخل محفظة Web3");
+                // رابط لفتح المحفظة في حال عدم وجودها
+                window.open("https://metamask.app.link/dapp/" + window.location.href.replace("https://", ""), "_blank");
             }
         }
 
-        async function updateBalance(addr) {
-            const provider = new ethers.providers.JsonRpcProvider(RPC);
-            const contract = new ethers.Contract(CONTRACT, ["function balanceOf(address) view returns (uint256)"], provider);
-            const bal = await contract.balanceOf(addr);
-            const fmt = parseFloat(ethers.utils.formatUnits(bal, 18));
-            document.getElementById('userBalance').innerText = fmt.toLocaleString(undefined, {minimumFractionDigits:2});
-            
-            if (fmt >= 1000000) { document.getElementById('rankIcon').innerText = "👑"; document.getElementById('rankTitle').innerText = "Dragon King"; }
-            else if (fmt >= 100000) { document.getElementById('rankIcon').innerText = "⚔️"; document.getElementById('rankTitle').innerText = "Warrior Dragon"; }
-        }
-
         function showToast(m) {
-            const t = document.getElementById('toast'); t.innerText = m; t.classList.add('show');
+            const t = document.getElementById('toast');
+            t.innerText = m; t.classList.add('show');
             setTimeout(() => t.classList.remove('show'), 3000);
         }
 
-        initData();
-        setInterval(initData, 30000);
+        fetchRealStats();
+        setInterval(fetchRealStats, 20000);
     </script>
 </body>
 </html>
