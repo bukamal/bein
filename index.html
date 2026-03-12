@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dragon Coin Elite</title>
+    <title>Dragon Coin Elite Hub</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -16,93 +16,92 @@
         #toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: #ff4d4d; padding: 12px 25px; border-radius: 50px; font-weight: bold; opacity: 0; z-index: 1000; transition: 0.3s; pointer-events: none; }
         #toast.show { opacity: 1; }
         .done-task { opacity: 0.3; filter: grayscale(1); pointer-events: none; }
+        .burn-bar { height: 8px; background: #111; border-radius: 10px; overflow: hidden; border: 1px solid #333; }
+        .burn-fill { background: linear-gradient(90deg, #ff4d4d, #991b1b); transition: 2s ease-in-out; }
     </style>
 </head>
 <body class="pb-28">
 
-    <header class="p-4 sticky top-0 bg-[#050505]/90 backdrop-blur-md z-50 border-b border-white/5">
-        <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-red-600 rounded-xl flex items-center justify-center shadow-lg shadow-red-900/40">
-                    <i class="fas fa-dragon text-white"></i>
-                </div>
-                <div>
-                    <h1 class="text-sm font-black uppercase italic">DRAGON<span class="text-red-600">COIN</span></h1>
-                    <p class="text-[10px] text-yellow-500 font-bold uppercase tracking-widest"><span id="pointsHeader">0</span> PTS</p>
-                </div>
+    <header class="p-4 sticky top-0 bg-[#050505]/90 backdrop-blur-md z-50 border-b border-white/5 flex justify-between items-center">
+        <div class="flex items-center gap-2">
+            <div class="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center shadow-lg shadow-red-900/40">
+                <i class="fas fa-dragon text-white text-sm"></i>
             </div>
-            <div class="bg-white/5 px-3 py-1 rounded-full border border-white/10">
-                <span id="rankLabel" class="text-[9px] font-black uppercase text-gray-400">RANK: EGG</span>
-            </div>
+            <h1 class="text-xs font-black uppercase italic">DRAGON<span class="text-red-600">COIN</span></h1>
+        </div>
+        <div class="text-right">
+            <p id="pointsHeader" class="text-sm font-black text-white">0</p>
+            <p id="rankLabel" class="text-[8px] text-yellow-500 font-bold uppercase tracking-widest">RANK: EGG</p>
         </div>
     </header>
 
     <main class="p-4 space-y-6">
         
         <div id="home-tab" class="tab-content active space-y-6">
-            
             <div class="bg-red-600/10 border border-red-600/30 p-4 rounded-2xl flex gap-3 items-start animate-pulse">
                 <i class="fas fa-shield-alt text-red-500 mt-1"></i>
-                <div>
-                    <p class="text-[11px] font-black text-red-500 uppercase mb-1">أمان التداول</p>
-                    <p class="text-[10px] text-gray-300 leading-relaxed">اضبط الانزلاق (Slippage) على 15%+. يرجى الشراء بمبالغ صغيرة ($1-$2) للحفاظ على استقرار السعر.</p>
+                <div class="text-[10px] text-gray-300 leading-relaxed">
+                    <b class="text-red-500 block mb-1">أمان التداول:</b> اضبط الانزلاق (Slippage) 15%+. الشراء بمبالغ ($1-$2) فقط.
                 </div>
             </div>
 
-            <section>
-                <h3 class="text-blue-400 text-[10px] font-black mb-3 flex items-center gap-2 uppercase tracking-[0.2em]">
-                    <i class="fab fa-twitter"></i> مهام منصة X
-                </h3>
-                <div id="x-tasks" class="space-y-3"></div>
-            </section>
+            <div class="grid grid-cols-2 gap-3">
+                <div class="dragon-card p-4 rounded-2xl text-center">
+                    <p class="text-[9px] text-gray-500 uppercase font-bold mb-1">السعر المباشر</p>
+                    <p id="m-price" class="text-sm font-black text-green-500">$0.00</p>
+                </div>
+                <div class="dragon-card p-4 rounded-2xl text-center">
+                    <p class="text-[9px] text-gray-500 uppercase font-bold mb-1">السيولة</p>
+                    <p id="m-liq" class="text-sm font-black text-white">$0</p>
+                </div>
+            </div>
+
+            <div class="dragon-card p-4 rounded-2xl">
+                <div class="flex justify-between items-center mb-2">
+                    <p class="text-[9px] text-gray-500 font-bold uppercase">إجمالي الحرق 🔥</p>
+                    <p id="m-burn-p" class="text-[9px] text-red-500 font-black">0%</p>
+                </div>
+                <div class="burn-bar"><div id="burnFill" class="burn-fill h-full w-0"></div></div>
+                <p id="m-burn-v" class="text-[8px] text-gray-600 mt-2 font-mono">0 $DRGN Burned</p>
+            </div>
 
             <section>
-                <h3 class="text-pink-500 text-[10px] font-black mb-3 flex items-center gap-2 uppercase tracking-[0.2em]">
-                    <i class="fab fa-tiktok"></i> مهام تيك توك
-                </h3>
+                <h3 class="text-blue-400 text-[10px] font-black mb-3 flex items-center gap-2 uppercase tracking-widest"><i class="fab fa-twitter"></i> مهام X</h3>
+                <div id="x-tasks" class="space-y-3"></div>
+            </section>
+            <section>
+                <h3 class="text-pink-500 text-[10px] font-black mb-3 flex items-center gap-2 uppercase tracking-widest"><i class="fab fa-tiktok"></i> مهام تيك توك</h3>
                 <div id="tk-tasks" class="space-y-3"></div>
             </section>
         </div>
 
-        <div id="friends-tab" class="tab-content">
+        <div id="wallet-tab" class="tab-content">
             <div class="dragon-card p-8 rounded-[2.5rem] text-center">
-                <div class="text-5xl mb-4">👥</div>
-                <h2 class="text-xl font-black mb-2">تجنيد التنانين</h2>
-                <p class="text-xs text-gray-500 mb-6">احصل على 2000 نقطة عن كل صديق ينضم للعرين عبر رابطك.</p>
-                
-                <div class="bg-black/40 p-4 rounded-2xl border border-white/5 mb-6">
-                    <p id="friendsStats" class="text-2xl font-black text-red-600">0</p>
-                    <p class="text-[9px] text-gray-500 uppercase font-bold">إجمالي المجندين</p>
-                </div>
-
-                <input id="refUrl" readonly class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-[10px] text-center text-gray-400 font-mono mb-3">
-                <button onclick="copyRef()" class="w-full bg-white text-black py-4 rounded-xl text-xs font-black uppercase">نسخ رابط الدعوة</button>
+                <i class="fas fa-wallet text-4xl mb-6 text-gray-700"></i>
+                <h2 class="text-xl font-black mb-2 uppercase">المحفظة</h2>
+                <p id="walletDisplay" class="text-[9px] text-gray-500 font-mono mb-6 truncate px-4">لم يتم الربط بعد</p>
+                <button onclick="connectWallet()" class="w-full bg-white text-black py-4 rounded-xl text-xs font-black uppercase mb-4 shadow-lg shadow-white/5">ربط المحفظة</button>
+                <a href="https://pancakeswap.finance/swap?outputCurrency=0x583787E29Bb2D92FcBc713389FD66807602c72F3" target="_blank" class="block w-full border border-red-600/30 text-red-500 py-3 rounded-xl text-[10px] font-bold">شراء $DRGN</a>
             </div>
         </div>
 
-        <div id="ranks-tab" class="tab-content text-center py-10">
-            <div class="dragon-card p-10 rounded-[3rem] inline-block w-full">
-                <div id="rankEmoji" class="text-8xl mb-6">🥚</div>
-                <h2 id="rankTitle" class="text-2xl font-black italic uppercase">Dragon Egg</h2>
-                <div class="w-full bg-white/5 h-2 rounded-full mt-6 overflow-hidden">
-                    <div id="rankProgress" class="bg-red-600 h-full w-[10%]" style="transition: 1s"></div>
+        <div id="friends-tab" class="tab-content">
+            <div class="dragon-card p-6 rounded-3xl text-center space-y-4">
+                <h2 class="text-lg font-black italic">نظام الإحالات</h2>
+                <div class="bg-black/40 p-5 rounded-2xl border border-white/5">
+                    <p id="friendsCount" class="text-3xl font-black text-red-600">0</p>
+                    <p class="text-[8px] text-gray-500 uppercase mt-1">صديق تم تجنيده</p>
                 </div>
-                <p id="rankNext" class="text-[9px] text-gray-500 mt-3 font-bold uppercase italic"></p>
+                <input id="refUrl" readonly class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-[10px] text-center text-gray-400 font-mono">
+                <button onclick="copyRef()" class="w-full bg-white text-black py-4 rounded-xl text-xs font-black uppercase">نسخ الرابط</button>
             </div>
         </div>
-
     </main>
 
-    <nav class="fixed bottom-0 left-0 right-0 bg-[#050505]/95 backdrop-blur-xl border-t border-white/5 flex justify-around p-4 z-50">
-        <button onclick="switchTab('home')" class="flex flex-col items-center gap-1 text-red-600" id="nav-home">
-            <i class="fas fa-fire-alt text-lg"></i><span class="text-[8px] font-bold">HOME</span>
-        </button>
-        <button onclick="switchTab('friends')" class="flex flex-col items-center gap-1 text-gray-600" id="nav-friends">
-            <i class="fas fa-users text-lg"></i><span class="text-[8px] font-bold">FRIENDS</span>
-        </button>
-        <button onclick="switchTab('ranks')" class="flex flex-col items-center gap-1 text-gray-600" id="nav-ranks">
-            <i class="fas fa-medal text-lg"></i><span class="text-[8px] font-bold">RANKS</span>
-        </button>
+    <nav class="fixed bottom-0 left-0 right-0 bg-black/95 backdrop-blur-xl border-t border-white/5 flex justify-around p-4 z-50">
+        <button onclick="switchTab('home')" class="nav-btn flex flex-col items-center gap-1 text-red-600" id="btn-home"><i class="fas fa-home"></i><span class="text-[8px] font-bold">HOME</span></button>
+        <button onclick="switchTab('wallet')" class="nav-btn flex flex-col items-center gap-1 text-gray-600" id="btn-wallet"><i class="fas fa-wallet"></i><span class="text-[8px] font-bold">WALLET</span></button>
+        <button onclick="switchTab('friends')" class="nav-btn flex flex-col items-center gap-1 text-gray-600" id="btn-friends"><i class="fas fa-users"></i><span class="text-[8px] font-bold">FRIENDS</span></button>
     </nav>
 
     <div id="toast"></div>
@@ -111,47 +110,45 @@
         const API_URL = "https://noisy-moon-4289.manhal-almasrillll199119.workers.dev";
         const tg = window.Telegram.WebApp;
         const userId = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id.toString() : "788903767";
-        const startParam = tg.initDataUnsafe.start_param || "";
 
-        async function refreshData() {
+        async function refresh() {
             try {
-                const response = await fetch(`${API_URL}?userId=${userId}&referrer=${startParam}`);
-                const data = await response.json();
+                const res = await fetch(`${API_URL}?userId=${userId}&referrer=${tg.initDataUnsafe.start_param || ''}`);
+                const data = await res.json();
                 
-                // تحديث البيانات
-                document.getElementById('pointsHeader').innerText = (data.points || 0).toLocaleString();
-                document.getElementById('friendsStats').innerText = data.friends || 0;
+                document.getElementById('pointsHeader').innerText = data.points.toLocaleString();
+                document.getElementById('friendsCount').innerText = data.friends;
                 document.getElementById('refUrl').value = `https://t.me/Drgncoin_bot?start=${userId}`;
-                
-                updateRankUI(data.points || 0);
-                renderTasks(data.tasks, data.done || []);
-            } catch (e) { console.error(e); }
+                if(data.wallet) document.getElementById('walletDisplay').innerText = data.wallet;
+
+                // تحديث بيانات السوق
+                document.getElementById('m-price').innerText = data.marketData.price;
+                document.getElementById('m-liq').innerText = data.marketData.liquidity;
+                document.getElementById('m-burn-p').innerText = data.marketData.burned;
+                document.getElementById('m-burn-v').innerText = data.marketData.burnAmount;
+                document.getElementById('burnFill').style.width = data.marketData.burned;
+
+                // الرتبة
+                document.getElementById('rankLabel').innerText = data.points >= 10000 ? "RANK: DRAGON" : "RANK: EGG";
+
+                renderTasks(data.tasks, data.done);
+            } catch(e) { console.error(e); }
         }
 
         function renderTasks(tasks, doneList) {
             const xBox = document.getElementById('x-tasks');
             const tkBox = document.getElementById('tk-tasks');
             xBox.innerHTML = ''; tkBox.innerHTML = '';
-
-            tasks.forEach(task => {
-                const isDone = doneList.includes(task.id);
-                const html = `
-                    <div class="dragon-card p-4 rounded-2xl flex justify-between items-center ${isDone ? 'done-task' : ''}">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-lg">
-                                <i class="${task.platform === 'x' ? 'fab fa-twitter text-blue-400' : 'fab fa-tiktok text-pink-500'}"></i>
-                            </div>
-                            <div>
-                                <p class="text-[11px] font-bold">${task.title}</p>
-                                <p class="text-[9px] text-yellow-500 font-black">+${task.reward} PTS</p>
-                            </div>
-                        </div>
-                        ${isDone ? '<i class="fas fa-check-circle text-green-500"></i>' : 
-                        `<button onclick="runTask('${task.id}', '${task.url}')" class="bg-white text-black text-[9px] font-black px-4 py-2 rounded-lg uppercase">GO</button>`}
+            tasks.forEach(t => {
+                const isDone = doneList.includes(t.id);
+                const html = `<div class="dragon-card p-4 rounded-2xl flex justify-between items-center ${isDone ? 'done-task' : ''}">
+                    <div class="flex items-center gap-3">
+                        <i class="${t.platform === 'x' ? 'fab fa-twitter text-blue-400' : 'fab fa-tiktok text-pink-500'}"></i>
+                        <div><p class="text-[11px] font-bold">${t.title}</p><p class="text-[9px] text-yellow-500">+${t.reward} PTS</p></div>
                     </div>
-                `;
-                if (task.platform === 'x') xBox.innerHTML += html;
-                else tkBox.innerHTML += html;
+                    ${isDone ? '<i class="fas fa-check-circle text-green-500"></i>' : `<button onclick="runTask('${t.id}', '${t.url}')" class="bg-white text-black text-[9px] font-black px-4 py-2 rounded-lg">GO</button>`}
+                </div>`;
+                t.platform === 'x' ? xBox.innerHTML += html : tkBox.innerHTML += html;
             });
         }
 
@@ -160,39 +157,30 @@
             showToast("جاري التحقق...");
             setTimeout(async () => {
                 await fetch(`${API_URL}?userId=${userId}&action=complete&taskId=${id}`);
-                refreshData();
-                showToast("تمت إضافة النقاط بنجاح! 🔥");
+                refresh();
             }, 5000);
         }
 
-        function updateRankUI(pts) {
-            const label = document.getElementById('rankLabel');
-            const emoji = document.getElementById('rankEmoji');
-            const title = document.getElementById('rankTitle');
-            const progress = document.getElementById('rankProgress');
-            const next = document.getElementById('rankNext');
-
-            if (pts >= 10000) {
-                label.innerText = "RANK: DRAGON"; emoji.innerText = "🐉"; title.innerText = "Young Dragon";
-                progress.style.width = "100%"; next.innerText = "MAX RANK REACHED";
-            } else {
-                label.innerText = "RANK: EGG"; emoji.innerText = "🥚"; title.innerText = "Dragon Egg";
-                let perc = (pts / 10000) * 100;
-                progress.style.width = perc + "%";
-                next.innerText = `التالي: DRAGON عند 10,000 (باقي ${(10000 - pts).toLocaleString()})`;
-            }
+        async function connectWallet() {
+            if (window.ethereum) {
+                const accs = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                const addr = accs[0];
+                await fetch(`${API_URL}?userId=${userId}&action=connectWallet&address=${addr}`);
+                refresh();
+                showToast("تم ربط المحفظة!");
+            } else { showToast("يرجى استخدام متصفح DApp"); }
         }
 
         function switchTab(t) {
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.querySelectorAll('nav button').forEach(b => b.classList.replace('text-red-600', 'text-gray-600'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.replace('text-red-600', 'text-gray-600'));
             document.getElementById(t + '-tab').classList.add('active');
-            document.getElementById('nav-' + t).classList.replace('text-gray-600', 'text-red-600');
+            document.getElementById('btn-' + t).classList.replace('text-gray-600', 'text-red-600');
         }
 
         function copyRef() {
             navigator.clipboard.writeText(document.getElementById('refUrl').value);
-            showToast("تم نسخ الرابط!");
+            showToast("تم النسخ!");
         }
 
         function showToast(m) {
@@ -200,7 +188,7 @@
             setTimeout(() => t.classList.remove('show'), 3000);
         }
 
-        refreshData();
+        refresh();
         tg.expand();
     </script>
 </body>
