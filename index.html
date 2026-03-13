@@ -67,10 +67,10 @@ body { background: #000; color: #fff; font-family: 'Tajawal', sans-serif; }
   <button onclick="showTab('home')" class="nav-btn active flex-1 flex flex-col items-center" id="n-home">
     <i class="fas fa-th-large mb-1 text-lg"></i><span id="nav-home" class="text-[8px] font-black">الملعب</span>
   </button>
-  <button onclick="showTab('leaderboard')" class="nav-btn flex-1 flex flex-col items-center" id="n-leaderboard">
+  <button onclick="showTab('leaderboard')" class="nav-btn flex-1 flex-col items-center" id="n-leaderboard">
     <i class="fas fa-trophy mb-1 text-lg"></i><span id="nav-league" class="text-[8px] font-black">الدوري</span>
   </button>
-  <button onclick="showTab('wallet')" class="nav-btn flex-1 flex flex-col items-center" id="n-wallet">
+  <button onclick="showTab('wallet')" class="nav-btn flex-1 flex-col items-center" id="n-wallet">
     <i class="fas fa-user mb-1 text-lg"></i><span id="nav-acc" class="text-[8px] font-black">الحساب</span>
   </button>
 </nav>
@@ -117,7 +117,7 @@ async function fetchMatches(){
   if(data.success){
     document.getElementById('match-container').innerHTML = data.matches.map(m => {
       const now = Date.now();
-      const canVote = now >= m.time-3600000 && now < m.time; // فتح التصويت قبل ساعة
+      const canVote = now >= m.time-3600000 && now < m.time;
       return `<div class="dragon-card p-4">
         <div class="flex justify-between text-[7px] font-black opacity-30 uppercase mb-3"><span>${m.league}</span><span>ID: ${m.id}</span></div>
         <div class="flex items-center justify-around mb-4">
@@ -138,13 +138,12 @@ async function fetchMatches(){
 async function fetchLeaderboard(){
   const data = await request('/leaderboard');
   if(Array.isArray(data)){
-    // حساب الرصيد الإجمالي لكل لاعب (gameBalance + tokenBalance)
     const sorted = data.map(p=>({
       username: p.username,
       gameBalance: p.gameBalance || 0,
       tokenBalance: p.tokenBalance || 0,
       total: (p.gameBalance||0)+(p.tokenBalance||0)
-    })).sort((a,b)=>b.total - a.total); // ترتيب تنازلي حسب المجموع
+    })).sort((a,b)=>b.total - a.total);
 
     document.getElementById('lb-list').innerHTML = sorted.map((p,i)=>`
       <div class="flex justify-between items-center bg-white/5 p-3 rounded-xl">
