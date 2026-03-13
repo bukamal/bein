@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Dragon Stadium</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://cdn.tailwindcss.com"></script>
@@ -21,20 +21,22 @@ body { background: #000; color: #fff; font-family: 'Tajawal', sans-serif; }
 <body class="rtl">
 
 <header class="p-5 flex justify-between items-center sticky top-0 bg-black/90 backdrop-blur-md z-50 border-b border-white/5">
-  <div class="flex items-center gap-2">
-    <i class="fas fa-dragon text-red-600"></i>
-    <span id="txt-logo" class="text-[10px] font-black uppercase tracking-widest">ملعب التنين</span>
-  </div>
-  <button onclick="toggleLang()" class="bg-white/5 px-4 py-2 rounded-xl border border-white/10">
-    <i class="fas fa-globe text-red-600"></i> <span id="btn-lang" class="text-[9px] font-bold">EN</span>
-  </button>
+<div class="flex items-center gap-2">
+<i class="fas fa-dragon text-red-600"></i>
+<span id="txt-logo" class="text-[10px] font-black uppercase tracking-widest">ملعب التنين</span>
+</div>
+<button onclick="toggleLang()" class="bg-white/5 px-4 py-2 rounded-xl border border-white/10">
+<i class="fas fa-globe text-red-600"></i> <span id="btn-lang" class="text-[9px] font-bold">EN</span>
+</button>
 </header>
 
 <main class="p-4">
+  <!-- الملعب -->
   <div id="home" class="tab-content active space-y-4">
     <div id="match-container" class="space-y-4"></div>
   </div>
 
+  <!-- الدوري -->
   <div id="leaderboard" class="tab-content">
     <div class="dragon-card p-4">
       <h3 id="txt-lb-title" class="text-center font-black mb-4 text-red-600 tracking-widest uppercase">ترتيب التنانين</h3>
@@ -42,6 +44,7 @@ body { background: #000; color: #fff; font-family: 'Tajawal', sans-serif; }
     </div>
   </div>
 
+  <!-- المحفظة -->
   <div id="wallet" class="tab-content space-y-4 text-center">
     <div class="dragon-card p-8">
       <p id="txt-bal-label" class="text-[8px] text-zinc-500 font-black uppercase mb-1">إجمالي الأصول</p>
@@ -74,7 +77,7 @@ body { background: #000; color: #fff; font-family: 'Tajawal', sans-serif; }
 
 <script>
 const tg = window.Telegram.WebApp;
-const API = "https://noisy-moon-4289.manhal-almasriiii199119.workers.dev"; // Worker URL الجديد
+const API = "https://noisy-moon-4289.manhal-almasriiii199119.workers.dev";
 let currentLang = 'ar';
 
 const i18n = {
@@ -83,101 +86,97 @@ const i18n = {
 };
 
 function toggleLang() {
-  currentLang = currentLang === 'ar' ? 'en' : 'ar';
-  document.body.className = currentLang === 'ar' ? 'rtl' : 'ltr';
-  document.getElementById('nav-home').innerText = i18n[currentLang].home;
-  document.getElementById('nav-league').innerText = i18n[currentLang].league;
-  document.getElementById('nav-acc').innerText = i18n[currentLang].acc;
-  document.getElementById('txt-logo').innerText = i18n[currentLang].logo;
-  document.getElementById('btn-update').innerText = i18n[currentLang].update;
-  document.getElementById('btn-claim').innerText = i18n[currentLang].claim;
-  document.getElementById('txt-lb-title').innerText = i18n[currentLang].lb;
-  document.getElementById('btn-lang').innerText = currentLang === 'ar' ? 'EN' : 'AR';
+  currentLang = currentLang==='ar'?'en':'ar';
+  document.body.className = currentLang==='ar'?'rtl':'ltr';
+  document.getElementById('nav-home').innerText=i18n[currentLang].home;
+  document.getElementById('nav-league').innerText=i18n[currentLang].league;
+  document.getElementById('nav-acc').innerText=i18n[currentLang].acc;
+  document.getElementById('txt-logo').innerText=i18n[currentLang].logo;
+  document.getElementById('btn-update').innerText=i18n[currentLang].update;
+  document.getElementById('btn-claim').innerText=i18n[currentLang].claim;
+  document.getElementById('txt-lb-title').innerText=i18n[currentLang].lb;
+  document.getElementById('btn-lang').innerText=currentLang==='ar'?'EN':'AR';
 }
 
-async function request(path, method='GET', body=null) {
-  const options = { method, headers: { 'Content-Type': 'application/json', 'x-telegram-init-data': tg.initData } };
-  if (body) options.body = JSON.stringify(body);
+async function request(path, method='GET', body=null){
+  const options = { method, headers: { 'Content-Type':'application/json', 'x-telegram-init-data': tg.initData } };
+  if(body) options.body = JSON.stringify(body);
   return await (await fetch(`${API}${path}`, options)).json();
 }
 
-async function init() {
+async function init(){
   tg.ready(); tg.expand();
-  const data = await request('/sync', 'POST');
-  if (data.success) render(data.user);
+  const data = await request('/sync','POST');
+  if(data.success) render(data.user);
   fetchMatches();
   fetchLeaderboard();
 }
 
-async function fetchMatches() {
+async function fetchMatches(){
   const data = await request('/get-matches');
-  if (data.success) {
-    const now = Date.now();
+  if(data.success){
     document.getElementById('match-container').innerHTML = data.matches.map(m => {
-      let status = now < m.time - 3600000 ? 'قريب' : (now < m.time ? 'تصويت مفتوح' : 'مغلق');
-      return `
-      <div class="dragon-card p-4">
+      const now = Date.now();
+      const canVote = now >= m.time-3600000 && now < m.time; // قبل ساعة
+      return `<div class="dragon-card p-4">
         <div class="flex justify-between text-[7px] font-black opacity-30 uppercase mb-3"><span>${m.league}</span><span>ID: ${m.id}</span></div>
         <div class="flex items-center justify-around mb-4">
           <div class="text-center w-1/3"><img src="${m.logoA}" class="w-8 h-8 mx-auto mb-1"><p class="text-[8px]">${m.teamA}</p></div>
           <div class="text-red-600 font-black italic">VS</div>
           <div class="text-center w-1/3"><img src="${m.logoB}" class="w-8 h-8 mx-auto mb-1"><p class="text-[8px]">${m.teamB}</p></div>
         </div>
-        ${status === 'تصويت مفتوح' ? `<div class="grid grid-cols-3 gap-2">
+        ${canVote?`<div class="grid grid-cols-3 gap-2">
           <button onclick="vote('${m.id}','HOME')" class="bg-white/5 py-2 rounded-lg text-[9px] font-black">1</button>
           <button onclick="vote('${m.id}','DRAW')" class="bg-white/5 py-2 rounded-lg text-[9px] font-black">X</button>
           <button onclick="vote('${m.id}','AWAY')" class="bg-white/5 py-2 rounded-lg text-[9px] font-black">2</button>
-        </div>` : `<div class="text-center text-[8px] opacity-20 py-2">${status}</div>`}
+        </div>`:`<div class="text-center text-[8px] opacity-20 py-2">مغلق</div>`}
       </div>`;
     }).join('');
   }
 }
 
-async function fetchLeaderboard() {
+async function fetchLeaderboard(){
   const data = await request('/leaderboard');
-  if (Array.isArray(data)) {
-    document.getElementById('lb-list').innerHTML = data.map((p,i) => `
-      <div class="flex justify-between items-center bg-white/5 p-3 rounded-xl">
-        <span class="text-[10px] font-bold">#${i+1} ${p.username}</span>
-        <span class="text-[10px] font-black text-red-600">${Math.floor(p.score)}</span>
-      </div>`).join('');
+  if(Array.isArray(data)){
+    document.getElementById('lb-list').innerHTML = data.map((p,i)=>`<div class="flex justify-between items-center bg-white/5 p-3 rounded-xl">
+      <span class="text-[10px] font-bold">#${i+1} ${p.username}</span>
+      <span class="text-[10px] font-black text-red-600">${Math.floor(p.score)}</span>
+    </div>`).join('');
   }
 }
 
-async function updateWallet() {
+async function updateWallet(){
   const wallet = document.getElementById('bsc-address').value.trim();
-  if (!wallet) return tg.showAlert("الرجاء إدخال عنوان المحفظة");
-  const res = await request('/check-balance', 'POST', { wallet });
-  if (res.success) { render(res.user); tg.showAlert("تم التحديث!"); }
+  if(!wallet) return tg.showAlert("الرجاء إدخال عنوان المحفظة");
+  const res = await request('/check-balance','POST',{ wallet });
+  if(res.success){ render(res.user); tg.showAlert("تم التحديث!"); }
   else tg.showAlert(res.message);
 }
 
-async function claimRewards() {
-  const res = await request('/claim-rewards', 'POST');
-  if (res.success) { tg.showAlert("تم السحب!"); init(); }
+async function claimRewards(){
+  const res = await request('/claim-rewards','POST');
+  if(res.success){ tg.showAlert("تم السحب!"); init(); }
 }
 
-function vote(matchId, voteFor) {
-  request('/vote','POST',{ matchId, voteFor }).then(res => {
-    if(res.success) tg.showAlert("تم التصويت!");
-    else tg.showAlert(res.message);
-    fetchMatches();
-  });
-}
-
-function render(u) {
-  document.getElementById('total-balance').innerText = Math.floor((u.gameBalance||0) + (u.tokenBalance||0)).toLocaleString();
+function render(u){
+  document.getElementById('total-balance').innerText = Math.floor((u.gameBalance||0)+(u.tokenBalance||0)).toLocaleString();
   document.getElementById('game-balance').innerText = Math.floor(u.gameBalance||0).toLocaleString();
   document.getElementById('pending-rewards').innerText = Math.floor(u.pendingRewards||0).toLocaleString();
   document.getElementById('rank-name').innerText = `${u.rank} MEMBER`;
   if(u.wallet) document.getElementById('bsc-address').value = u.wallet;
 }
 
-function showTab(id) {
+function showTab(id){
   document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   document.getElementById('n-'+id).classList.add('active');
+}
+
+async function vote(matchId, voteFor){
+  const res = await request('/vote','POST',{ matchId, voteFor });
+  if(res.success){ tg.showAlert("تم التصويت!"); fetchMatches(); }
+  else tg.showAlert(res.message);
 }
 
 init();
