@@ -1,208 +1,142 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-
 <title>Dragon Sports</title>
-
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
 <style>
-
-body{
-background:#000;
-color:#fff;
-font-family:sans-serif;
-padding:20px;
-margin:0;
-}
-
-.card{
-background:#111;
-padding:20px;
-border-radius:14px;
-margin-bottom:20px;
-}
-
-button{
-width:100%;
-padding:14px;
-background:#ff3b3b;
-border:none;
-border-radius:10px;
-color:white;
-font-weight:bold;
-}
-
-input{
-width:100%;
-padding:12px;
-margin-top:10px;
-border:none;
-border-radius:8px;
-}
-
+body{margin:0;font-family:sans-serif;background:#000;color:white;}
+.page{display:none;padding:20px;padding-bottom:90px;}
+.page.active{display:block;}
+.card{background:#111;padding:18px;border-radius:12px;margin-bottom:15px;}
+input{width:100%;padding:12px;border-radius:8px;border:none;margin-top:10px;}
+button{width:100%;padding:14px;border:none;background:#ff3b3b;color:white;border-radius:10px;font-weight:bold;margin-top:10px;}
+.nav{position:fixed;bottom:0;left:0;right:0;background:#111;display:flex;border-top:1px solid #333;}
+.nav button{flex:1;background:none;border:none;color:white;padding:12px;font-size:14px;}
 </style>
-
 </head>
-
 <body>
 
-<h2>🐉 Dragon VIP</h2>
-
+<!-- HOME -->
+<div id="home" class="page active">
+<h2 data-lang="home_title">Dragon Sports</h2>
 <div class="card">
-
-رصيدك
-
+<div data-lang="balance">رصيدك</div>
 <h1 id="balance">0</h1>
-
 <div id="rank">BRONZE</div>
-
+</div>
 </div>
 
+<!-- WALLET -->
+<div id="wallet" class="page">
+<h2 data-lang="wallet_title">المحفظة</h2>
 <div class="card">
-
-<input id="wallet" placeholder="BSC wallet 0x...">
-
-<button onclick="verify()">
-التحقق من العضوية
-</button>
-
+<input id="walletInput" placeholder="0x...">
+<button onclick="verify()" data-lang="verify_btn">التحقق من العضوية</button>
+</div>
 </div>
 
+<!-- LEADERBOARD -->
+<div id="leaderboard" class="page">
+<h2 data-lang="leaderboard">الدوري</h2>
+<div class="card" id="leaders"></div>
+</div>
+
+<!-- SETTINGS -->
+<div id="settings" class="page">
+<h2 data-lang="settings">الإعدادات</h2>
 <div class="card">
+<button onclick="setLang('ar')">العربية</button>
+<button onclick="setLang('en')">English</button>
+</div>
+</div>
 
-<h3>🏆 Leaderboard</h3>
-
-<div id="leaders"></div>
-
+<!-- BOTTOM NAV -->
+<div class="nav">
+<button onclick="openTab('home')">🏠</button>
+<button onclick="openTab('wallet')">💰</button>
+<button onclick="openTab('leaderboard')">🏆</button>
+<button onclick="openTab('settings')">⚙️</button>
 </div>
 
 <script>
-
 const tg=window.Telegram.WebApp;
-
-const API="PUT_WORKER_URL_HERE";
-
+const API="https://noisy-moon-4289.manhal-almasriiii199119.workers.dev";
 let user;
 
+/* LANGUAGE SYSTEM */
+const langData={
+ar:{home_title:"رياضة التنين",balance:"رصيدك",wallet_title:"المحفظة",verify_btn:"التحقق من العضوية",leaderboard:"الدوري",settings:"الإعدادات"},
+en:{home_title:"Dragon Sports",balance:"Balance",wallet_title:"Wallet",verify_btn:"Verify Membership",leaderboard:"Leaderboard",settings:"Settings"}
+};
+let lang=localStorage.getItem("lang") || "ar";
+function applyLang(){
+document.querySelectorAll("[data-lang]").forEach(el=>{
+const key=el.dataset.lang;
+el.innerText=langData[lang][key];
+});
+document.documentElement.dir=lang==="ar"?"rtl":"ltr";
+}
+function setLang(l){lang=l;localStorage.setItem("lang",l);applyLang();}
+
+/* NAVIGATION */
+function openTab(id){
+document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+document.getElementById(id).classList.add("active");
+}
+
+/* INIT */
 async function init(){
-
 const u=tg.initDataUnsafe.user || {id:1,first_name:"Player"};
-
-const r=await fetch(API+"/sync",{
-
+const res=await fetch(API+"/sync",{
 method:"POST",
-
-headers:{
-"Content-Type":"application/json"
-},
-
-body:JSON.stringify({
-
-userId:u.id,
-username:u.first_name
-
-})
-
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({userId:u.id,username:u.first_name})
 });
-
-user=await r.json();
-
+user=await res.json();
 render();
-
 loadLeaders();
-
 }
 
+/* RENDER */
 function render(){
-
-document.getElementById("balance").innerText=
-Math.floor(user.balance || 0);
-
+document.getElementById("balance").innerText=Math.floor(user.balance||0);
 document.getElementById("rank").innerText=user.rank;
-
 }
 
+/* VERIFY WALLET */
 async function verify(){
-
-const wallet=document.getElementById("wallet").value;
-
-if(wallet.length<40){
-
-tg.showAlert("wallet wrong");
-
-return;
-
-}
-
+const wallet=document.getElementById("walletInput").value;
+if(wallet.length<40){tg.showAlert("Wallet wrong");return;}
 const res=await fetch(API+"/check-balance",{
-
 method:"POST",
-
-headers:{
-"Content-Type":"application/json"
-},
-
-body:JSON.stringify({
-
-walletAddress:wallet,
-userId:tg.initDataUnsafe.user.id,
-username:tg.initDataUnsafe.user.first_name
-
-})
-
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({walletAddress:wallet,userId:tg.initDataUnsafe.user.id,username:tg.initDataUnsafe.user.first_name})
 });
-
 const data=await res.json();
-
-if(data.error){
-
-tg.showAlert(data.error);
-
-return;
-
-}
-
+if(data.error){tg.showAlert(data.error);return;}
 user=data;
-
 render();
-
 tg.showAlert("Rank: "+data.rank);
-
 }
 
+/* LEADERBOARD */
 async function loadLeaders(){
-
 const res=await fetch(API+"/leaderboard");
-
 const list=await res.json();
-
 let html="";
-
 list.forEach((p,i)=>{
-
-html+=`<div>
-
-${i+1}. ${p.username} — ${Math.floor(p.balance)}
-
-</div>`;
-
+html+=`<div>${i+1}. ${p.username} — ${Math.floor(p.balance)}</div>`;
 });
-
 document.getElementById("leaders").innerHTML=html;
-
 }
 
+/* START */
 tg.expand();
-
+applyLang();
 init();
-
 </script>
 
 </body>
-
 </html>
