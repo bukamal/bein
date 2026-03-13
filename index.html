@@ -117,7 +117,7 @@ async function fetchMatches(){
   if(data.success){
     document.getElementById('match-container').innerHTML = data.matches.map(m => {
       const now = Date.now();
-      const canVote = now >= m.time-3600000 && now < m.time; // قبل ساعة
+      const canVote = now >= m.time-3600000 && now < m.time; // فتح التصويت قبل ساعة
       return `<div class="dragon-card p-4">
         <div class="flex justify-between text-[7px] font-black opacity-30 uppercase mb-3"><span>${m.league}</span><span>ID: ${m.id}</span></div>
         <div class="flex items-center justify-around mb-4">
@@ -138,10 +138,19 @@ async function fetchMatches(){
 async function fetchLeaderboard(){
   const data = await request('/leaderboard');
   if(Array.isArray(data)){
-    document.getElementById('lb-list').innerHTML = data.map((p,i)=>`<div class="flex justify-between items-center bg-white/5 p-3 rounded-xl">
-      <span class="text-[10px] font-bold">#${i+1} ${p.username}</span>
-      <span class="text-[10px] font-black text-red-600">${Math.floor(p.score)}</span>
-    </div>`).join('');
+    // حساب الرصيد الإجمالي لكل لاعب (gameBalance + tokenBalance)
+    const sorted = data.map(p=>({
+      username: p.username,
+      gameBalance: p.gameBalance || 0,
+      tokenBalance: p.tokenBalance || 0,
+      total: (p.gameBalance||0)+(p.tokenBalance||0)
+    })).sort((a,b)=>b.total - a.total); // ترتيب تنازلي حسب المجموع
+
+    document.getElementById('lb-list').innerHTML = sorted.map((p,i)=>`
+      <div class="flex justify-between items-center bg-white/5 p-3 rounded-xl">
+        <span class="text-[10px] font-bold">#${i+1} ${p.username}</span>
+        <span class="text-[10px] font-black text-red-600">${p.total.toLocaleString()}</span>
+      </div>`).join('');
   }
 }
 
@@ -149,7 +158,7 @@ async function updateWallet(){
   const wallet = document.getElementById('bsc-address').value.trim();
   if(!wallet) return tg.showAlert("الرجاء إدخال عنوان المحفظة");
   const res = await request('/check-balance','POST',{ wallet });
-  if(res.success){ render(res.user); tg.showAlert("تم التحديث!"); }
+  if(res.success){ render(res.user); fetchLeaderboard(); tg.showAlert("تم التحديث!"); }
   else tg.showAlert(res.message);
 }
 
