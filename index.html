@@ -74,12 +74,12 @@
 
     <script>
         const tg = window.Telegram.WebApp;
-        const API = "https://noisy-moon-4289.manhal-almasriiii199119.workers.dev";
+        const API = "https://noisy-moon-4289.manhal-almasriiii199119.workers.dev"; // Worker URL الجديد
         let currentLang = 'ar';
 
         const i18n = {
-            ar: { logo: "ملعب التنين", home: "الملعب", league: "الدوري", acc: "الحساب", update: "تحديث المحفظة", claim: "سحب المكافآت", lb: "ترتيب التنانين" },
-            en: { logo: "DRAGON STADIUM", home: "STADIUM", league: "LEAGUE", acc: "ACCOUNT", update: "UPDATE WALLET", claim: "CLAIM REWARDS", lb: "LEADERBOARD" }
+            ar: { logo:"ملعب التنين", home:"الملعب", league:"الدوري", acc:"الحساب", update:"تحديث المحفظة", claim:"سحب المكافآت", lb:"ترتيب التنانين" },
+            en: { logo:"DRAGON STADIUM", home:"STADIUM", league:"LEAGUE", acc:"ACCOUNT", update:"UPDATE WALLET", claim:"CLAIM REWARDS", lb:"LEADERBOARD" }
         };
 
         function toggleLang() {
@@ -141,7 +141,8 @@
         }
 
         async function updateWallet() {
-            const wallet = document.getElementById('bsc-address').value;
+            const wallet = document.getElementById('bsc-address').value.trim();
+            if (!wallet) return tg.showAlert("الرجاء إدخال عنوان المحفظة");
             const res = await request('/check-balance', 'POST', { wallet });
             if (res.success) { render(res.user); tg.showAlert("تم التحديث!"); }
             else tg.showAlert(res.message);
