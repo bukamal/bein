@@ -3,54 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dragon VIP Sports | التنين الرياضي</title>
+    <title>Dragon VIP Sports</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@900&family=Tajawal:wght@400;900&display=swap');
-        :root { --dragon-red: #ff4d4d; --dragon-gold: #f3ba2f; }
-        body { background: #000; color: #fff; font-family: 'Tajawal', sans-serif; user-select: none; overflow-x: hidden; }
-        .dragon-card { background: linear-gradient(145deg, #0f0f0f, #050505); border: 1px solid #1a1a1a; border-radius: 24px; position: relative; }
-        .raid-active { border: 1px solid var(--dragon-red); box-shadow: 0 0 20px rgba(255, 77, 77, 0.15); }
+        body { background: #000; color: #fff; font-family: 'Tajawal', sans-serif; user-select: none; }
+        .dragon-card { background: linear-gradient(145deg, #0f0f0f, #050505); border: 1px solid #1a1a1a; border-radius: 24px; }
+        .raid-active { border: 1px solid #ff4d4d; box-shadow: 0 0 15px rgba(255, 77, 77, 0.1); }
         .tab-content { display: none; animation: fadeIn 0.4s ease; padding-bottom: 100px; }
         .tab-content.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .nav-btn.active { color: var(--dragon-red); border-top: 2px solid var(--dragon-red); background: linear-gradient(to bottom, rgba(255,77,77,0.05), transparent); }
-        .prediction-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; transition: 0.2s; }
-        .prediction-btn:active { background: var(--dragon-red); transform: scale(0.95); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .nav-btn.active { color: #ff4d4d; border-top: 2px solid #ff4d4d; background: linear-gradient(to bottom, rgba(255,77,77,0.05), transparent); }
+        .prediction-btn { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; transition: 0.2s; }
+        .prediction-btn:active { background: #ff4d4d; transform: scale(0.95); }
     </style>
 </head>
 <body>
 
-    <div id="loader" class="fixed inset-0 bg-black z-[9999] flex flex-col items-center justify-center">
-        <i class="fas fa-dragon text-5xl text-red-600 animate-bounce"></i>
+    <div id="loader" class="fixed inset-0 bg-black z-[9999] flex items-center justify-center">
+        <i class="fas fa-dragon text-4xl text-red-600 animate-pulse"></i>
     </div>
 
     <header class="p-4 flex justify-between items-center sticky top-0 bg-black/90 backdrop-blur-md z-50 border-b border-white/5">
         <div class="flex items-center gap-2">
             <i class="fas fa-dragon text-red-600"></i>
-            <span style="font-family: 'Orbitron';" class="text-[10px] font-black tracking-widest uppercase">DRAGON SPORTS</span>
+            <span style="font-family: 'Orbitron';" class="text-[9px] font-black tracking-widest uppercase">DRAGON SPORTS</span>
         </div>
-        <div id="status-badge" class="px-3 py-1 bg-zinc-800 rounded-full text-[8px] font-black uppercase">الانتظار</div>
+        <div id="status-badge" class="px-3 py-1 bg-zinc-800 rounded-full text-[8px] font-black uppercase tracking-tighter">جاري الفحص</div>
     </header>
 
     <main class="p-4">
         <div id="home" class="tab-content active space-y-4">
             <div id="match-area" class="dragon-card p-6 text-center raid-active">
                 <div class="flex justify-between items-center mb-6">
-                    <span class="text-[8px] font-black text-red-500 uppercase animate-pulse">● المباراة القادمة</span>
+                    <span class="text-[8px] font-black text-red-500 uppercase">● البث المباشر القادم</span>
                     <span id="match-timer" style="font-family: 'Orbitron';" class="text-xs text-yellow-500">00:00:00</span>
                 </div>
                 <div class="flex items-center justify-around py-4">
-                    <div class="text-center">
-                        <div class="w-14 h-14 bg-zinc-900 rounded-full mx-auto mb-2 flex items-center justify-center border border-white/10"><i class="fas fa-shield-halved text-2xl"></i></div>
-                        <p id="team-a" class="text-[10px] font-black uppercase">فريق A</p>
+                    <div class="text-center flex-1">
+                        <div class="w-14 h-14 bg-zinc-900 rounded-full mx-auto mb-2 flex items-center justify-center border border-white/5 text-zinc-600"><i class="fas fa-shield-halved text-2xl"></i></div>
+                        <p id="team-a" class="text-[10px] font-black uppercase truncate px-1">قريباً</p>
                     </div>
-                    <div class="text-xl font-black italic text-zinc-800">VS</div>
-                    <div class="text-center">
-                        <div class="w-14 h-14 bg-zinc-900 rounded-full mx-auto mb-2 flex items-center justify-center border border-white/10"><i class="fas fa-shield-halved text-2xl"></i></div>
-                        <p id="team-b" class="text-[10px] font-black uppercase">فريق B</p>
+                    <div class="px-4 text-xl font-black italic text-zinc-800 uppercase">VS</div>
+                    <div class="text-center flex-1">
+                        <div class="w-14 h-14 bg-zinc-900 rounded-full mx-auto mb-2 flex items-center justify-center border border-white/5 text-zinc-600"><i class="fas fa-shield-halved text-2xl"></i></div>
+                        <p id="team-b" class="text-[10px] font-black uppercase truncate px-1">قريباً</p>
                     </div>
                 </div>
                 <div class="grid grid-cols-3 gap-2 mt-6">
@@ -59,12 +58,12 @@
                     <button onclick="predict('B')" class="prediction-btn py-4 text-[9px] font-black uppercase">فوز B</button>
                 </div>
             </div>
-            <button onclick="tg.openLink('https://pancakeswap.finance/swap?outputCurrency=0x583787E29Bb2D92FcBc713389FD66807602c72F3')" class="w-full py-4 bg-yellow-500 text-black rounded-2xl text-[11px] font-black uppercase shadow-lg">تفعيل رتبة VIP وشراء $DRGN 👑</button>
+            <button onclick="tg.openLink('https://pancakeswap.finance/swap?outputCurrency=0x583787E29Bb2D92FcBc713389FD66807602c72F3')" class="w-full py-4 bg-yellow-500 text-black rounded-2xl text-[11px] font-black uppercase shadow-lg shadow-yellow-500/10">تفعيل رتبة VIP وشراء $DRGN 👑</button>
         </div>
 
         <div id="missions" class="tab-content space-y-3">
              <div class="dragon-card p-4 flex justify-between items-center">
-                <div><p class="text-[10px] font-black">شاهد تحليل المباراة الأخير</p><p class="text-[8px] text-yellow-500">+10,000 PTS</p></div>
+                <div><p class="text-[10px] font-black">تابع المباراة على تيك توك</p><p class="text-[8px] text-yellow-500">+10,000 PTS</p></div>
                 <button onclick="tg.openLink('https://tiktok.com')" class="bg-white text-black px-4 py-1 rounded-lg text-[9px] font-black uppercase">GO</button>
             </div>
         </div>
@@ -73,24 +72,24 @@
             <div id="lb-list" class="space-y-2"></div>
         </div>
 
-        <div id="wallet" class="tab-content space-y-4">
-            <div class="dragon-card p-8 text-center">
-                <p class="text-[8px] text-gray-500 font-bold uppercase mb-2">رصيدك الحالي</p>
+        <div id="wallet" class="tab-content space-y-4 text-center">
+            <div class="dragon-card p-8">
+                <p class="text-[8px] text-gray-500 font-bold uppercase mb-2">رصيد النقاط</p>
                 <h2 id="user-pts" class="text-4xl font-black">0</h2>
-                <p id="rank-name" class="text-[10px] text-red-500 font-black mt-2">BRONZE MEMBER</p>
+                <p id="rank-name" class="text-[10px] text-red-500 font-black mt-2 uppercase tracking-widest">BRONZE MEMBER</p>
                 <div class="mt-8">
-                    <input id="bsc-address" type="text" placeholder="عنوان محفظة BSC" class="w-full bg-white/5 border border-white/10 p-3 rounded-xl text-[10px] text-center mb-3">
-                    <button onclick="verify()" class="w-full py-3 bg-white text-black text-[10px] font-black rounded-xl uppercase">التحقق من الرصيد</button>
+                    <input id="bsc-address" type="text" placeholder="أدخل عنوان محفظة BSC" class="w-full bg-white/5 border border-white/10 p-3 rounded-xl text-[10px] text-center mb-3">
+                    <button onclick="verify()" class="w-full py-3 bg-white text-black text-[10px] font-black rounded-xl uppercase">التحقق من العضوية</button>
                 </div>
             </div>
         </div>
     </main>
 
     <nav class="fixed bottom-0 left-0 right-0 bg-black/95 border-t border-white/5 flex justify-around p-3 z-50 backdrop-blur-xl">
-        <button onclick="showTab('home')" class="nav-btn active flex-1 flex flex-col items-center" id="n-home"><i class="fas fa-futbol text-lg mb-1"></i><span class="text-[8px] font-black uppercase">الملعب</span></button>
+        <button onclick="showTab('home')" class="nav-btn active flex-1 flex flex-col items-center" id="n-home"><i class="fas fa-volleyball-ball text-lg mb-1"></i><span class="text-[8px] font-black uppercase">الملعب</span></button>
         <button onclick="showTab('missions')" class="nav-btn flex-1 flex flex-col items-center" id="n-missions"><i class="fas fa-tasks text-lg mb-1"></i><span class="text-[8px] font-black uppercase">المهام</span></button>
-        <button onclick="showTab('leaderboard')" class="nav-btn flex-1 flex flex-col items-center" id="n-leaderboard"><i class="fas fa-trophy text-lg mb-1"></i><span class="text-[8px] font-black uppercase">الدوري</span></button>
-        <button onclick="showTab('wallet')" class="nav-btn flex-1 flex flex-col items-center" id="n-wallet"><i class="fas fa-user-circle text-lg mb-1"></i><span class="text-[8px] font-black uppercase">عضويتي</span></button>
+        <button onclick="showTab('leaderboard')" class="nav-btn flex-1 flex flex-col items-center" id="n-leaderboard"><i class="fas fa-award text-lg mb-1"></i><span class="text-[8px] font-black uppercase">الدوري</span></button>
+        <button onclick="showTab('wallet')" class="nav-btn flex-1 flex flex-col items-center" id="n-wallet"><i class="fas fa-id-badge text-lg mb-1"></i><span class="text-[8px] font-black uppercase">الحساب</span></button>
     </nav>
 
     <script>
@@ -108,31 +107,55 @@
                 render();
                 fetchMatch();
             } catch(e) {}
-            document.getElementById('loader').style.display = 'none';
+            setTimeout(() => document.getElementById('loader').style.display = 'none', 800);
         }
 
         async function fetchMatch() {
-            const res = await fetch(`${WORKER_URL}/get-next-match`);
-            const m = await res.json();
-            const teams = m.title.split(/vs|ضد/i);
-            document.getElementById('team-a').innerText = teams[0] ? teams[0].trim() : "فريق A";
-            document.getElementById('team-b').innerText = teams[1] ? teams[1].trim() : "فريق B";
-            
-            const timer = setInterval(() => {
-                const diff = m.startTime - new Date().getTime();
-                if(diff <= 0) { document.getElementById('match-timer').innerText = "LIVE"; clearInterval(timer); return; }
-                const h = Math.floor(diff / 3600000), m_ = Math.floor((diff % 3600000) / 60000), s = Math.floor((diff % 60000) / 1000);
-                document.getElementById('match-timer').innerText = `${String(h).padStart(2,'0')}:${String(m_).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-            }, 1000);
+            try {
+                const res = await fetch(`${WORKER_URL}/get-next-match`);
+                const m = await res.json();
+                const statusBadge = document.getElementById('status-badge');
+
+                if (m.status === "expired" || m.startTime === 0) {
+                    document.getElementById('team-a').innerText = "قريباً";
+                    document.getElementById('team-b').innerText = "قريباً";
+                    document.getElementById('match-timer').innerText = "--:--:--";
+                    statusBadge.innerText = "في انتظار القمة";
+                    return;
+                }
+
+                const teams = m.title.split(/vs|ضد/i);
+                document.getElementById('team-a').innerText = teams[0] ? teams[0].trim() : "قريباً";
+                document.getElementById('team-b').innerText = teams[1] ? teams[1].trim() : "قريباً";
+                statusBadge.innerText = "مباراة مرتقبة";
+                
+                const timer = setInterval(() => {
+                    const diff = m.startTime - new Date().getTime();
+                    if(diff <= 0) { 
+                        document.getElementById('match-timer').innerText = "LIVE NOW"; 
+                        statusBadge.innerText = "مباشر الآن";
+                        statusBadge.classList.add('text-red-500');
+                        clearInterval(timer); 
+                        return; 
+                    }
+                    const h = Math.floor(diff / 3600000), m_ = Math.floor((diff % 3600000) / 60000), s = Math.floor((diff % 60000) / 1000);
+                    document.getElementById('match-timer').innerText = `${String(h).padStart(2,'0')}:${String(m_).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+                }, 1000);
+            } catch(e) {}
         }
 
         async function verify() {
             const addr = document.getElementById('bsc-address').value;
-            if(!addr.startsWith('0x')) return tg.showAlert("أدخل عنوان صحيح");
+            if(!addr.startsWith('0x')) return tg.showAlert("عنوان المحفظة غير صحيح");
             const res = await fetch(`${WORKER_URL}/check-balance`, { method: 'POST', body: JSON.stringify({ walletAddress: addr }) });
             const { balance } = await res.json();
-            if(balance >= 1000000) { tg.showAlert(`✅ تم التحقق! رصيدك ${balance.toFixed(0)} عملة. أنت VIP الآن!`); uData.rank = "VIP"; render(); }
-            else tg.showAlert(`رصيدك ${balance.toFixed(0)} فقط. تحتاج لمليون عملة.`);
+            if(balance >= 1000000) { 
+                tg.showAlert(`✅ رصيدك ${balance.toFixed(0)} عملة. تم تفعيل الـ VIP!`); 
+                uData.rank = "VIP"; 
+                render(); 
+            } else {
+                tg.showAlert(`❌ رصيدك ${balance.toFixed(0)} عملة. تحتاج لمليون عملة للـ VIP.`);
+            }
         }
 
         function showTab(id) {
@@ -140,10 +163,34 @@
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             document.getElementById('n-'+id).classList.add('active');
+            if(id === 'leaderboard') loadLB();
         }
 
-        function predict(c) { tg.HapticFeedback.impactOccurred('medium'); tg.showConfirm("تأكيد التوقع؟", (ok) => { if(ok) tg.showAlert("تم التسجيل! انتظر النتيجة ⚽"); }); }
-        function render() { document.getElementById('user-pts').innerText = uData.pts.toLocaleString(); document.getElementById('rank-name').innerText = uData.rank + " MEMBER"; }
+        async function loadLB() {
+            const list = document.getElementById('lb-list');
+            list.innerHTML = '<p class="text-center text-[8px] py-4 uppercase opacity-50">جاري التحميل...</p>';
+            const res = await fetch(`${WORKER_URL}/leaderboard`);
+            const data = await res.json();
+            list.innerHTML = '';
+            data.forEach((u, i) => {
+                list.innerHTML += `<div class="dragon-card p-3 flex justify-between items-center ${i<3?'border-red-900/30':''}">
+                    <div class="flex items-center gap-3"><span class="text-[10px] font-black opacity-30">#${i+1}</span><span class="text-xs font-bold">${u.username}</span></div>
+                    <span class="text-xs font-black text-red-500">${u.points.toLocaleString()}</span>
+                </div>`;
+            });
+        }
+
+        function predict(c) { 
+            tg.HapticFeedback.notificationOccurred('success');
+            tg.showConfirm("هل أنت متأكد من توقعك؟", (ok) => { 
+                if(ok) tg.showAlert("⚽ تم تسجيل توقعك! سيتم توزيع النقاط بعد صافرة النهاية."); 
+            }); 
+        }
+
+        function render() { 
+            document.getElementById('user-pts').innerText = uData.pts.toLocaleString(); 
+            document.getElementById('rank-name').innerText = uData.rank + " MEMBER"; 
+        }
 
         tg.expand();
         init();
