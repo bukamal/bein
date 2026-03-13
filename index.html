@@ -9,27 +9,28 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Tajawal:wght@400;900&display=swap');
-        body { background: #000; color: #fff; font-family: 'Tajawal', sans-serif; transition: all 0.3s ease; }
+        body { background: #000; color: #fff; font-family: 'Tajawal', sans-serif; overflow-x: hidden; }
         .dragon-card { background: linear-gradient(145deg, #0a0a0a, #020202); border: 1px solid #151515; border-radius: 24px; }
         .tab-content { display: none; animation: fadeIn 0.4s ease; padding-bottom: 120px; }
         .tab-content.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .nav-btn.active { color: #ff3333; border-top: 2px solid #ff3333; }
         .lang-en { font-family: 'Orbitron', sans-serif; direction: ltr; }
+        .logo-glow { filter: drop-shadow(0 0 8px rgba(255,255,255,0.15)); }
     </style>
 </head>
 <body class="rtl">
 
     <div id="loader" class="fixed inset-0 bg-black z-[9999] flex items-center justify-center">
-        <i class="fas fa-dragon text-4xl text-red-600 animate-pulse"></i>
+        <i class="fas fa-dragon text-4xl text-red-600 animate-bounce"></i>
     </div>
 
     <header class="p-5 flex justify-between items-center sticky top-0 bg-black/80 backdrop-blur-md z-50 border-b border-white/5">
         <div class="flex items-center gap-2">
             <i class="fas fa-dragon text-red-600"></i>
-            <span id="txt-logo" class="text-[10px] font-black tracking-widest uppercase">DRAGON STADIUM</span>
+            <span id="txt-logo" class="text-[10px] font-black tracking-widest uppercase logo-glow">DRAGON STADIUM</span>
         </div>
-        <button onclick="toggleLang()" class="bg-white/5 p-2 rounded-lg text-[10px] font-bold">
+        <button onclick="toggleLang()" class="bg-white/5 px-3 py-1.5 rounded-xl text-[10px] font-black border border-white/10">
             <i class="fas fa-globe mr-1"></i> <span id="btn-lang">EN</span>
         </button>
     </header>
@@ -43,23 +44,23 @@
             <div id="lb-list" class="space-y-2"></div>
         </div>
 
-        <div id="wallet" class="tab-content space-y-4">
-            <div class="dragon-card p-10 text-center">
-                <p id="txt-bal-label" class="text-[8px] text-zinc-500 font-bold uppercase mb-2">رصيدك</p>
-                <h2 id="user-balance" class="text-5xl font-black italic">0</h2>
-                <p id="rank-name" class="text-[10px] text-red-600 font-black mt-3 uppercase tracking-widest">BRONZE</p>
-                <div class="mt-8 space-y-3">
-                    <input id="bsc-address" type="text" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl text-[10px] text-center outline-none focus:border-red-600">
-                    <button id="btn-update" onclick="verify()" class="w-full py-4 bg-white text-black text-[10px] font-black rounded-xl uppercase">تحديث</button>
+        <div id="wallet" class="tab-content space-y-4 text-center">
+            <div class="dragon-card p-10">
+                <p id="txt-bal-label" class="text-[8px] text-zinc-500 font-black uppercase mb-2 tracking-[0.2em]">Balance</p>
+                <h2 id="user-balance" class="text-5xl font-black italic tracking-tighter">0</h2>
+                <p id="rank-name" class="text-[10px] text-red-600 font-black mt-3 uppercase tracking-widest italic">BRONZE MEMBER</p>
+                <div class="mt-10 space-y-3">
+                    <input id="bsc-address" type="text" placeholder="BSC Wallet Address" class="w-full bg-white/5 border border-white/10 p-5 rounded-2xl text-[10px] text-center outline-none focus:border-red-600 transition-all">
+                    <button id="btn-update" onclick="verify()" class="w-full py-5 bg-white text-black text-[11px] font-black rounded-2xl uppercase shadow-lg shadow-white/5">Update Statistics</button>
                 </div>
             </div>
         </div>
     </main>
 
-    <nav class="fixed bottom-0 left-0 right-0 bg-black border-t border-white/5 flex justify-around p-4 z-50">
-        <button onclick="showTab('home')" class="nav-btn active flex-1 flex flex-col items-center" id="n-home"><i class="fas fa-th-large mb-1 text-lg"></i><span id="nav-home" class="text-[8px] font-black uppercase">الملعب</span></button>
-        <button onclick="showTab('leaderboard')" class="nav-btn flex-1 flex flex-col items-center" id="n-leaderboard"><i class="fas fa-list-ol mb-1 text-lg"></i><span id="nav-league" class="text-[8px] font-black uppercase">الدوري</span></button>
-        <button onclick="showTab('wallet')" class="nav-btn flex-1 flex flex-col items-center" id="n-wallet"><i class="fas fa-wallet mb-1 text-lg"></i><span id="nav-acc" class="text-[8px] font-black uppercase">الحساب</span></button>
+    <nav class="fixed bottom-0 left-0 right-0 bg-black border-t border-white/5 flex justify-around p-4 z-50 backdrop-blur-xl">
+        <button onclick="showTab('home')" class="nav-btn active flex-1 flex flex-col items-center" id="n-home"><i class="fas fa-fire mb-1 text-lg"></i><span id="nav-home" class="text-[8px] font-black uppercase tracking-tighter">Stadium</span></button>
+        <button onclick="showTab('leaderboard')" class="nav-btn flex-1 flex flex-col items-center" id="n-leaderboard"><i class="fas fa-trophy mb-1 text-lg"></i><span id="nav-league" class="text-[8px] font-black uppercase tracking-tighter">League</span></button>
+        <button onclick="showTab('wallet')" class="nav-btn flex-1 flex flex-col items-center" id="n-wallet"><i class="fas fa-crown mb-1 text-lg"></i><span id="nav-acc" class="text-[8px] font-black uppercase tracking-tighter">Account</span></button>
     </nav>
 
     <script>
@@ -72,14 +73,14 @@
             ar: {
                 langBtn: "EN", logo: "ملعب التنين", home: "الملعب", league: "الدوري", acc: "الحساب",
                 bal: "رصيدك الحالي", update: "تحديث البيانات", live: "مباشر", scheduled: "مجدولة",
-                finished: "انتهت", voteWin: "فوز", voteLocked: "🔒 التصويت مغلق", noMatches: "لا توجد مباريات حالياً",
-                vOpens: "يفتح قبل المباراة بساعة"
+                finished: "انتهت", voteWin: "فوز", voteDraw: "تعادل", voteLocked: "🔒 التصويت مغلق", noMatches: "لا توجد مباريات",
+                vOpens: "يفتح قبل المباراة بساعة", success: "✅ تم تسجيل توقعك!"
             },
             en: {
                 langBtn: "AR", logo: "DRAGON STADIUM", home: "STADIUM", league: "LEAGUE", acc: "ACCOUNT",
-                bal: "YOUR BALANCE", update: "UPDATE DATA", live: "LIVE", scheduled: "SCHEDULED",
-                finished: "FINISHED", voteWin: "WIN", voteLocked: "🔒 LOCKED", noMatches: "No Matches Available",
-                vOpens: "Opens 1H before"
+                bal: "CURRENT BALANCE", update: "UPDATE DATA", live: "LIVE", scheduled: "SCHEDULED",
+                finished: "FINISHED", voteWin: "WIN", voteDraw: "DRAW", voteLocked: "🔒 LOCKED", noMatches: "No Matches",
+                vOpens: "Opens 1H before", success: "✅ Vote Recorded!"
             }
         };
 
@@ -88,7 +89,7 @@
             document.body.className = currentLang === 'ar' ? 'rtl' : 'lang-en';
             document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
             applyLang();
-            fetchMatches(); // إعادة التحميل لتحديث نصوص البطاقات
+            fetchMatches();
         }
 
         function applyLang() {
@@ -103,7 +104,7 @@
         }
 
         async function init() {
-            const user = tg.initDataUnsafe.user || { id: 0, first_name: 'Player' };
+            const user = tg.initDataUnsafe.user || { id: 0, first_name: 'DragonPlayer' };
             try {
                 const res = await fetch(`${WORKER_URL}/sync`, { 
                     method: 'POST', headers: {'Content-Type': 'application/json'},
@@ -122,38 +123,39 @@
                 const res = await fetch(`${WORKER_URL}/get-matches`);
                 const matches = await res.json();
                 const container = document.getElementById('match-container');
-                if (matches.length === 0) {
-                    container.innerHTML = `<p class="py-20 text-center opacity-30 text-[10px]">${t.noMatches}</p>`;
+                if (!matches.length) {
+                    container.innerHTML = `<p class="py-20 text-center opacity-20 text-[10px] font-black">${t.noMatches}</p>`;
                     return;
                 }
                 container.innerHTML = matches.map(m => `
-                    <div class="dragon-card overflow-hidden border ${m.isLive ? 'border-red-600 animate-pulse' : 'border-white/5'}">
-                        <div class="bg-white/5 px-4 py-2 flex justify-between items-center text-[8px] font-bold">
+                    <div class="dragon-card overflow-hidden border ${m.isLive ? 'border-red-600 shadow-[0_0_15px_rgba(220,38,38,0.15)]' : 'border-white/5'}">
+                        <div class="bg-white/5 px-4 py-2 flex justify-between items-center text-[7px] font-black uppercase">
                             <span class="text-red-500">${m.league}</span>
-                            <span>${m.isLive ? t.live : m.isFinished ? t.finished : t.scheduled}</span>
+                            <span class="${m.isLive ? 'animate-pulse text-red-400' : ''}">${m.isLive ? t.live : m.isFinished ? t.finished : t.scheduled}</span>
                         </div>
                         <div class="p-6 flex items-center justify-around">
                             <div class="text-center w-24">
-                                <img src="${m.logoA}" class="w-12 h-12 mx-auto mb-2 object-contain">
-                                <p class="text-[9px] font-black uppercase truncate">${m.teamA}</p>
+                                <img src="${m.logoA}" class="w-11 h-11 mx-auto mb-2 object-contain logo-glow">
+                                <p class="text-[8px] font-black uppercase truncate">${m.teamA}</p>
                             </div>
                             <div class="text-center">
-                                <span class="text-[10px] font-black text-zinc-800">VS</span>
-                                <p class="text-[10px] font-bold mt-1">${new Date(m.time).toLocaleTimeString(currentLang === 'ar' ? 'ar-EG' : 'en-US', {hour:'2-digit', minute:'2-digit'})}</p>
+                                <span class="text-[9px] font-black text-zinc-800">VS</span>
+                                <p class="text-[10px] font-mono mt-1">${new Date(m.time).toLocaleTimeString(currentLang==='ar'?'ar-EG':'en-US', {hour:'2-digit', minute:'2-digit'})}</p>
                             </div>
                             <div class="text-center w-24">
-                                <img src="${m.logoB}" class="w-12 h-12 mx-auto mb-2 object-contain">
-                                <p class="text-[9px] font-black uppercase truncate">${m.teamB}</p>
+                                <img src="${m.logoB}" class="w-11 h-11 mx-auto mb-2 object-contain logo-glow">
+                                <p class="text-[8px] font-black uppercase truncate">${m.teamB}</p>
                             </div>
                         </div>
-                        <div class="px-6 pb-6">
+                        <div class="px-4 pb-6">
                             ${m.canVote ? `
-                                <div class="grid grid-cols-2 gap-2">
-                                    <button class="py-3 bg-red-600 rounded-xl text-[9px] font-black uppercase">${t.voteWin} ${m.teamA}</button>
-                                    <button class="py-3 bg-blue-600 rounded-xl text-[9px] font-black uppercase">${t.voteWin} ${m.teamB}</button>
+                                <div class="grid grid-cols-3 gap-2">
+                                    <button onclick="castVote('${m.id}', 'HOME')" class="py-3 bg-red-600 rounded-xl text-[8px] font-black active:scale-90 transition-all">${t.voteWin} 1</button>
+                                    <button onclick="castVote('${m.id}', 'DRAW')" class="py-3 bg-zinc-800 rounded-xl text-[8px] font-black active:scale-90 transition-all">${t.voteDraw}</button>
+                                    <button onclick="castVote('${m.id}', 'AWAY')" class="py-3 bg-blue-600 rounded-xl text-[8px] font-black active:scale-90 transition-all">${t.voteWin} 2</button>
                                 </div>
                             ` : `
-                                <div class="py-3 bg-white/5 text-center rounded-xl text-[8px] text-zinc-600 font-bold uppercase">
+                                <div class="py-3 bg-white/5 text-center rounded-xl text-[8px] text-zinc-600 font-black uppercase border border-white/5">
                                     ${m.isLive || m.isFinished ? t.voteLocked : t.vOpens}
                                 </div>
                             `}
@@ -163,9 +165,23 @@
             } catch(e) {}
         }
 
+        async function castVote(matchId, choice) {
+            const user = tg.initDataUnsafe.user || { id: 0 };
+            if (uData.balance <= 0) return tg.showAlert(currentLang === 'ar' ? "رصيدك غير كافٍ!" : "Insufficient Balance!");
+
+            try {
+                const res = await fetch(`${WORKER_URL}/vote`, {
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ userId: user.id, matchId, voteFor: choice })
+                });
+                const r = await res.json();
+                if (r.success) tg.showAlert(i18n[currentLang].success);
+            } catch(e) { tg.showAlert("Error!"); }
+        }
+
         async function verify() {
             const addr = document.getElementById('bsc-address').value;
-            const user = tg.initDataUnsafe.user || { id: 0, first_name: 'Player' };
+            const user = tg.initDataUnsafe.user || { id: 0, first_name: 'DragonPlayer' };
             if (addr.length < 42) return tg.showAlert("Invalid Address");
             const res = await fetch(`${WORKER_URL}/check-balance`, {
                 method: 'POST', headers: {'Content-Type': 'application/json'},
@@ -173,7 +189,7 @@
             });
             uData = await res.json();
             render();
-            tg.showAlert(currentLang === 'ar' ? "تم التحديث!" : "Updated!");
+            tg.showAlert(currentLang === 'ar' ? "تم التحديث!" : "Profile Updated!");
         }
 
         function showTab(id) {
@@ -182,6 +198,26 @@
             document.getElementById(id).classList.add('active');
             document.getElementById('n-'+id).classList.add('active');
             if(id === 'leaderboard') loadLB();
+        }
+
+        async function loadLB() {
+            const list = document.getElementById('lb-list');
+            try {
+                const res = await fetch(`${WORKER_URL}/leaderboard`);
+                const data = await res.json();
+                list.innerHTML = data.map((u, i) => `
+                    <div class="dragon-card p-4 flex justify-between items-center ${u.userId == tg.initDataUnsafe.user?.id ? 'border-red-600/40 bg-red-600/5' : ''}">
+                        <div class="flex items-center gap-3">
+                            <span class="text-[9px] font-black text-zinc-700">#${i+1}</span>
+                            <span class="text-xs font-bold">${u.username}</span>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-[10px] font-black text-red-500">${Math.floor(u.balance).toLocaleString()}</p>
+                            <p class="text-[7px] text-zinc-600 font-bold uppercase">${u.rank}</p>
+                        </div>
+                    </div>
+                `).join('');
+            } catch(e) {}
         }
 
         function render() {
