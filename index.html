@@ -27,10 +27,10 @@
                 <i class="fas fa-dragon text-white"></i>
             </div>
             <div>
-                <h1 class="text-sm font-black tracking-tighter uppercase italic">Dragon Stadium</h1>
+                <h1 id="header-title" class="text-sm font-black tracking-tighter uppercase italic">Dragon Stadium</h1>
                 <div class="flex items-center gap-1">
                     <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                    <span class="text-[8px] text-zinc-500 font-bold uppercase">Online Hub</span>
+                    <span id="online-hub" class="text-[8px] text-zinc-500 font-bold uppercase">Online Hub</span>
                 </div>
             </div>
         </div>
@@ -50,7 +50,7 @@
 
         <section id="league" class="tab-content space-y-4">
             <div class="dragon-card p-5 border-red-900/30">
-                <h2 class="text-center text-red-600 font-black italic mb-4">LEADERBOARD</h2>
+                <h2 id="leaderboard-title" class="text-center text-red-600 font-black italic mb-4">LEADERBOARD</h2>
                 <div id="lb-list" class="space-y-2"></div>
             </div>
         </section>
@@ -58,7 +58,7 @@
         <section id="account" class="tab-content space-y-4">
             <div class="dragon-card p-6 text-center relative overflow-hidden">
                 <div class="absolute top-0 left-0 w-full h-1 bg-red-600"></div>
-                <p class="text-[10px] text-zinc-500 font-black uppercase tracking-widest">Total Assets</p>
+                <p id="total-assets-label" class="text-[10px] text-zinc-500 font-black uppercase tracking-widest">Total Assets</p>
                 <div class="flex items-center justify-center gap-2 mt-2">
                     <h2 id="total-balance" class="text-4xl font-black italic">0</h2>
                     <span class="text-red-600 font-bold text-xs uppercase italic">DRGN</span>
@@ -68,34 +68,34 @@
 
             <div class="grid grid-cols-2 gap-4">
                 <div class="dragon-card p-4 text-center">
-                    <p class="text-[8px] text-zinc-500 font-bold uppercase">Game Wallet</p>
+                    <p id="game-wallet-label" class="text-[8px] text-zinc-500 font-bold uppercase">Game Wallet</p>
                     <p id="game-balance" class="text-lg font-black mt-1">0</p>
                 </div>
                 <div class="dragon-card p-4 text-center">
-                    <p class="text-[8px] text-zinc-500 font-bold uppercase">Pending</p>
+                    <p id="pending-label" class="text-[8px] text-zinc-500 font-bold uppercase">Pending</p>
                     <p id="pending-rewards" class="text-lg font-black mt-1 text-yellow-500">0</p>
                 </div>
             </div>
 
-            <button onclick="claimRewards()" class="w-full py-4 bg-red-600 text-white font-black rounded-2xl shadow-xl shadow-red-900/40 active:scale-95 transition-all">سحب المكافآت</button>
+            <button id="claim-btn" onclick="claimRewards()" class="w-full py-4 bg-red-600 text-white font-black rounded-2xl shadow-xl shadow-red-900/40 active:scale-95 transition-all">سحب المكافآت</button>
 
             <div class="dragon-card p-5 space-y-3">
-                <p class="text-[9px] text-zinc-500 font-bold text-center italic">ربط محفظة BSC لتحديث الرتبة والرصيد</p>
+                <p id="connect-wallet-label" class="text-[9px] text-zinc-500 font-bold text-center italic">ربط محفظة BSC لتحديث الرتبة والرصيد</p>
                 <input id="bsc-address" type="text" placeholder="0x..." class="w-full bg-black border border-white/10 p-4 rounded-xl text-xs text-center outline-none focus:border-red-600 transition-all">
-                <button onclick="updateWallet()" class="w-full py-3 bg-white text-black text-[11px] font-black rounded-xl uppercase active:scale-95 transition-all">تحديث المحفظة</button>
+                <button onclick="updateWallet()" id="update-wallet-btn" class="w-full py-3 bg-white text-black text-[11px] font-black rounded-xl uppercase active:scale-95 transition-all">تحديث المحفظة</button>
             </div>
         </section>
     </main>
 
     <nav class="fixed bottom-0 left-0 right-0 bg-black/80 backdrop-blur-xl border-t border-white/5 flex justify-around p-3 z-[100]">
         <button onclick="showTab('home')" class="nav-btn active flex-1 flex flex-col items-center">
-            <i class="fas fa-gamepad text-xl mb-1"></i><span class="text-[9px] font-bold">الملعب</span>
+            <i class="fas fa-gamepad text-xl mb-1"></i><span id="nav-stadium">الملعب</span>
         </button>
         <button onclick="showTab('league')" class="nav-btn flex-1 flex flex-col items-center">
-            <i class="fas fa-trophy text-xl mb-1"></i><span class="text-[9px] font-bold">الدوري</span>
+            <i class="fas fa-trophy text-xl mb-1"></i><span id="nav-league">الدوري</span>
         </button>
         <button onclick="showTab('account')" class="nav-btn flex-1 flex flex-col items-center">
-            <i class="fas fa-wallet text-xl mb-1"></i><span class="text-[9px] font-bold">الحساب</span>
+            <i class="fas fa-wallet text-xl mb-1"></i><span id="nav-account">الحساب</span>
         </button>
     </nav>
 
@@ -103,6 +103,38 @@
         const tg = window.Telegram.WebApp;
         const API = "https://noisy-moon-4289.manhal-almasriiii199119.workers.dev";
         let initDataStr = "";
+        let currentLang = "ar";
+
+        const translations = {
+            ar: {
+                headerTitle: "Dragon Stadium",
+                onlineHub: "Online Hub",
+                totalAssets: "إجمالي الأصول",
+                gameWallet: "Game Wallet",
+                pending: "Pending",
+                claimRewards: "سحب المكافآت",
+                connectWallet: "ربط محفظة BSC لتحديث الرتبة والرصيد",
+                updateWallet: "تحديث المحفظة",
+                leaderboardTitle: "LEADERBOARD",
+                navStadium: "الملعب",
+                navLeague: "الدوري",
+                navAccount: "الحساب"
+            },
+            en: {
+                headerTitle: "Dragon Stadium",
+                onlineHub: "Online Hub",
+                totalAssets: "Total Assets",
+                gameWallet: "Game Wallet",
+                pending: "Pending",
+                claimRewards: "Claim Rewards",
+                connectWallet: "Connect BSC Wallet to update rank and balance",
+                updateWallet: "Update Wallet",
+                leaderboardTitle: "LEADERBOARD",
+                navStadium: "Stadium",
+                navLeague: "League",
+                navAccount: "Account"
+            }
+        };
 
         async function apiReq(path, method = 'GET', body = null) {
             if (!initDataStr) initDataStr = tg.initData || '';
@@ -115,6 +147,21 @@
             return await r.json();
         }
 
+        function applyTranslations() {
+            document.getElementById('header-title').innerText = translations[currentLang].headerTitle;
+            document.getElementById('online-hub').innerText = translations[currentLang].onlineHub;
+            document.getElementById('total-assets-label').innerText = translations[currentLang].totalAssets;
+            document.getElementById('game-wallet-label').innerText = translations[currentLang].gameWallet;
+            document.getElementById('pending-label').innerText = translations[currentLang].pending;
+            document.getElementById('claim-btn').innerText = translations[currentLang].claimRewards;
+            document.getElementById('connect-wallet-label').innerText = translations[currentLang].connectWallet;
+            document.getElementById('update-wallet-btn').innerText = translations[currentLang].updateWallet;
+            document.getElementById('leaderboard-title').innerText = translations[currentLang].leaderboardTitle;
+            document.getElementById('nav-stadium').innerText = translations[currentLang].navStadium;
+            document.getElementById('nav-league').innerText = translations[currentLang].navLeague;
+            document.getElementById('nav-account').innerText = translations[currentLang].navAccount;
+        }
+
         async function init() {
             tg.ready(); tg.expand();
             initDataStr = tg.initData || '';
@@ -122,6 +169,7 @@
             if (r.success) renderUser(r.user);
             loadMatches();
             loadLeaderboard();
+            applyTranslations();   // ← تطبيق الترجمة عند البداية
         }
 
         async function loadMatches() {
@@ -169,7 +217,7 @@
         }
 
         async function vote(id, side, time) {
-            tg.MainButton.setText("جاري إرسال التصويت...").show();
+            tg.MainButton.setText(currentLang === 'ar' ? "جاري إرسال التصويت..." : "Sending vote...").show();
             const r = await apiReq('/vote', 'POST', { matchId: id, voteFor: side, matchTime: time });
             tg.MainButton.hide();
             if (r.success) {
@@ -190,13 +238,13 @@
         async function updateWallet() {
             const wallet = document.getElementById('bsc-address').value.trim();
             if (!wallet || !wallet.startsWith('0x') || wallet.length !== 42) {
-                tg.showAlert("عنوان BSC غير صحيح");
+                tg.showAlert(currentLang === 'ar' ? "عنوان BSC غير صحيح" : "Invalid BSC address");
                 return;
             }
             const r = await apiReq('/check-balance', 'POST', { wallet });
             if (r.success) {
                 renderUser(r.user);
-                tg.showConfirm("✅ تم تحديث المحفظة والرتبة!");
+                tg.showConfirm(currentLang === 'ar' ? "✅ تم تحديث المحفظة والرتبة!" : "✅ Wallet updated successfully!");
             } else tg.showAlert(r.message || "Unauthorized");
         }
 
@@ -204,7 +252,7 @@
             const r = await apiReq('/claim-rewards', 'POST');
             if (r.success) {
                 renderUser(r.user);
-                tg.showAlert("✅ تم سحب المكافآت!");
+                tg.showAlert(currentLang === 'ar' ? "✅ تم سحب المكافآت!" : "✅ Rewards claimed!");
             } else tg.showAlert(r.message || "Unauthorized");
         }
 
@@ -233,16 +281,15 @@
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(id).classList.add('active');
-
-            // تفعيل الزر السفلي الصحيح
             const activeBtn = document.querySelector(`button[onclick="showTab('${id}')"]`);
             if (activeBtn) activeBtn.classList.add('active');
         }
 
         function toggleLang() {
-            const isRtl = document.body.dir === 'rtl';
-            document.body.dir = isRtl ? 'ltr' : 'rtl';
-            document.getElementById('btn-lang').innerText = isRtl ? 'AR' : 'EN';
+            currentLang = currentLang === 'ar' ? 'en' : 'ar';
+            document.body.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+            document.getElementById('btn-lang').innerText = currentLang === 'ar' ? 'EN' : 'AR';
+            applyTranslations();
         }
 
         init();
