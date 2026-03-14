@@ -49,27 +49,27 @@
             <div id="match-container" class="space-y-4"></div>
         </section>
 
-        <!-- تبويب الدوري -->
+        <!-- تبويب لوحة الشرف -->
         <section id="league" class="tab-content space-y-4">
             <div class="dragon-card p-5 border-red-900/30">
-                <h2 id="leaderboard-title" class="text-center text-red-600 font-black italic mb-4">قائمة المتصدرين</h2>
+                <h2 id="leaderboard-title" class="text-center text-red-600 font-black italic mb-4">لوحة الشرف</h2>
                 <div id="lb-list" class="space-y-2"></div>
             </div>
         </section>
 
-        <!-- تبويب المتجر -->
+        <!-- تبويب السوق -->
         <section id="store" class="tab-content space-y-4">
             <div class="dragon-card p-5 border-purple-900/30">
-                <h2 class="text-center text-purple-600 font-black italic mb-4">المتجر</h2>
+                <h2 class="text-center text-purple-600 font-black italic mb-4">السوق</h2>
                 <div id="store-items" class="space-y-3"></div>
             </div>
         </section>
 
-        <!-- تبويب الحساب (مع رابط MetaMask المباشر) -->
+        <!-- تبويب محفظتي -->
         <section id="account" class="tab-content space-y-4">
             <div class="dragon-card p-6 text-center relative overflow-hidden">
                 <div class="absolute top-0 left-0 w-full h-1 bg-red-600"></div>
-                <p id="total-assets-label" class="text-[10px] text-zinc-500 font-black uppercase tracking-widest">إجمالي الأصول</p>
+                <p id="total-assets-label" class="text-[10px] text-zinc-500 font-black uppercase tracking-widest">إجمالي الرصيد</p>
                 <div class="flex items-center justify-center gap-2 mt-2">
                     <h2 id="total-balance" class="text-4xl font-black italic">0</h2>
                     <span class="text-red-600 font-bold text-xs uppercase italic">DRGN</span>
@@ -79,11 +79,11 @@
 
             <div class="grid grid-cols-2 gap-4">
                 <div class="dragon-card p-4 text-center">
-                    <p id="game-wallet-label" class="text-[8px] text-zinc-500 font-bold uppercase">محفظة اللعبة</p>
+                    <p id="game-wallet-label" class="text-[8px] text-zinc-500 font-bold uppercase">رصيد اللعبة</p>
                     <p id="game-balance" class="text-lg font-black mt-1">0</p>
                 </div>
                 <div class="dragon-card p-4 text-center">
-                    <p id="pending-label" class="text-[8px] text-zinc-500 font-bold uppercase">معلق</p>
+                    <p id="pending-label" class="text-[8px] text-zinc-500 font-bold uppercase">مكافآت معلقة</p>
                     <p id="pending-rewards" class="text-lg font-black mt-1 text-yellow-500">0</p>
                 </div>
             </div>
@@ -115,33 +115,17 @@
                 </div>
             </div>
 
-            <button id="claim-btn" onclick="claimRewards()" class="w-full py-4 bg-red-600 text-white font-black rounded-2xl shadow-xl shadow-red-900/40 active:scale-95 transition-all">سحب المكافآت</button>
+            <button id="claim-btn" onclick="claimRewards()" class="w-full py-4 bg-red-600 text-white font-black rounded-2xl shadow-xl shadow-red-900/40 active:scale-95 transition-all">سحب الأرباح</button>
 
-            <!-- قسم ربط المحفظة (رابط MetaMask مباشر) -->
+            <!-- قسم ربط المحفظة -->
             <div class="dragon-card p-5 space-y-3">
                 <p id="connect-wallet-label" class="text-[9px] text-zinc-500 font-bold text-center italic">
-                    ربط محفظة BSC لتحديث الرتبة والرصيد
+                    لربط محفظة BSC، أدخل عنوان محفظتك يدوياً واضغط تحديث:
                 </p>
-                
-                <!-- زر فتح MetaMask مباشرة -->
-                <button onclick="openMetaMask()" class="w-full py-3 bg-orange-600 text-white text-[11px] font-black rounded-xl uppercase active:scale-95 transition-all">
-                    <i class="fab fa-metamask ml-1"></i> فتح في MetaMask
-                </button>
-                <p class="text-[8px] text-zinc-600 text-center">(سيتم فتح التطبيق، ثم عد وأدخل عنوانك يدوياً)</p>
-                
-                <!-- خيار يدوي -->
-                <div class="relative">
-                    <div class="absolute inset-0 flex items-center">
-                        <div class="w-full border-t border-white/10"></div>
-                    </div>
-                    <div class="relative flex justify-center text-[8px]">
-                        <span class="px-2 bg-black text-zinc-500">أو أدخل العنوان يدوياً</span>
-                    </div>
-                </div>
                 
                 <input id="bsc-address" type="text" placeholder="0x..." class="w-full bg-black border border-white/10 p-4 rounded-xl text-xs text-center outline-none focus:border-red-600 transition-all">
                 <button onclick="updateWallet()" class="w-full py-3 bg-white text-black text-[11px] font-black rounded-xl uppercase active:scale-95 transition-all">
-                    تحديث المحفظة يدوياً
+                    تحديث الرصيد
                 </button>
 
                 <div class="flex gap-2 mt-2">
@@ -156,7 +140,7 @@
 
             <div class="dragon-card p-5 mt-2 border border-yellow-600/30">
                 <p class="text-center text-[10px] text-yellow-500 font-bold">
-                    ⚡ رصيد اللعبة (Game Balance) يمكن استخدامه في المتجر لشراء التذاكر والشارات.
+                    ⚡ رصيد اللعبة يمكن استخدامه في السوق لشراء التذاكر والشارات.
                 </p>
             </div>
         </section>
@@ -180,22 +164,22 @@
 
     <nav class="fixed bottom-0 left-0 right-0 bg-black/80 backdrop-blur-xl border-t border-white/5 flex justify-around p-3 z-[100]">
         <button onclick="showTab('home')" class="nav-btn active flex-1 flex flex-col items-center">
-            <i class="fas fa-gamepad text-xl mb-1"></i><span id="nav-stadium">الملعب</span>
+            <i class="fas fa-gamepad text-xl mb-1"></i><span id="nav-stadium">المباريات</span>
         </button>
         <button onclick="showTab('league')" class="nav-btn flex-1 flex flex-col items-center">
-            <i class="fas fa-trophy text-xl mb-1"></i><span id="nav-league">الدوري</span>
+            <i class="fas fa-trophy text-xl mb-1"></i><span id="nav-league">المتصدرون</span>
         </button>
         <button onclick="showTab('store')" class="nav-btn flex-1 flex flex-col items-center">
-            <i class="fas fa-store text-xl mb-1"></i><span id="nav-store">المتجر</span>
+            <i class="fas fa-store text-xl mb-1"></i><span id="nav-store">السوق</span>
         </button>
         <button onclick="showTab('account')" class="nav-btn flex-1 flex flex-col items-center">
-            <i class="fas fa-wallet text-xl mb-1"></i><span id="nav-account">الحساب</span>
+            <i class="fas fa-wallet text-xl mb-1"></i><span id="nav-account">محفظتي</span>
         </button>
     </nav>
 
     <script>
         const tg = window.Telegram.WebApp;
-        const API = "https://noisy-moon-4289.manhal-almasriiii199119.workers.dev"; // ⚠️ غيّر إلى رابط الـ Worker الخاص بك
+        const API = "https://noisy-moon-4289.manhal-almasriiii199119.workers.dev";
         let initDataStr = "";
         let currentLang = "ar";
         let storeItems = [];
@@ -204,32 +188,32 @@
             ar: {
                 headerTitle: "Dragon Stadium",
                 onlineHub: "Online Hub",
-                totalAssets: "إجمالي الأصول",
-                gameWallet: "محفظة اللعبة",
-                pending: "معلق",
-                claimRewards: "سحب المكافآت",
-                connectWallet: "ربط محفظة BSC لتحديث الرتبة والرصيد",
-                updateWallet: "تحديث المحفظة",
-                leaderboardTitle: "قائمة المتصدرين",
-                navStadium: "الملعب",
-                navLeague: "الدوري",
-                navStore: "المتجر",
-                navAccount: "الحساب"
+                totalAssets: "إجمالي الرصيد",
+                gameWallet: "رصيد اللعبة",
+                pending: "مكافآت معلقة",
+                claimRewards: "سحب الأرباح",
+                connectWallet: "أدخل عنوان محفظة BSC لتحديث الرتبة والرصيد",
+                updateWallet: "تحديث الرصيد",
+                leaderboardTitle: "لوحة الشرف",
+                navStadium: "المباريات",
+                navLeague: "المتصدرون",
+                navStore: "السوق",
+                navAccount: "محفظتي"
             },
             en: {
                 headerTitle: "Dragon Stadium",
                 onlineHub: "Online Hub",
-                totalAssets: "Total Assets",
-                gameWallet: "Game Wallet",
-                pending: "Pending",
-                claimRewards: "Claim Rewards",
-                connectWallet: "Connect BSC Wallet to update rank and balance",
-                updateWallet: "Update Wallet",
-                leaderboardTitle: "LEADERBOARD",
-                navStadium: "Stadium",
-                navLeague: "League",
-                navStore: "Store",
-                navAccount: "Account"
+                totalAssets: "Total Balance",
+                gameWallet: "Game Balance",
+                pending: "Pending Rewards",
+                claimRewards: "Claim Earnings",
+                connectWallet: "Enter BSC wallet address to update rank and balance",
+                updateWallet: "Update Balance",
+                leaderboardTitle: "Hall of Fame",
+                navStadium: "Matches",
+                navLeague: "Leaderboard",
+                navStore: "Market",
+                navAccount: "My Wallet"
             }
         };
 
@@ -279,7 +263,6 @@
             applyTranslations();
         }
 
-        // دالة لحساب الوقت المتبقي
         function getTimeRemaining(matchTime) {
             const now = Date.now();
             const diff = matchTime - now;
@@ -291,7 +274,6 @@
             return `${minutes}د`;
         }
 
-        // دالة لجلب المباريات التي صوت عليها المستخدم
         async function checkUserVotes(matchIds) {
             if (!matchIds || matchIds.length === 0) return [];
             const r = await apiReq('/get-user-votes', 'POST', { matchIds });
@@ -310,7 +292,6 @@
                 return;
             }
             
-            // بناء HTML أولي
             let html = '';
             d.matches.forEach(m => {
                 const now = Date.now();
@@ -346,11 +327,9 @@
             });
             container.innerHTML = html;
 
-            // التحقق من التصويتات السابقة
             const matchIds = d.matches.map(m => m.id);
             const votedMatches = await checkUserVotes(matchIds);
             
-            // تحديث كل مباراة
             d.matches.forEach(m => {
                 const voteDiv = document.getElementById(`v-${m.id}`);
                 if (!voteDiv) return;
@@ -372,16 +351,16 @@
         }
 
         async function vote(id, side, time) {
-            tg.MainButton.setText(currentLang === 'ar' ? "جاري إرسال التصويت (1000 DRGN)..." : "Sending vote (1000 DRGN)...").show();
+            tg.MainButton.setText(currentLang === 'ar' ? "جاري إرسال التصويت..." : "Sending vote...").show();
             const r = await apiReq('/vote', 'POST', { matchId: id, voteFor: side, matchTime: time });
             tg.MainButton.hide();
             if (r.success) {
                 tg.HapticFeedback.notificationOccurred('success');
                 const v = document.getElementById(`v-${id}`);
                 if (v) v.innerHTML = `<div class="py-2 text-center text-green-500 font-black italic text-xs">✅ تم التصويت مسبقاً</div>`;
-                await loadLeaderboard(); // تحديث المتصدرين
+                await loadLeaderboard();
             } else {
-                tg.showAlert(r.message || "خطأ");
+                tg.showAlert(r.message || (currentLang === 'ar' ? "خطأ" : "Error"));
             }
         }
 
@@ -404,7 +383,7 @@
             if (r.success) {
                 renderUser(r.user);
                 await loadLeaderboard();
-                tg.showAlert(currentLang === 'ar' ? "✅ تم تحديث المحفظة والرتبة!" : "✅ Wallet updated successfully!");
+                tg.showAlert(currentLang === 'ar' ? "✅ تم تحديث الرصيد والرتبة!" : "✅ Balance and rank updated!");
             } else {
                 tg.showAlert(r.message || "Unauthorized");
             }
@@ -415,7 +394,7 @@
             if (r.success) {
                 renderUser(r.user);
                 await loadLeaderboard();
-                tg.showAlert(currentLang === 'ar' ? "✅ تم سحب المكافآت!" : "✅ Rewards claimed!");
+                tg.showAlert(currentLang === 'ar' ? "✅ تم سحب الأرباح!" : "✅ Earnings claimed!");
             } else {
                 tg.showAlert(r.message || "Unauthorized");
             }
@@ -425,7 +404,7 @@
             const data = await apiReq('/leaderboard');
             const list = document.getElementById('lb-list');
             if (!data || data.length === 0) {
-                list.innerHTML = `<div class="text-center text-zinc-500 py-8">لا يوجد لاعبين بعد</div>`;
+                list.innerHTML = `<div class="text-center text-zinc-500 py-8">لا يوجد متصدرين بعد</div>`;
                 return;
             }
             let html = '';
@@ -459,7 +438,7 @@
             tg.showAlert(currentLang === 'ar' ? "تم نسخ الرابط!" : "Link copied!");
         }
 
-        // ========== المتجر ==========
+        // ========== السوق ==========
         async function loadStoreItems() {
             const data = await apiReq('/store/items');
             if (!data.success || !data.items) return;
@@ -551,16 +530,12 @@
             }
         }
 
-        // ========== فتح MetaMask مباشرة عبر رابط ==========
+        // ========== فتح MetaMask عبر رابط (اختياري) ==========
         function openMetaMask() {
-            const dappUrl = encodeURIComponent('https://noisy-moon-4289.manhal-almasriiii199119.workers.dev');
+            const dappUrl = encodeURIComponent(window.location.origin);
             const metamaskDeeplink = `https://metamask.app.link/dapp/${dappUrl}`;
-            
             if (Telegram.WebApp.openLink) {
                 Telegram.WebApp.openLink(metamaskDeeplink);
-                tg.showAlert(currentLang === 'ar' 
-                    ? 'تم فتح MetaMask. بعد الاتصال، عد إلى التطبيق وأدخل عنوان محفظتك يدوياً في الحقل أعلاه.'
-                    : 'MetaMask opened. After connecting, return and enter your wallet address manually above.');
             } else {
                 window.open(metamaskDeeplink, '_blank');
             }
