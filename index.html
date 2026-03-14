@@ -101,7 +101,7 @@
 
     <script>
         const tg = window.Telegram.WebApp;
-        const API = "https://noisy-moon-4289.manhal-almasriiii199119.workers.dev";
+        const API = "https://noisy-moon-4289.manhal-almasriiii199119.workers.dev"; // ضع رابط الـ worker الخاص بك هنا
         let initDataStr = "";
         let currentLang = "ar";
 
@@ -136,14 +136,18 @@
             }
         };
 
+        // دالة الطلب إلى API (تستخدم Header بدلاً من Query String)
         async function apiReq(path, method = 'GET', body = null) {
             if (!initDataStr) initDataStr = tg.initData || '';
-            let fetchUrl = API + path;
-            if (path.includes('?')) fetchUrl += '&initData=' + encodeURIComponent(initDataStr);
-            else fetchUrl += '?initData=' + encodeURIComponent(initDataStr);
-            const options = { method, headers: { 'Content-Type': 'application/json' } };
+            const options = { 
+                method, 
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'x-telegram-init-data': initDataStr  // إرسال initData في الرأس
+                } 
+            };
             if (body) options.body = JSON.stringify(body);
-            const r = await fetch(fetchUrl, options);
+            const r = await fetch(API + path, options);
             return await r.json();
         }
 
@@ -163,13 +167,14 @@
         }
 
         async function init() {
-            tg.ready(); tg.expand();
+            tg.ready(); 
+            tg.expand();
             initDataStr = tg.initData || '';
             const r = await apiReq('/sync', 'POST');
             if (r.success) renderUser(r.user);
             loadMatches();
             loadLeaderboard();
-            applyTranslations();   // ← تطبيق الترجمة عند البداية
+            applyTranslations();
         }
 
         async function loadMatches() {
@@ -186,11 +191,12 @@
             d.matches.forEach(m => {
                 const timeStr = new Date(m.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                 const status = m.isOpen ? `<span class="text-green-500">● LIVE VOTING</span>` : `<span>${timeStr}</span>`;
+                // تم تصحيح القالب هنا: استخدام ${} بدلاً من \( \)
                 const votingHTML = m.isOpen ? `
                     <div class="grid grid-cols-3 gap-2 mt-4" id="v-${m.id}">
-                        <button onclick="vote('\( {m.id}','HOME', \){m.time})" class="bg-white/5 py-3 rounded-xl hover:bg-red-600 transition-all font-black italic text-xs">1</button>
-                        <button onclick="vote('\( {m.id}','DRAW', \){m.time})" class="bg-white/5 py-3 rounded-xl hover:bg-red-600 transition-all font-black italic text-xs">X</button>
-                        <button onclick="vote('\( {m.id}','AWAY', \){m.time})" class="bg-white/5 py-3 rounded-xl hover:bg-red-600 transition-all font-black italic text-xs">2</button>
+                        <button onclick="vote('${m.id}','HOME',${m.time})" class="bg-white/5 py-3 rounded-xl hover:bg-red-600 transition-all font-black italic text-xs">1</button>
+                        <button onclick="vote('${m.id}','DRAW',${m.time})" class="bg-white/5 py-3 rounded-xl hover:bg-red-600 transition-all font-black italic text-xs">X</button>
+                        <button onclick="vote('${m.id}','AWAY',${m.time})" class="bg-white/5 py-3 rounded-xl hover:bg-red-600 transition-all font-black italic text-xs">2</button>
                     </div>` : `
                     <div class="mt-4 py-2 bg-black/40 rounded-xl text-center text-[9px] text-zinc-600 font-black italic uppercase">Voting Closed</div>`;
                 html += `
@@ -224,7 +230,9 @@
                 tg.HapticFeedback.notificationOccurred('success');
                 const v = document.getElementById(`v-${id}`);
                 if (v) v.innerHTML = `<div class="col-span-3 py-2 text-center text-green-500 font-black italic text-xs animate-bounce">تم تسجيل التصويت ✓</div>`;
-            } else tg.showAlert(r.message || "خطأ");
+            } else {
+                tg.showAlert(r.message || "خطأ");
+            }
         }
 
         function renderUser(u) {
@@ -237,15 +245,18 @@
 
         async function updateWallet() {
             const wallet = document.getElementById('bsc-address').value.trim();
-            if (!wallet || !wallet.startsWith('0x') || wallet.length !== 42) {
+            // تحسين التحقق من العنوان
+            if (!wallet || !/^0x[a-fA-F0-9]{40}$/.test(wallet)) {
                 tg.showAlert(currentLang === 'ar' ? "عنوان BSC غير صحيح" : "Invalid BSC address");
                 return;
             }
             const r = await apiReq('/check-balance', 'POST', { wallet });
             if (r.success) {
                 renderUser(r.user);
-                tg.showConfirm(currentLang === 'ar' ? "✅ تم تحديث المحفظة والرتبة!" : "✅ Wallet updated successfully!");
-            } else tg.showAlert(r.message || "Unauthorized");
+                tg.showAlert(currentLang === 'ar' ? "✅ تم تحديث المحفظة والرتبة!" : "✅ Wallet updated successfully!");
+            } else {
+                tg.showAlert(r.message || "Unauthorized");
+            }
         }
 
         async function claimRewards() {
@@ -253,7 +264,9 @@
             if (r.success) {
                 renderUser(r.user);
                 tg.showAlert(currentLang === 'ar' ? "✅ تم سحب المكافآت!" : "✅ Rewards claimed!");
-            } else tg.showAlert(r.message || "Unauthorized");
+            } else {
+                tg.showAlert(r.message || "Unauthorized");
+            }
         }
 
         async function loadLeaderboard() {
@@ -292,6 +305,7 @@
             applyTranslations();
         }
 
+        // بدء التطبيق
         init();
     </script>
 </body>
