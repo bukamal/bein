@@ -105,7 +105,7 @@
             </div>
         </section>
 
-        <!-- تبويب التنين (جديد) -->
+        <!-- تبويب التنين -->
         <section id="dragon" class="tab-content space-y-4">
             <div class="dragon-card p-6 text-center relative overflow-hidden">
                 <div class="absolute top-0 left-0 w-full h-1 bg-purple-600"></div>
@@ -151,6 +151,17 @@
                     </div>
                 </div>
                 
+                <!-- التحديات اليومية -->
+                <div class="bg-white/5 p-3 rounded-xl mb-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-xs font-bold text-yellow-500" id="daily-title">📅 التحديات اليومية</span>
+                        <span class="text-[8px] text-zinc-400" id="daily-reset">(تتجدد يومياً)</span>
+                    </div>
+                    <div id="daily-challenges" class="space-y-2">
+                        <!-- ستضاف ديناميكياً -->
+                    </div>
+                </div>
+                
                 <!-- أزرار المعارك -->
                 <div class="grid grid-cols-2 gap-3 mb-4">
                     <button onclick="quickBattle()" id="quick-battle-btn" class="bg-red-600 py-3 rounded-xl text-xs font-black active:scale-95 transition-all">
@@ -172,6 +183,64 @@
                     <div id="battle-log" class="space-y-2 max-h-40 overflow-y-auto">
                         <!-- ستضاف المعارك هنا ديناميكياً -->
                     </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- تبويب العشيرة -->
+        <section id="guild" class="tab-content space-y-4">
+            <div class="dragon-card p-5">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-red-600 font-black italic" id="guild-title">🏰 العشيرة</h2>
+                    <span id="guild-tag" class="bg-purple-600/20 px-2 py-1 rounded text-xs"></span>
+                </div>
+                
+                <div id="guild-not-in" class="text-center py-8">
+                    <p class="text-zinc-400 mb-4" id="guild-not-in-text">أنت لست عضوًا في أي عشيرة بعد</p>
+                    <div class="flex flex-col gap-3">
+                        <button onclick="showCreateGuild()" id="create-guild-btn" class="bg-green-600 py-3 rounded-xl text-sm font-black active:scale-95 transition-all">
+                            ➕ إنشاء عشيرة جديدة
+                        </button>
+                        <button onclick="showJoinGuild()" id="join-guild-btn" class="bg-blue-600 py-3 rounded-xl text-sm font-black active:scale-95 transition-all">
+                            🔍 الانضمام إلى عشيرة
+                        </button>
+                    </div>
+                </div>
+                
+                <div id="guild-info" class="hidden">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="w-16 h-16 bg-gradient-to-br from-purple-700 to-red-700 rounded-full flex items-center justify-center text-3xl">
+                            🛡️
+                        </div>
+                        <div>
+                            <h3 id="guild-name" class="font-bold text-lg"></h3>
+                            <p id="guild-description" class="text-xs text-zinc-400"></p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-3 gap-2 mb-4 text-center">
+                        <div class="bg-white/5 p-2 rounded-lg">
+                            <p class="text-[10px] text-zinc-500" id="guild-level-label">المستوى</p>
+                            <p id="guild-level" class="font-black text-yellow-500">1</p>
+                        </div>
+                        <div class="bg-white/5 p-2 rounded-lg">
+                            <p class="text-[10px] text-zinc-500" id="guild-members-label">الأعضاء</p>
+                            <p id="guild-members-count" class="font-black text-blue-500">1</p>
+                        </div>
+                        <div class="bg-white/5 p-2 rounded-lg">
+                            <p class="text-[10px] text-zinc-500" id="guild-xp-label">XP</p>
+                            <p id="guild-xp" class="font-black text-green-500">0</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <p class="text-xs text-zinc-500 mb-2" id="guild-members-list-label">👥 قائمة الأعضاء</p>
+                        <div id="guild-members-list" class="space-y-2 max-h-40 overflow-y-auto"></div>
+                    </div>
+                    
+                    <button onclick="leaveGuild()" id="leave-guild-btn" class="w-full bg-red-600/50 py-3 rounded-xl text-xs font-black active:scale-95 transition-all">
+                        🚪 مغادرة العشيرة
+                    </button>
                 </div>
             </div>
         </section>
@@ -286,6 +355,9 @@
         <button onclick="showTab('dragon')" class="nav-btn flex-1 flex flex-col items-center">
             <i class="fas fa-dragon text-xl mb-1"></i><span id="nav-dragon">التنين</span>
         </button>
+        <button onclick="showTab('guild')" class="nav-btn flex-1 flex flex-col items-center">
+            <i class="fas fa-shield-alt text-xl mb-1"></i><span id="nav-guild">العشيرة</span>
+        </button>
         <button onclick="showTab('account')" class="nav-btn flex-1 flex flex-col items-center">
             <i class="fas fa-wallet text-xl mb-1"></i><span id="nav-account">محفظتي</span>
         </button>
@@ -293,7 +365,7 @@
 
     <script>
         const tg = window.Telegram.WebApp;
-        const API = "https://noisy-moon-4289.manhal-almasriiii199119.workers.dev";
+        const API = "https://noisy-moon-4289.manhal-almasriiii199119.workers.dev"; // ضع رابط الـ Worker الخاص بك
         let initDataStr = "";
         let currentLang = "ar";
         let storeItems = [];
@@ -314,6 +386,7 @@
                 navLeague: "المتصدرون",
                 navStore: "السوق",
                 navDragon: "التنين",
+                navGuild: "العشيرة",
                 navAccount: "محفظتي",
                 referralTitle: "🤝 نظام الإحالة",
                 referralLinkLabel: "رابط الإحالة الخاص بك:",
@@ -336,7 +409,7 @@
                 startsIn: "⏳ يبدأ بعد",
                 ended: "✓ انتهت",
                 closed: "Voting Closed",
-                // Dragon translations
+                // Dragon
                 dragonName: "التنين الناري",
                 dragonLevel: "المستوى",
                 dragonElement: "عنصر: ناري",
@@ -351,7 +424,19 @@
                 noBattles: "لا توجد معارك بعد",
                 win: "فوز",
                 loss: "خسارة",
-                vs: "ضد"
+                vs: "ضد",
+                dailyTitle: "📅 التحديات اليومية",
+                dailyReset: "(تتجدد يومياً)",
+                // Guild
+                guildTitle: "🏰 العشيرة",
+                guildNotIn: "أنت لست عضوًا في أي عشيرة بعد",
+                createGuild: "➕ إنشاء عشيرة جديدة",
+                joinGuild: "🔍 الانضمام إلى عشيرة",
+                guildLevelLabel: "المستوى",
+                guildMembersLabel: "الأعضاء",
+                guildXpLabel: "XP",
+                guildMembersListLabel: "👥 قائمة الأعضاء",
+                leaveGuild: "🚪 مغادرة العشيرة"
             },
             en: {
                 headerTitle: "Dragon Stadium",
@@ -368,6 +453,7 @@
                 navLeague: "Leaderboard",
                 navStore: "Market",
                 navDragon: "Dragon",
+                navGuild: "Guild",
                 navAccount: "My Wallet",
                 referralTitle: "🤝 Referral System",
                 referralLinkLabel: "Your referral link:",
@@ -390,7 +476,7 @@
                 startsIn: "⏳ Starts in",
                 ended: "✓ Ended",
                 closed: "Voting Closed",
-                // Dragon translations
+                // Dragon
                 dragonName: "Fire Dragon",
                 dragonLevel: "Level",
                 dragonElement: "Element: Fire",
@@ -405,7 +491,19 @@
                 noBattles: "No battles yet",
                 win: "Win",
                 loss: "Loss",
-                vs: "vs"
+                vs: "vs",
+                dailyTitle: "📅 Daily Challenges",
+                dailyReset: "(resets daily)",
+                // Guild
+                guildTitle: "🏰 Guild",
+                guildNotIn: "You are not a member of any guild yet",
+                createGuild: "➕ Create New Guild",
+                joinGuild: "🔍 Join Guild",
+                guildLevelLabel: "Level",
+                guildMembersLabel: "Members",
+                guildXpLabel: "XP",
+                guildMembersListLabel: "👥 Member List",
+                leaveGuild: "🚪 Leave Guild"
             }
         };
 
@@ -439,6 +537,7 @@
             document.getElementById('nav-league').innerText = t.navLeague;
             document.getElementById('nav-store').innerText = t.navStore;
             document.getElementById('nav-dragon').innerText = t.navDragon;
+            document.getElementById('nav-guild').innerText = t.navGuild;
             document.getElementById('nav-account').innerText = t.navAccount;
             document.getElementById('referral-title').innerText = t.referralTitle;
             document.getElementById('referral-link-label').innerText = t.referralLinkLabel;
@@ -454,7 +553,7 @@
             document.getElementById('convert-confirm-btn').innerText = t.convertConfirm;
             document.getElementById('convert-cancel-btn').innerText = t.convertCancel;
 
-            // Dragon tab translations
+            // Dragon tab
             document.getElementById('dragon-name').innerText = t.dragonName;
             document.getElementById('dragon-accuracy-label').innerText = t.dragonAccuracyLabel;
             document.getElementById('dragon-wins-label').innerText = t.dragonWinsLabel;
@@ -464,8 +563,21 @@
             document.getElementById('random-challenge-btn').innerText = t.randomChallenge;
             document.getElementById('challenge-friend-btn').innerText = t.challengeFriend;
             document.getElementById('battle-log-label').innerText = t.battleLogLabel;
+            document.getElementById('daily-title').innerText = t.dailyTitle;
+            document.getElementById('daily-reset').innerText = t.dailyReset;
 
-            // تحديث المحتوى الديناميكي إذا كان ظاهراً
+            // Guild tab
+            document.getElementById('guild-title').innerText = t.guildTitle;
+            document.getElementById('guild-not-in-text').innerText = t.guildNotIn;
+            document.getElementById('create-guild-btn').innerText = t.createGuild;
+            document.getElementById('join-guild-btn').innerText = t.joinGuild;
+            document.getElementById('guild-level-label').innerText = t.guildLevelLabel;
+            document.getElementById('guild-members-label').innerText = t.guildMembersLabel;
+            document.getElementById('guild-xp-label').innerText = t.guildXpLabel;
+            document.getElementById('guild-members-list-label').innerText = t.guildMembersListLabel;
+            document.getElementById('leave-guild-btn').innerText = t.leaveGuild;
+
+            // تحديث المحتوى الديناميكي
             if (document.getElementById('match-container').innerHTML) {
                 loadMatches();
             }
@@ -475,7 +587,13 @@
             if (document.getElementById('dragon').classList.contains('active')) {
                 loadDragonData();
             }
+            if (document.getElementById('guild').classList.contains('active')) {
+                loadGuildData();
+            }
         }
+
+        // نهاية الجزء الأول. يتبع الجزء الثاني...
+                // ================== الجزء الثاني ==================
 
         async function loadLiquidityData() {
             try {
@@ -485,7 +603,6 @@
                     document.getElementById('volume-value').innerText = parseFloat(data.volume24h).toFixed(2);
                     document.getElementById('slippage-value').innerText = data.slippage;
                     
-                    // تحديث تسميات الشريط حسب اللغة
                     const t = translations[currentLang];
                     const tickerItems = document.querySelectorAll('.ticker-item');
                     if (tickerItems.length >= 3) {
@@ -515,7 +632,6 @@
             loadLiquidityData();
             applyTranslations();
 
-            // تحديث بيانات السيولة كل دقيقة
             setInterval(loadLiquidityData, 60000);
         }
 
@@ -824,6 +940,9 @@
                 } else {
                     logDiv.innerHTML = `<div class="text-center text-zinc-500 text-[10px] py-2">${t.noBattles}</div>`;
                 }
+                
+                // تحميل التحديات اليومية
+                loadDailyChallenges();
             }
         }
 
@@ -893,6 +1012,137 @@
             }
         }
 
+        // ========== التحديات اليومية ==========
+        async function loadDailyChallenges() {
+            const data = await apiReq('/daily-challenges');
+            if (data.success) {
+                const t = translations[currentLang];
+                const container = document.getElementById('daily-challenges');
+                let html = '';
+                data.challenges.forEach(ch => {
+                    const completed = data.completed.includes(ch.id);
+                    const progressPercent = (ch.progress / ch.target) * 100;
+                    html += `
+                    <div class="flex items-center gap-2 ${completed ? 'opacity-50' : ''}">
+                        <div class="flex-1">
+                            <div class="flex justify-between text-[9px] mb-1">
+                                <span>${getChallengeName(ch.id, currentLang)}</span>
+                                <span>${ch.progress}/${ch.target}</span>
+                            </div>
+                            <div class="w-full bg-zinc-800 h-2 rounded-full overflow-hidden">
+                                <div class="bg-yellow-500 h-2 rounded-full" style="width: ${progressPercent}%;"></div>
+                            </div>
+                        </div>
+                        <button onclick="claimDaily('${ch.id}')" class="bg-blue-600 text-[8px] px-2 py-1 rounded" ${completed ? 'disabled' : ''}>
+                            ${completed ? '✅' : '💰 '+ch.reward+' XP'}
+                        </button>
+                    </div>`;
+                });
+                container.innerHTML = html;
+            }
+        }
+
+        function getChallengeName(id, lang) {
+            const names = {
+                'vote_3': { ar: 'توقع 3 مباريات', en: 'Predict 3 matches' },
+                'win_2': { ar: 'اربح معركتين', en: 'Win 2 battles' },
+                'earn_500': { ar: 'اكتسب 500 XP', en: 'Earn 500 XP' }
+            };
+            return names[id] ? names[id][lang] : id;
+        }
+
+        async function claimDaily(challengeId) {
+            const r = await apiReq('/claim-daily', 'POST', { challengeId });
+            if (r.success) {
+                tg.showAlert(currentLang === 'ar' ? '✅ تم استلام المكافأة!' : '✅ Reward claimed!');
+                loadDragonData();
+                loadDailyChallenges();
+            } else {
+                tg.showAlert(r.message || (currentLang === 'ar' ? 'فشل' : 'Failed'));
+            }
+        }
+
+        // ========== دوال العشيرة ==========
+        async function loadGuildData() {
+            const data = await apiReq('/guild/data');
+            if (data.success) {
+                document.getElementById('guild-not-in').classList.add('hidden');
+                document.getElementById('guild-info').classList.remove('hidden');
+                
+                const g = data.guild;
+                const t = translations[currentLang];
+                document.getElementById('guild-name').innerText = g.name;
+                document.getElementById('guild-tag').innerText = `[${g.tag}]`;
+                document.getElementById('guild-description').innerText = g.description || '';
+                document.getElementById('guild-level').innerText = g.level;
+                document.getElementById('guild-members-count').innerText = g.members.length;
+                document.getElementById('guild-xp').innerText = g.xp || 0;
+                
+                let membersHtml = '';
+                g.membersData.forEach(m => {
+                    membersHtml += `
+                    <div class="flex justify-between items-center bg-white/5 p-2 rounded-lg text-xs">
+                        <span>${m.username} ${m.isOwner ? '👑' : ''}</span>
+                        <span class="text-yellow-500">${t.dragonLevel} ${m.level}</span>
+                    </div>`;
+                });
+                document.getElementById('guild-members-list').innerHTML = membersHtml;
+            } else {
+                document.getElementById('guild-not-in').classList.remove('hidden');
+                document.getElementById('guild-info').classList.add('hidden');
+            }
+        }
+
+        function showCreateGuild() {
+            const name = prompt(currentLang === 'ar' ? 'أدخل اسم العشيرة:' : 'Enter guild name:');
+            if (!name) return;
+            const tag = prompt(currentLang === 'ar' ? 'أدخل اختصار العشيرة (3-5 أحرف):' : 'Enter guild tag (3-5 letters):');
+            if (!tag) return;
+            const description = prompt(currentLang === 'ar' ? 'أدخل وصف العشيرة (اختياري):' : 'Enter guild description (optional):') || '';
+            
+            tg.MainButton.setText(currentLang === 'ar' ? 'جاري الإنشاء...' : 'Creating...').show();
+            apiReq('/guild/create', 'POST', { name, tag, description }).then(r => {
+                tg.MainButton.hide();
+                if (r.success) {
+                    tg.showAlert(currentLang === 'ar' ? '✅ تم إنشاء العشيرة!' : '✅ Guild created!');
+                    loadGuildData();
+                } else {
+                    tg.showAlert(r.message || (currentLang === 'ar' ? 'فشل الإنشاء' : 'Creation failed'));
+                }
+            });
+        }
+
+        function showJoinGuild() {
+            const guildId = prompt(currentLang === 'ar' ? 'أدخل معرف العشيرة (من صديق):' : 'Enter guild ID (from friend):');
+            if (!guildId) return;
+            
+            tg.MainButton.setText(currentLang === 'ar' ? 'جاري الانضمام...' : 'Joining...').show();
+            apiReq('/guild/join', 'POST', { guildId }).then(r => {
+                tg.MainButton.hide();
+                if (r.success) {
+                    tg.showAlert(currentLang === 'ar' ? '✅ انضممت إلى العشيرة!' : '✅ Joined guild!');
+                    loadGuildData();
+                } else {
+                    tg.showAlert(r.message || (currentLang === 'ar' ? 'فشل الانضمام' : 'Join failed'));
+                }
+            });
+        }
+
+        function leaveGuild() {
+            if (!confirm(currentLang === 'ar' ? 'هل أنت متأكد من مغادرة العشيرة؟' : 'Are you sure you want to leave the guild?')) return;
+            
+            tg.MainButton.setText(currentLang === 'ar' ? 'جاري المغادرة...' : 'Leaving...').show();
+            apiReq('/guild/leave', 'POST', {}).then(r => {
+                tg.MainButton.hide();
+                if (r.success) {
+                    tg.showAlert(currentLang === 'ar' ? '✅ غادرت العشيرة' : '✅ Left guild');
+                    loadGuildData();
+                } else {
+                    tg.showAlert(r.message || (currentLang === 'ar' ? 'فشل' : 'Failed'));
+                }
+            });
+        }
+
         // ========== وظائف إضافية ==========
         function openBuyLink() {
             const tokenAddress = "0x583787E29Bb2D92FcBc713389FD66807602c72F3";
@@ -928,6 +1178,8 @@
                 loadReferralData();
             } else if (id === 'dragon') {
                 loadDragonData();
+            } else if (id === 'guild') {
+                loadGuildData();
             }
         }
 
