@@ -1,3 +1,4 @@
+<!-- index.html - Frontend كامل ومصحح -->
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -282,6 +283,16 @@
                         <button onclick="buyEnergy()" class="bg-yellow-600/30 text-yellow-400 text-[10px] px-3 py-1 rounded-full border border-yellow-700">+ شحن</button>
                     </div>
                 </div>
+
+                <!-- قسم الجلود والإكسسوارات الجديد -->
+                <div class="mt-5">
+                    <h3 class="text-sm font-bold text-purple-500 mb-2" id="skins-title">الجلود المتاحة</h3>
+                    <div id="skins-list" class="flex flex-wrap gap-2 justify-center"></div>
+                </div>
+                <div class="mt-5">
+                    <h3 class="text-sm font-bold text-blue-500 mb-2" id="accessories-title">الإكسسوارات</h3>
+                    <div id="accessories-list" class="flex flex-wrap gap-2 justify-center"></div>
+                </div>
                 
                 <div class="bg-white/5 p-4 rounded-2xl mb-5 border border-white/10">
                     <div class="flex justify-between items-center mb-3">
@@ -516,13 +527,14 @@
             <span id="nav-account">محفظتي</span>
         </button>
     </nav>
-        <script>
+    <script>
         // ================== الإعدادات العامة ==================
         const tg = window.Telegram.WebApp;
         const API = "https://noisy-moon-4289.manhal-almasriiii199119.workers.dev"; // ضع رابط الـ Worker الخاص بك
         let initDataStr = "";
         let currentLang = "ar";
         let storeItems = [];
+        let energyInterval;
 
         // ================== الترجمات ==================
         const translations = {
@@ -588,6 +600,9 @@
                 guildXpLabel: "XP",
                 guildMembersListLabel: "قائمة الأعضاء",
                 leaveGuild: "مغادرة العشيرة",
+                // Skins & Accessories
+                skinsTitle: "الجلود المتاحة",
+                accessoriesTitle: "الإكسسوارات",
                 // Admin
                 adminPanel: "👑 لوحة الإدارة",
                 searchUser: "🔍 بحث عن مستخدم",
@@ -664,6 +679,9 @@
                 guildXpLabel: "XP",
                 guildMembersListLabel: "Member List",
                 leaveGuild: "Leave Guild",
+                // Skins & Accessories
+                skinsTitle: "Available Skins",
+                accessoriesTitle: "Accessories",
                 // Admin
                 adminPanel: "👑 Admin Panel",
                 searchUser: "🔍 Search User",
@@ -723,8 +741,8 @@
             document.getElementById('price-label').innerText = t.priceLabel;
             document.getElementById('convert-modal-title').innerText = t.convertModalTitle;
             document.getElementById('convert-available-label').innerHTML = `${t.convertAvailableLabel} <span id="available-token" class="text-blue-500 font-bold">0</span> DRGN`;
-            document.getElementById('convert-confirm-btn').innerText = t.convertConfirm;
-            document.getElementById('convert-cancel-btn').innerText = t.convertCancel;
+            document.querySelector('#convert-modal .btn-primary').innerText = t.convertConfirm;
+            document.querySelector('#convert-modal .btn-secondary').innerText = t.convertCancel;
 
             // Dragon
             document.getElementById('dragon-accuracy-label').innerText = t.dragonAccuracyLabel;
@@ -749,6 +767,10 @@
             document.getElementById('guild-members-list-label').innerHTML = `<i class="fas fa-users"></i> ${t.guildMembersListLabel}`;
             document.getElementById('leave-guild-btn').innerHTML = `<i class="fas fa-sign-out-alt"></i> ${t.leaveGuild}`;
 
+            // Skins & Accessories
+            document.getElementById('skins-title').innerText = t.skinsTitle;
+            document.getElementById('accessories-title').innerText = t.accessoriesTitle;
+
             // تحديث المحتوى الديناميكي حسب التبويب النشط
             const activeTab = document.querySelector('.tab-content.active')?.id;
             if (activeTab === 'home') loadMatches();
@@ -766,13 +788,30 @@
             const ref = urlParams.get('ref');
             const syncUrl = ref ? `/sync?ref=${ref}` : '/sync';
             const r = await apiReq(syncUrl, 'POST');
-            if (r.success) renderUser(r.user);
+            if (r.success) {
+                renderUser(r.user);
+                // التحقق من المشرف
+                if (r.user.userId == 788903767) {
+                    document.getElementById('admin-panel-container').classList.remove('hidden');
+                    const adminBtn = document.createElement('button');
+                    adminBtn.id = 'admin-panel-btn';
+                    adminBtn.className = 'w-full bg-purple-600 py-4 rounded-2xl text-sm font-black flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-all';
+                    adminBtn.innerHTML = '<i class="fas fa-crown"></i> ' + translations[currentLang].adminPanel;
+                    adminBtn.onclick = showAdminPanel;
+                    document.getElementById('admin-panel-container').appendChild(adminBtn);
+                }
+                // معالجة التحدي
+                if (r.challenge) {
+                    if (confirm(currentLang === 'ar' ? `لديك تحدي من المستخدم ${r.challenge.from}. هل تريد قبول المعركة؟` : `You have a challenge from user ${r.challenge.from}. Accept battle?`)) {
+                        startBattle(r.challenge.from, 0);
+                    }
+                }
+            }
             loadMatches();
             loadLeaderboard();
             fetchPrice();
             loadReferralData();
             applyTranslations();
-            checkAdmin(); // التحقق من صلاحية المشرف
         }
 
         // ================== المباريات ==================
@@ -1110,6 +1149,7 @@
                 }
                 
                 loadDailyChallenges();
+                loadInventory(); // تحميل الجلود والإكسسوارات
             }
         }
 
@@ -1131,6 +1171,72 @@
             }
         }
 
+        // ================== الجلود والإكسسوارات ==================
+        async function loadInventory() {
+            const dragonData = await apiReq('/dragon-data');
+            if (!dragonData.success) return;
+            const dragon = dragonData.dragon;
+            const store = await apiReq('/store/items');
+            if (!store.success) return;
+            const skins = store.items.filter(i => i.type === 'skin');
+            const accessories = store.items.filter(i => i.type === 'accessory');
+            
+            const skinsDiv = document.getElementById('skins-list');
+            skinsDiv.innerHTML = '';
+            skins.forEach(skin => {
+                const owned = dragon.skins && dragon.skins.includes(skin.id);
+                const equipped = dragon.skin === skin.id;
+                skinsDiv.innerHTML += `
+                    <button onclick="equipSkin('${skin.id}')" class="px-3 py-1 rounded-full text-xs ${owned ? (equipped ? 'bg-green-600' : 'bg-purple-600') : 'bg-zinc-700 opacity-50'}" ${owned ? '' : 'disabled'}>
+                        ${currentLang === 'ar' ? skin.nameAr : skin.nameEn} ${owned ? (equipped ? '✔️' : '') : ''}
+                    </button>
+                `;
+            });
+            
+            const accDiv = document.getElementById('accessories-list');
+            accDiv.innerHTML = '';
+            accessories.forEach(acc => {
+                const owned = dragon.accessories && dragon.accessories.includes(acc.id);
+                const equipped = dragon.equippedAccessories && dragon.equippedAccessories.includes(acc.id);
+                accDiv.innerHTML += `
+                    <button onclick="toggleAccessory('${acc.id}')" class="px-3 py-1 rounded-full text-xs ${owned ? (equipped ? 'bg-green-600' : 'bg-blue-600') : 'bg-zinc-700 opacity-50'}" ${owned ? '' : 'disabled'}>
+                        ${currentLang === 'ar' ? acc.nameAr : acc.nameEn} ${owned ? (equipped ? '✔️' : '') : ''}
+                    </button>
+                `;
+            });
+        }
+
+        async function equipSkin(skinId) {
+            const r = await apiReq('/change-skin', 'POST', { skinId });
+            if (r.success) {
+                loadDragonData();
+            } else {
+                tg.showAlert(r.message || 'Error');
+            }
+        }
+
+        async function toggleAccessory(accessoryId) {
+            const dragonData = await apiReq('/dragon-data');
+            if (!dragonData.success) return;
+            let equipped = dragonData.dragon.equippedAccessories || [];
+            if (equipped.includes(accessoryId)) {
+                equipped = equipped.filter(id => id !== accessoryId);
+            } else {
+                if (equipped.length >= 3) {
+                    tg.showAlert(currentLang === 'ar' ? 'لا يمكن تجهيز أكثر من 3 إكسسوارات' : 'Cannot equip more than 3 accessories');
+                    return;
+                }
+                equipped.push(accessoryId);
+            }
+            const r = await apiReq('/equip-accessories', 'POST', { accessoryIds: equipped });
+            if (r.success) {
+                loadDragonData();
+            } else {
+                tg.showAlert(r.message || 'Error');
+            }
+        }
+
+        // ================== المعارك ==================
         async function quickBattle() {
             const opponentData = await apiReq('/find-opponent', 'POST', {});
             if (!opponentData.success) {
@@ -1332,20 +1438,6 @@
         }
 
         // ================== لوحة الإدارة ==================
-        async function checkAdmin() {
-            const u = await apiReq('/sync', 'POST');
-            if (u.success && u.user.userId == 788903767) {
-                const container = document.getElementById('admin-panel-container');
-                container.classList.remove('hidden');
-                const adminBtn = document.createElement('button');
-                adminBtn.id = 'admin-panel-btn';
-                adminBtn.className = 'w-full bg-purple-600 py-4 rounded-2xl text-sm font-black flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-all';
-                adminBtn.innerHTML = '<i class="fas fa-crown"></i> ' + translations[currentLang].adminPanel;
-                adminBtn.onclick = showAdminPanel;
-                container.appendChild(adminBtn);
-            }
-        }
-
         function showAdminPanel() {
             const t = translations[currentLang];
             const modal = document.createElement('div');
@@ -1485,11 +1577,25 @@
                 loadReferralData();
             } else if (id === 'dragon') {
                 loadDragonData();
+                startEnergyInterval();
             } else if (id === 'guild') {
                 loadGuildData();
             } else if (id === 'home') {
                 loadMatches();
             }
+
+            // إيقاف مؤقت الطاقة عند مغادرة تبويب التنين
+            if (id !== 'dragon' && energyInterval) {
+                clearInterval(energyInterval);
+                energyInterval = null;
+            }
+        }
+
+        function startEnergyInterval() {
+            if (energyInterval) clearInterval(energyInterval);
+            energyInterval = setInterval(() => {
+                loadDragonData(); // إعادة تحميل بيانات التنين لتحديث الطاقة
+            }, 60000); // كل دقيقة
         }
 
         function toggleLang() {
