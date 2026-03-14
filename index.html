@@ -136,14 +136,13 @@
             }
         };
 
-        // دالة الطلب إلى API (تستخدم Header بدلاً من Query String)
         async function apiReq(path, method = 'GET', body = null) {
             if (!initDataStr) initDataStr = tg.initData || '';
             const options = { 
                 method, 
                 headers: { 
                     'Content-Type': 'application/json',
-                    'x-telegram-init-data': initDataStr  // إرسال initData في الرأس
+                    'x-telegram-init-data': initDataStr
                 } 
             };
             if (body) options.body = JSON.stringify(body);
@@ -191,7 +190,6 @@
             d.matches.forEach(m => {
                 const timeStr = new Date(m.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                 const status = m.isOpen ? `<span class="text-green-500">● LIVE VOTING</span>` : `<span>${timeStr}</span>`;
-                // تم تصحيح القالب هنا: استخدام ${} بدلاً من \( \)
                 const votingHTML = m.isOpen ? `
                     <div class="grid grid-cols-3 gap-2 mt-4" id="v-${m.id}">
                         <button onclick="vote('${m.id}','HOME',${m.time})" class="bg-white/5 py-3 rounded-xl hover:bg-red-600 transition-all font-black italic text-xs">1</button>
@@ -245,7 +243,6 @@
 
         async function updateWallet() {
             const wallet = document.getElementById('bsc-address').value.trim();
-            // تحسين التحقق من العنوان
             if (!wallet || !/^0x[a-fA-F0-9]{40}$/.test(wallet)) {
                 tg.showAlert(currentLang === 'ar' ? "عنوان BSC غير صحيح" : "Invalid BSC address");
                 return;
@@ -253,6 +250,8 @@
             const r = await apiReq('/check-balance', 'POST', { wallet });
             if (r.success) {
                 renderUser(r.user);
+                // 🆕 إعادة تحميل لوحة المتصدرين بعد تحديث الرصيد
+                await loadLeaderboard();
                 tg.showAlert(currentLang === 'ar' ? "✅ تم تحديث المحفظة والرتبة!" : "✅ Wallet updated successfully!");
             } else {
                 tg.showAlert(r.message || "Unauthorized");
@@ -263,6 +262,8 @@
             const r = await apiReq('/claim-rewards', 'POST');
             if (r.success) {
                 renderUser(r.user);
+                // 🆕 إعادة تحميل لوحة المتصدرين بعد المطالبة
+                await loadLeaderboard();
                 tg.showAlert(currentLang === 'ar' ? "✅ تم سحب المكافآت!" : "✅ Rewards claimed!");
             } else {
                 tg.showAlert(r.message || "Unauthorized");
@@ -296,6 +297,10 @@
             document.getElementById(id).classList.add('active');
             const activeBtn = document.querySelector(`button[onclick="showTab('${id}')"]`);
             if (activeBtn) activeBtn.classList.add('active');
+            // إذا تم فتح تبويب الدوري، نضمن تحميل أحدث البيانات
+            if (id === 'league') {
+                loadLeaderboard();
+            }
         }
 
         function toggleLang() {
@@ -305,7 +310,6 @@
             applyTranslations();
         }
 
-        // بدء التطبيق
         init();
     </script>
 </body>
