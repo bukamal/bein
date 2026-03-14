@@ -21,6 +21,7 @@
 </head>
 <body class="pb-24">
 
+    <!-- Header + Main + Nav (نفس السابق) -->
     <header class="p-4 flex justify-between items-center bg-black/50 backdrop-blur-lg sticky top-0 z-[100] border-b border-white/5">
         <div class="flex items-center gap-3">
             <div class="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center shadow-lg shadow-red-600/20">
@@ -77,25 +78,25 @@
                 </div>
             </div>
 
-            <button onclick="claimRewards()" id="btn-claim" class="w-full py-4 bg-red-600 text-white font-black rounded-2xl shadow-xl shadow-red-900/40 active:scale-95 transition-all">CLAIM REWARDS</button>
+            <button onclick="claimRewards()" id="btn-claim" class="w-full py-4 bg-red-600 text-white font-black rounded-2xl shadow-xl shadow-red-900/40 active:scale-95 transition-all">سحب المكافآت</button>
 
             <div class="dragon-card p-5 space-y-3">
-                <p class="text-[9px] text-zinc-500 font-bold text-center italic">Connect your BSC Wallet to update Rank & Balance</p>
+                <p class="text-[9px] text-zinc-500 font-bold text-center italic">ربط محفظة BSC لتحديث الرتبة والرصيد</p>
                 <input id="bsc-address" type="text" placeholder="0x..." class="w-full bg-black border border-white/10 p-4 rounded-xl text-xs text-center outline-none focus:border-red-600 transition-all">
-                <button onclick="updateWallet()" id="btn-update" class="w-full py-3 bg-white text-black text-[11px] font-black rounded-xl uppercase active:scale-95 transition-all">Update Wallet</button>
+                <button onclick="updateWallet()" id="btn-update" class="w-full py-3 bg-white text-black text-[11px] font-black rounded-xl uppercase active:scale-95 transition-all">تحديث المحفظة</button>
             </div>
         </section>
     </main>
 
     <nav class="fixed bottom-0 left-0 right-0 bg-black/80 backdrop-blur-xl border-t border-white/5 flex justify-around p-3 z-[100]">
         <button onclick="showTab('home')" id="n-home" class="nav-btn active flex-1 flex flex-col items-center">
-            <i class="fas fa-gamepad text-xl mb-1"></i><span id="nav-home" class="text-[9px] font-bold">Stadium</span>
+            <i class="fas fa-gamepad text-xl mb-1"></i><span id="nav-home" class="text-[9px] font-bold">الملعب</span>
         </button>
         <button onclick="showTab('league')" id="n-league" class="nav-btn flex-1 flex flex-col items-center">
-            <i class="fas fa-trophy text-xl mb-1"></i><span id="nav-league" class="text-[9px] font-bold">League</span>
+            <i class="fas fa-trophy text-xl mb-1"></i><span id="nav-league" class="text-[9px] font-bold">الدوري</span>
         </button>
         <button onclick="showTab('account')" id="n-account" class="nav-btn flex-1 flex flex-col items-center">
-            <i class="fas fa-wallet text-xl mb-1"></i><span id="nav-acc" class="text-[9px] font-bold">Account</span>
+            <i class="fas fa-wallet text-xl mb-1"></i><span id="nav-acc" class="text-[9px] font-bold">الحساب</span>
         </button>
     </nav>
 
@@ -103,10 +104,10 @@
         const tg = window.Telegram.WebApp;
         const API = "https://noisy-moon-4289.manhal-almasriiii199119.workers.dev";
         
-        // الحل النهائي: حفظ initData مرة واحدة فقط
-        let initDataStr = tg.initData || '';
+        let initDataStr = "";   // ← مهم: نبدأ فارغ
 
         async function apiReq(path, method = 'GET', body = null) {
+            if (!initDataStr) initDataStr = tg.initData || '';   // حماية إضافية
             try {
                 const options = {
                     method,
@@ -119,18 +120,22 @@
                 const r = await fetch(API + path, options);
                 return await r.json();
             } catch (e) {
-                return { success: false, message: "Network Error" };
+                return { success: false, message: "خطأ في الاتصال" };
             }
         }
 
         async function init() {
-            tg.ready(); tg.expand();
+            tg.ready();           // ← أول شيء
+            tg.expand();
+            initDataStr = tg.initData || '';   // ← هنا بعد ready() (هذا هو الحل)
+            
             const r = await apiReq('/sync', 'POST');
             if (r.success) renderUser(r.user);
             loadMatches();
             loadLeaderboard();
         }
 
+        // باقي الكود (نفس النسخة الناجحة سابقاً)
         async function loadMatches() {
             document.getElementById('match-loader').classList.remove('hidden');
             const d = await apiReq('/get-matches');
@@ -140,7 +145,7 @@
             container.innerHTML = '';
 
             if (!d.success || !d.matches || d.matches.length === 0) {
-                container.innerHTML = `<div class="dragon-card p-6 text-center text-red-500">خطأ في تحميل المباريات<br><small>${d.message || ''}</small></div>`;
+                container.innerHTML = `<div class="dragon-card p-6 text-center text-red-500">خطأ في تحميل المباريات</div>`;
                 return;
             }
 
@@ -148,7 +153,6 @@
             d.matches.forEach(m => {
                 const timeStr = new Date(m.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                 const status = m.isOpen ? `<span class="text-green-500">● LIVE VOTING</span>` : `<span>${timeStr}</span>`;
-
                 const votingHTML = m.isOpen ? `
                     <div class="grid grid-cols-3 gap-2 mt-4" id="v-${m.id}">
                         <button onclick="vote('\( {m.id}','HOME', \){m.time})" class="bg-white/5 py-3 rounded-xl hover:bg-red-600 transition-all font-black italic text-xs">1</button>
@@ -165,12 +169,12 @@
                     </div>
                     <div class="flex items-center gap-4">
                         <div class="flex-1 text-center">
-                            <img src="${m.logoA}" class="w-12 h-12 mx-auto mb-2 drop-shadow-lg" onerror="this.src='https://via.placeholder.com/48?text=TeamA'">
+                            <img src="${m.logoA}" class="w-12 h-12 mx-auto mb-2 drop-shadow-lg" onerror="this.src='https://via.placeholder.com/48?text=A'">
                             <p class="text-[10px] font-black uppercase">${m.teamA}</p>
                         </div>
                         <div class="text-red-600 font-black italic text-xl">VS</div>
                         <div class="flex-1 text-center">
-                            <img src="${m.logoB}" class="w-12 h-12 mx-auto mb-2 drop-shadow-lg" onerror="this.src='https://via.placeholder.com/48?text=TeamB'">
+                            <img src="${m.logoB}" class="w-12 h-12 mx-auto mb-2 drop-shadow-lg" onerror="this.src='https://via.placeholder.com/48?text=B'">
                             <p class="text-[10px] font-black uppercase">${m.teamB}</p>
                         </div>
                     </div>
@@ -181,16 +185,14 @@
         }
 
         async function vote(id, side, time) {
-            tg.MainButton.setText("SENDING VOTE...").show();
+            tg.MainButton.setText("جاري إرسال التصويت...").show();
             const r = await apiReq('/vote', 'POST', { matchId: id, voteFor: side, matchTime: time });
             tg.MainButton.hide();
             if (r.success) {
                 tg.HapticFeedback.notificationOccurred('success');
                 const v = document.getElementById(`v-${id}`);
-                if (v) v.innerHTML = `<div class="col-span-3 py-2 text-center text-green-500 font-black italic text-xs animate-bounce">VOTE REGISTERED ✓</div>`;
-            } else {
-                tg.showAlert(r.message || "Error");
-            }
+                if (v) v.innerHTML = `<div class="col-span-3 py-2 text-center text-green-500 font-black italic text-xs animate-bounce">تم تسجيل التصويت ✓</div>`;
+            } else tg.showAlert(r.message || "خطأ");
         }
 
         function renderUser(u) {
@@ -204,15 +206,15 @@
         async function updateWallet() {
             const wallet = document.getElementById('bsc-address').value.trim();
             if (!wallet || !wallet.startsWith('0x') || wallet.length !== 42) {
-                tg.showAlert("Invalid BSC Address");
+                tg.showAlert("عنوان BSC غير صحيح");
                 return;
             }
             const r = await apiReq('/check-balance', 'POST', { wallet });
             if (r.success) {
                 renderUser(r.user);
-                tg.showConfirm("✅ Wallet & Rank Updated!");
+                tg.showConfirm("✅ تم تحديث المحفظة والرتبة!");
             } else {
-                tg.showAlert(r.message || "Unauthorized - أعد فتح التطبيق من تليجرام");
+                tg.showAlert(r.message || "Unauthorized - أعد فتح التطبيق");
             }
         }
 
@@ -220,9 +222,9 @@
             const r = await apiReq('/claim-rewards', 'POST');
             if (r.success) {
                 renderUser(r.user);
-                tg.showAlert("✅ Rewards moved to Game Wallet!");
+                tg.showAlert("✅ تم سحب المكافآت إلى Game Wallet!");
             } else {
-                tg.showAlert(r.message || "Unauthorized - أعد فتح التطبيق من تليجرام");
+                tg.showAlert(r.message || "Unauthorized - أعد فتح التطبيق");
             }
         }
 
