@@ -21,7 +21,7 @@
 </head>
 <body class="pb-24">
 
-    <!-- Header + Main + Nav (نفس السابق) -->
+    <!-- Header + Main + Nav (نفس السابق تماماً) -->
     <header class="p-4 flex justify-between items-center bg-black/50 backdrop-blur-lg sticky top-0 z-[100] border-b border-white/5">
         <div class="flex items-center gap-3">
             <div class="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center shadow-lg shadow-red-600/20">
@@ -104,30 +104,32 @@
         const tg = window.Telegram.WebApp;
         const API = "https://noisy-moon-4289.manhal-almasriiii199119.workers.dev";
         
-        let initDataStr = "";   // ← مهم: نبدأ فارغ
+        let initDataStr = "";
 
         async function apiReq(path, method = 'GET', body = null) {
-            if (!initDataStr) initDataStr = tg.initData || '';   // حماية إضافية
-            try {
-                const options = {
-                    method,
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'x-telegram-init-data': initDataStr
-                    }
-                };
-                if (body) options.body = JSON.stringify(body);
-                const r = await fetch(API + path, options);
-                return await r.json();
-            } catch (e) {
-                return { success: false, message: "خطأ في الاتصال" };
+            if (!initDataStr) initDataStr = tg.initData || '';
+            
+            let fetchUrl = API + path;
+            if (path.includes('?')) {
+                fetchUrl += '&initData=' + encodeURIComponent(initDataStr);
+            } else {
+                fetchUrl += '?initData=' + encodeURIComponent(initDataStr);
             }
+
+            const options = { 
+                method, 
+                headers: { 'Content-Type': 'application/json' } 
+            };
+            if (body) options.body = JSON.stringify(body);
+
+            const r = await fetch(fetchUrl, options);
+            return await r.json();
         }
 
         async function init() {
-            tg.ready();           // ← أول شيء
+            tg.ready();
             tg.expand();
-            initDataStr = tg.initData || '';   // ← هنا بعد ready() (هذا هو الحل)
+            initDataStr = tg.initData || '';
             
             const r = await apiReq('/sync', 'POST');
             if (r.success) renderUser(r.user);
@@ -135,7 +137,6 @@
             loadLeaderboard();
         }
 
-        // باقي الكود (نفس النسخة الناجحة سابقاً)
         async function loadMatches() {
             document.getElementById('match-loader').classList.remove('hidden');
             const d = await apiReq('/get-matches');
@@ -153,6 +154,7 @@
             d.matches.forEach(m => {
                 const timeStr = new Date(m.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                 const status = m.isOpen ? `<span class="text-green-500">● LIVE VOTING</span>` : `<span>${timeStr}</span>`;
+                
                 const votingHTML = m.isOpen ? `
                     <div class="grid grid-cols-3 gap-2 mt-4" id="v-${m.id}">
                         <button onclick="vote('\( {m.id}','HOME', \){m.time})" class="bg-white/5 py-3 rounded-xl hover:bg-red-600 transition-all font-black italic text-xs">1</button>
@@ -192,7 +194,9 @@
                 tg.HapticFeedback.notificationOccurred('success');
                 const v = document.getElementById(`v-${id}`);
                 if (v) v.innerHTML = `<div class="col-span-3 py-2 text-center text-green-500 font-black italic text-xs animate-bounce">تم تسجيل التصويت ✓</div>`;
-            } else tg.showAlert(r.message || "خطأ");
+            } else {
+                tg.showAlert(r.message || "خطأ");
+            }
         }
 
         function renderUser(u) {
