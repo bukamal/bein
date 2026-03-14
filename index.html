@@ -120,7 +120,7 @@
 
             <button id="claim-btn" onclick="claimRewards()" class="w-full py-4 bg-red-600 text-white font-black rounded-2xl shadow-xl shadow-red-900/40 active:scale-95 transition-all">سحب المكافآت</button>
 
-            <!-- قسم ربط المحفظة (محدث) -->
+            <!-- قسم ربط المحفظة (محدث مع حل مشكلة فتح الرابط) -->
             <div class="dragon-card p-5 space-y-3">
                 <p id="connect-wallet-label" class="text-[9px] text-zinc-500 font-bold text-center italic">
                     ربط محفظة BSC لتحديث الرتبة والرصيد
@@ -351,7 +351,6 @@
             if (u.wallet) document.getElementById('bsc-address').value = u.wallet;
         }
 
-        // تحديث دالة updateWallet لقبول عنوان كمعامل (مع الحفاظ على التوافق)
         async function updateWallet(wallet = null) {
             if (!wallet) {
                 wallet = document.getElementById('bsc-address').value.trim();
@@ -423,7 +422,7 @@
         async function loadStoreItems() {
             const data = await apiReq('/store/items');
             if (!data.success || !data.items) return;
-            storeItems = data.items; // حفظ للاستخدام
+            storeItems = data.items;
             const container = document.getElementById('store-items');
             let html = '';
             data.items.forEach(item => {
@@ -511,43 +510,66 @@
             }
         }
 
-        // ========== WalletConnect ==========
+        // ========== WalletConnect محسّن ==========
         async function connectWallet() {
             try {
-                const projectId = 'a9351c7f86cc1e297719aba320b2f9bf'; // المشروع الخاص بك
-                
+                const projectId = 'a9351c7f86cc1e297719aba320b2f9bf';
                 tg.MainButton.setText(currentLang === 'ar' ? 'جاري ربط المحفظة...' : 'Connecting wallet...').show();
 
-                walletConnectProvider = await WalletConnectProvider.init({
+                // محاولة استخدام الطريقة العادية (مع modal)
+                const provider = await EthereumProvider.init({
                     projectId,
-                    chains: [56], // BSC Mainnet
+                    chains: [56],
                     showQrModal: true,
-                    methods: ['eth_sendTransaction', 'eth_sign'],
-                    optionalChains: [56],
-                    rpcMap: {
-                        56: 'https://bsc-dataseed.binance.org/'
-                    }
+                    rpcMap: { 56: 'https://bsc-dataseed.binance.org/' }
                 });
 
-                await walletConnectProvider.connect();
-                
-                const accounts = walletConnectProvider.accounts;
+                await provider.connect();
+                const accounts = provider.accounts;
                 if (accounts && accounts.length > 0) {
                     const address = accounts[0];
-                    
                     document.getElementById('wallet-info').innerHTML = `✅ متصل: ${address.slice(0,6)}...${address.slice(-4)}`;
                     document.getElementById('wallet-info').classList.remove('hidden');
-                    
-                    // تحديث المحفظة تلقائياً
                     await updateWallet(address);
-                    
                     tg.HapticFeedback.notificationOccurred('success');
                 }
             } catch (error) {
                 console.error('WalletConnect error:', error);
-                tg.showAlert(currentLang === 'ar' 
-                    ? 'فشل الاتصال بالمحفظة. تأكد من تثبيت محفظة مثل MetaMask أو TrustWallet.' 
-                    : 'Failed to connect wallet. Make sure you have a wallet like MetaMask or TrustWallet installed.');
+                
+                // إذا فشل (بسبب حظر النوافذ المنبثقة)، نستخدم الطريقة البديلة: إنشاء رابط URI وفتحه في متصفح خارجي
+                try {
+                    const provider = await EthereumProvider.init({
+                        projectId,
+                        chains: [56],
+                        showQrModal: false, // لا نستخدم modal
+                        rpcMap: { 56: 'https://bsc-dataseed.binance.org/' }
+                    });
+                    
+                    // الحصول على رابط الاتصال (URI)
+                    const uri = await provider.client.connect({
+                        permissions: {
+                            blockchain: { chains: ['eip155:56'] },
+                            jsonrpc: { methods: ['eth_sendTransaction', 'eth_sign'] }
+                        }
+                    });
+                    
+                    // فتح الرابط في متصفح خارجي (إذا كان متاحًا في بيئة Telegram)
+                    if (Telegram.WebApp.openLink) {
+                        Telegram.WebApp.openLink(uri);
+                        tg.showAlert(currentLang === 'ar' 
+                            ? 'تم فتح رابط الاتصال في متصفح خارجي. يرجى إتمام الخطوات هناك، ثم العودة للضغط على "تحديث المحفظة يدوياً" بعد الربط.'
+                            : 'Connection link opened in external browser. Please complete the steps there, then press "Update Wallet Manually" after connecting.');
+                    } else {
+                        // إذا لم يكن openLink متاحًا، نعرض الرابط للمستخدم
+                        tg.showAlert(currentLang === 'ar' 
+                            ? `الرابط: ${uri}\nانسخه وافتحه في متصفح.`
+                            : `Link: ${uri}\nCopy and open in browser.`);
+                    }
+                } catch (e) {
+                    tg.showAlert(currentLang === 'ar' 
+                        ? 'فشل الاتصال. حاول مرة أخرى أو استخدم الإدخال اليدوي.' 
+                        : 'Connection failed. Try again or use manual entry.');
+                }
             } finally {
                 tg.MainButton.hide();
             }
