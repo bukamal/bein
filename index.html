@@ -110,12 +110,12 @@
                 headerTitle: "Dragon Stadium",
                 onlineHub: "Online Hub",
                 totalAssets: "إجمالي الأصول",
-                gameWallet: "Game Wallet",
-                pending: "Pending",
+                gameWallet: "محفظة اللعبة",          // ترجمة
+                pending: "معلق",                      // ترجمة
                 claimRewards: "سحب المكافآت",
                 connectWallet: "ربط محفظة BSC لتحديث الرتبة والرصيد",
                 updateWallet: "تحديث المحفظة",
-                leaderboardTitle: "LEADERBOARD",
+                leaderboardTitle: "قائمة المتصدرين",  // ترجمة
                 navStadium: "الملعب",
                 navLeague: "الدوري",
                 navAccount: "الحساب"
@@ -250,7 +250,7 @@
             const r = await apiReq('/check-balance', 'POST', { wallet });
             if (r.success) {
                 renderUser(r.user);
-                // 🆕 إعادة تحميل لوحة المتصدرين بعد تحديث الرصيد
+                // إعادة تحميل لوحة المتصدرين بعد التحديث
                 await loadLeaderboard();
                 tg.showAlert(currentLang === 'ar' ? "✅ تم تحديث المحفظة والرتبة!" : "✅ Wallet updated successfully!");
             } else {
@@ -262,7 +262,6 @@
             const r = await apiReq('/claim-rewards', 'POST');
             if (r.success) {
                 renderUser(r.user);
-                // 🆕 إعادة تحميل لوحة المتصدرين بعد المطالبة
                 await loadLeaderboard();
                 tg.showAlert(currentLang === 'ar' ? "✅ تم سحب المكافآت!" : "✅ Rewards claimed!");
             } else {
@@ -297,7 +296,7 @@
             document.getElementById(id).classList.add('active');
             const activeBtn = document.querySelector(`button[onclick="showTab('${id}')"]`);
             if (activeBtn) activeBtn.classList.add('active');
-            // إذا تم فتح تبويب الدوري، نضمن تحميل أحدث البيانات
+            // تحميل لوحة المتصدرين عند فتح التبويب
             if (id === 'league') {
                 loadLeaderboard();
             }
