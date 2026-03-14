@@ -17,6 +17,37 @@
         .tab-content { display: none; animation: slideUp 0.4s ease-out; }
         .tab-content.active { display: block; }
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        
+        /* شريط التنبيه المتحرك */
+        .ticker-wrap {
+            width: 100%;
+            overflow: hidden;
+            background: linear-gradient(90deg, #1a1a1a, #2d2d2d);
+            border-bottom: 1px solid #ff3333;
+            padding: 8px 0;
+            white-space: nowrap;
+            position: relative;
+        }
+        .ticker {
+            display: inline-block;
+            animation: ticker 20s linear infinite;
+            padding-left: 100%;
+        }
+        .ticker-item {
+            display: inline-block;
+            margin-right: 40px;
+            color: #ffaa00;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        .ticker-item span {
+            color: #fff;
+            margin-left: 5px;
+        }
+        @keyframes ticker {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-100%); }
+        }
     </style>
 </head>
 <body class="pb-24">
@@ -39,6 +70,15 @@
         </button>
     </header>
 
+    <!-- شريط التنبيه المتحرك -->
+    <div class="ticker-wrap" id="ticker-wrap">
+        <div class="ticker" id="ticker">
+            <div class="ticker-item">🔮 <span id="liquidity-value">0</span> USDT</div>
+            <div class="ticker-item">📊 <span id="volume-value">0</span> USDT</div>
+            <div class="ticker-item">⚠️ <span id="slippage-value">0</span>%</div>
+        </div>
+    </div>
+
     <main class="p-4 space-y-6">
         <!-- تبويب المباريات -->
         <section id="home" class="tab-content active space-y-4">
@@ -60,7 +100,7 @@
         <!-- تبويب السوق -->
         <section id="store" class="tab-content space-y-4">
             <div class="dragon-card p-5 border-purple-900/30">
-                <h2 class="text-center text-purple-600 font-black italic mb-4">السوق</h2>
+                <h2 id="store-title" class="text-center text-purple-600 font-black italic mb-4">السوق</h2>
                 <div id="store-items" class="space-y-3"></div>
             </div>
         </section>
@@ -90,18 +130,18 @@
 
             <!-- عرض الرصيد الحقيقي وزر التحويل -->
             <div class="dragon-card p-4 text-center">
-                <p class="text-[8px] text-zinc-500 font-bold uppercase">الرصيد الحقيقي (Token)</p>
+                <p id="real-balance-label" class="text-[8px] text-zinc-500 font-bold uppercase">الرصيد الحقيقي</p>
                 <p id="token-balance-display" class="text-lg font-black mt-1 text-blue-500">0</p>
                 <button onclick="showConvertModal()" class="mt-2 w-full py-2 bg-blue-600 text-white text-[9px] font-black rounded-lg active:scale-95 transition-all">
-                    <i class="fas fa-exchange-alt ml-1"></i> تحويل إلى رصيد اللعبة
+                    <i id="convert-btn-text" class="fas fa-exchange-alt ml-1"></i> تحويل إلى رصيد اللعبة
                 </button>
             </div>
 
             <!-- نظام الإحالة -->
             <div class="dragon-card p-5 border-blue-600/30">
-                <p class="text-center text-blue-500 font-bold text-[10px] mb-2">🤝 نظام الإحالة</p>
+                <p id="referral-title" class="text-center text-blue-500 font-bold text-[10px] mb-2">🤝 نظام الإحالة</p>
                 <div class="text-center">
-                    <p class="text-[9px] text-zinc-400">رابط الإحالة الخاص بك:</p>
+                    <p id="referral-link-label" class="text-[9px] text-zinc-400">رابط الإحالة الخاص بك:</p>
                     <div class="flex items-center gap-2 mt-1">
                         <input id="referral-link" type="text" readonly class="flex-1 bg-black/50 border border-white/10 p-2 rounded-lg text-[8px] text-center outline-none" value="جاري التحميل...">
                         <button onclick="copyReferralLink()" class="bg-blue-600 px-3 py-2 rounded-lg text-[10px] font-bold">
@@ -109,8 +149,8 @@
                         </button>
                     </div>
                     <div class="flex justify-between mt-3 text-[9px]">
-                        <span>عدد المُحالين: <span id="referrals-count" class="text-blue-500 font-bold">0</span></span>
-                        <span>مكافآت الإحالة: <span id="referral-rewards" class="text-yellow-500 font-bold">0</span> DRGN</span>
+                        <span id="referrals-count-label">عدد المُحالين: <span id="referrals-count" class="text-blue-500 font-bold">0</span></span>
+                        <span id="referral-rewards-label">مكافآت الإحالة: <span id="referral-rewards" class="text-yellow-500 font-bold">0</span> DRGN</span>
                     </div>
                 </div>
             </div>
@@ -124,22 +164,22 @@
                 </p>
                 
                 <input id="bsc-address" type="text" placeholder="0x..." class="w-full bg-black border border-white/10 p-4 rounded-xl text-xs text-center outline-none focus:border-red-600 transition-all">
-                <button onclick="updateWallet()" class="w-full py-3 bg-white text-black text-[11px] font-black rounded-xl uppercase active:scale-95 transition-all">
+                <button onclick="updateWallet()" id="update-wallet-btn" class="w-full py-3 bg-white text-black text-[11px] font-black rounded-xl uppercase active:scale-95 transition-all">
                     تحديث الرصيد
                 </button>
 
                 <div class="flex gap-2 mt-2">
-                    <button onclick="openBuyLink()" class="flex-1 py-3 bg-yellow-600 text-white text-[11px] font-black rounded-xl uppercase active:scale-95 transition-all">
+                    <button onclick="openBuyLink()" id="buy-btn" class="flex-1 py-3 bg-yellow-600 text-white text-[11px] font-black rounded-xl uppercase active:scale-95 transition-all">
                         <i class="fas fa-shopping-cart ml-1"></i> اشترِ DRGN
                     </button>
                 </div>
                 <div id="price-container" class="text-center text-[9px] text-zinc-500 mt-2 hidden">
-                    السعر الحالي: <span id="drgn-price">...</span> USD
+                    <span id="price-label">السعر الحالي:</span> <span id="drgn-price">...</span> USD
                 </div>
             </div>
 
             <div class="dragon-card p-5 mt-2 border border-yellow-600/30">
-                <p class="text-center text-[10px] text-yellow-500 font-bold">
+                <p id="game-balance-note" class="text-center text-[10px] text-yellow-500 font-bold">
                     ⚡ رصيد اللعبة يمكن استخدامه في السوق لشراء التذاكر والشارات.
                 </p>
             </div>
@@ -152,12 +192,12 @@
             <button onclick="hideConvertModal()" class="absolute top-2 left-2 text-zinc-500">
                 <i class="fas fa-times"></i>
             </button>
-            <h3 class="text-center text-blue-500 font-black italic mb-4">تحويل الرصيد الحقيقي</h3>
-            <p class="text-[10px] text-zinc-400 text-center mb-2">الرصيد المتاح للتحويل: <span id="available-token" class="text-blue-500 font-bold">0</span> DRGN</p>
+            <h3 id="convert-modal-title" class="text-center text-blue-500 font-black italic mb-4">تحويل الرصيد الحقيقي</h3>
+            <p id="convert-available-label" class="text-[10px] text-zinc-400 text-center mb-2">الرصيد المتاح للتحويل: <span id="available-token" class="text-blue-500 font-bold">0</span> DRGN</p>
             <input id="convert-amount" type="number" min="1" placeholder="الكمية" class="w-full bg-black border border-white/10 p-3 rounded-xl text-xs text-center outline-none focus:border-blue-600 transition-all mb-3">
             <div class="flex gap-2">
-                <button onclick="convertToGame()" class="flex-1 py-3 bg-blue-600 text-white text-[10px] font-black rounded-xl active:scale-95 transition-all">تحويل</button>
-                <button onclick="hideConvertModal()" class="flex-1 py-3 bg-white/10 text-white text-[10px] font-black rounded-xl active:scale-95 transition-all">إلغاء</button>
+                <button onclick="convertToGame()" id="convert-confirm-btn" class="flex-1 py-3 bg-blue-600 text-white text-[10px] font-black rounded-xl active:scale-95 transition-all">تحويل</button>
+                <button onclick="hideConvertModal()" id="convert-cancel-btn" class="flex-1 py-3 bg-white/10 text-white text-[10px] font-black rounded-xl active:scale-95 transition-all">إلغاء</button>
             </div>
         </div>
     </div>
@@ -195,10 +235,32 @@
                 connectWallet: "أدخل عنوان محفظة BSC لتحديث الرتبة والرصيد",
                 updateWallet: "تحديث الرصيد",
                 leaderboardTitle: "لوحة الشرف",
+                storeTitle: "السوق",
                 navStadium: "المباريات",
                 navLeague: "المتصدرون",
                 navStore: "السوق",
-                navAccount: "محفظتي"
+                navAccount: "محفظتي",
+                referralTitle: "🤝 نظام الإحالة",
+                referralLinkLabel: "رابط الإحالة الخاص بك:",
+                referralsCountLabel: "عدد المُحالين:",
+                referralRewardsLabel: "مكافآت الإحالة:",
+                realBalanceLabel: "الرصيد الحقيقي",
+                convertBtn: "تحويل إلى رصيد اللعبة",
+                buyBtn: "اشترِ DRGN",
+                priceLabel: "السعر الحالي:",
+                gameBalanceNote: "⚡ رصيد اللعبة يمكن استخدامه في السوق لشراء التذاكر والشارات.",
+                convertModalTitle: "تحويل الرصيد الحقيقي",
+                convertAvailableLabel: "الرصيد المتاح للتحويل:",
+                convertConfirm: "تحويل",
+                convertCancel: "إلغاء",
+                slippageWarning: "⚠️ انزلاق",
+                liquidityLabel: "سيولة",
+                volumeLabel: "حجم 24h",
+                alreadyVoted: "✅ تم التصويت مسبقاً",
+                votingOpen: "● مفتوح الآن",
+                startsIn: "⏳ يبدأ بعد",
+                ended: "✓ انتهت",
+                closed: "Voting Closed"
             },
             en: {
                 headerTitle: "Dragon Stadium",
@@ -210,10 +272,32 @@
                 connectWallet: "Enter BSC wallet address to update rank and balance",
                 updateWallet: "Update Balance",
                 leaderboardTitle: "Hall of Fame",
+                storeTitle: "Market",
                 navStadium: "Matches",
                 navLeague: "Leaderboard",
                 navStore: "Market",
-                navAccount: "My Wallet"
+                navAccount: "My Wallet",
+                referralTitle: "🤝 Referral System",
+                referralLinkLabel: "Your referral link:",
+                referralsCountLabel: "Referrals:",
+                referralRewardsLabel: "Referral Rewards:",
+                realBalanceLabel: "Real Balance",
+                convertBtn: "Convert to Game Balance",
+                buyBtn: "Buy DRGN",
+                priceLabel: "Current price:",
+                gameBalanceNote: "⚡ Game balance can be used in the market to buy tickets and badges.",
+                convertModalTitle: "Convert Real Balance",
+                convertAvailableLabel: "Available balance:",
+                convertConfirm: "Convert",
+                convertCancel: "Cancel",
+                slippageWarning: "⚠️ Slippage",
+                liquidityLabel: "Liquidity",
+                volumeLabel: "24h Volume",
+                alreadyVoted: "✅ Already voted",
+                votingOpen: "● Open now",
+                startsIn: "⏳ Starts in",
+                ended: "✓ Ended",
+                closed: "Voting Closed"
             }
         };
 
@@ -232,19 +316,61 @@
         }
 
         function applyTranslations() {
-            document.getElementById('header-title').innerText = translations[currentLang].headerTitle;
-            document.getElementById('online-hub').innerText = translations[currentLang].onlineHub;
-            document.getElementById('total-assets-label').innerText = translations[currentLang].totalAssets;
-            document.getElementById('game-wallet-label').innerText = translations[currentLang].gameWallet;
-            document.getElementById('pending-label').innerText = translations[currentLang].pending;
-            document.getElementById('claim-btn').innerText = translations[currentLang].claimRewards;
-            document.getElementById('connect-wallet-label').innerText = translations[currentLang].connectWallet;
-            document.getElementById('update-wallet-btn').innerText = translations[currentLang].updateWallet;
-            document.getElementById('leaderboard-title').innerText = translations[currentLang].leaderboardTitle;
-            document.getElementById('nav-stadium').innerText = translations[currentLang].navStadium;
-            document.getElementById('nav-league').innerText = translations[currentLang].navLeague;
-            document.getElementById('nav-store').innerText = translations[currentLang].navStore;
-            document.getElementById('nav-account').innerText = translations[currentLang].navAccount;
+            const t = translations[currentLang];
+            document.getElementById('header-title').innerText = t.headerTitle;
+            document.getElementById('online-hub').innerText = t.onlineHub;
+            document.getElementById('total-assets-label').innerText = t.totalAssets;
+            document.getElementById('game-wallet-label').innerText = t.gameWallet;
+            document.getElementById('pending-label').innerText = t.pending;
+            document.getElementById('claim-btn').innerText = t.claimRewards;
+            document.getElementById('connect-wallet-label').innerText = t.connectWallet;
+            document.getElementById('update-wallet-btn').innerText = t.updateWallet;
+            document.getElementById('leaderboard-title').innerText = t.leaderboardTitle;
+            document.getElementById('store-title').innerText = t.storeTitle;
+            document.getElementById('nav-stadium').innerText = t.navStadium;
+            document.getElementById('nav-league').innerText = t.navLeague;
+            document.getElementById('nav-store').innerText = t.navStore;
+            document.getElementById('nav-account').innerText = t.navAccount;
+            document.getElementById('referral-title').innerText = t.referralTitle;
+            document.getElementById('referral-link-label').innerText = t.referralLinkLabel;
+            document.getElementById('referrals-count-label').innerHTML = `${t.referralsCountLabel} <span id="referrals-count" class="text-blue-500 font-bold">0</span>`;
+            document.getElementById('referral-rewards-label').innerHTML = `${t.referralRewardsLabel} <span id="referral-rewards" class="text-yellow-500 font-bold">0</span> DRGN`;
+            document.getElementById('real-balance-label').innerText = t.realBalanceLabel;
+            document.getElementById('convert-btn-text').innerText = t.convertBtn;
+            document.getElementById('buy-btn').innerHTML = `<i class="fas fa-shopping-cart ml-1"></i> ${t.buyBtn}`;
+            document.getElementById('price-label').innerText = t.priceLabel;
+            document.getElementById('game-balance-note').innerText = t.gameBalanceNote;
+            document.getElementById('convert-modal-title').innerText = t.convertModalTitle;
+            document.getElementById('convert-available-label').innerHTML = `${t.convertAvailableLabel} <span id="available-token" class="text-blue-500 font-bold">0</span> DRGN`;
+            document.getElementById('convert-confirm-btn').innerText = t.convertConfirm;
+            document.getElementById('convert-cancel-btn').innerText = t.convertCancel;
+
+            // تحديث النصوص في التبويبات الديناميكية
+            if (document.getElementById('match-container').innerHTML) {
+                loadMatches(); // إعادة تحميل المباريات لتحديث النصوص
+            }
+            if (document.getElementById('store-items').innerHTML) {
+                loadStoreItems(); // إعادة تحميل المتجر لتحديث الأسماء
+            }
+        }
+
+        async function loadLiquidityData() {
+            try {
+                const data = await apiReq('/liquidity-data');
+                if (data.success) {
+                    document.getElementById('liquidity-value').innerText = parseFloat(data.liquidity).toFixed(2);
+                    document.getElementById('volume-value').innerText = parseFloat(data.volume24h).toFixed(2);
+                    document.getElementById('slippage-value').innerText = data.slippage;
+                    
+                    // تحديث تسميات الشريط حسب اللغة
+                    const tickerItems = document.querySelectorAll('.ticker-item');
+                    tickerItems[0].innerHTML = `🔮 ${translations[currentLang].liquidityLabel}: <span>${parseFloat(data.liquidity).toFixed(2)} USDT</span>`;
+                    tickerItems[1].innerHTML = `📊 ${translations[currentLang].volumeLabel}: <span>${parseFloat(data.volume24h).toFixed(2)} USDT</span>`;
+                    tickerItems[2].innerHTML = `${translations[currentLang].slippageWarning}: <span>${data.slippage}%</span>`;
+                }
+            } catch (error) {
+                console.error('Error loading liquidity data:', error);
+            }
         }
 
         async function init() {
@@ -260,18 +386,22 @@
             loadLeaderboard();
             fetchPrice();
             loadReferralData();
+            loadLiquidityData();
             applyTranslations();
+
+            // تحديث بيانات السيولة كل دقيقة
+            setInterval(loadLiquidityData, 60000);
         }
 
         function getTimeRemaining(matchTime) {
             const now = Date.now();
             const diff = matchTime - now;
-            if (diff <= 0) return 'انتهت';
+            if (diff <= 0) return translations[currentLang].ended;
             const minutes = Math.floor(diff / 60000);
             const hours = Math.floor(minutes / 60);
             const remainingMinutes = minutes % 60;
-            if (hours > 0) return `${hours}س ${remainingMinutes}د`;
-            return `${minutes}د`;
+            if (hours > 0) return `${translations[currentLang].startsIn} ${hours}س ${remainingMinutes}د`;
+            return `${translations[currentLang].startsIn} ${minutes}د`;
         }
 
         async function checkUserVotes(matchIds) {
@@ -298,11 +428,11 @@
                 const matchTime = m.time;
                 let statusText = '';
                 if (m.isOpen) {
-                    statusText = '● مفتوح الآن';
+                    statusText = translations[currentLang].votingOpen;
                 } else if (matchTime > now) {
-                    statusText = `⏳ يبدأ بعد ${getTimeRemaining(matchTime)}`;
+                    statusText = getTimeRemaining(matchTime);
                 } else {
-                    statusText = '✓ انتهت';
+                    statusText = translations[currentLang].ended;
                 }
                 
                 html += `
@@ -336,7 +466,7 @@
                 
                 const hasVoted = votedMatches.includes(m.id);
                 if (hasVoted) {
-                    voteDiv.innerHTML = `<div class="py-2 text-center text-green-500 font-black italic text-xs">✅ تم التصويت مسبقاً</div>`;
+                    voteDiv.innerHTML = `<div class="py-2 text-center text-green-500 font-black italic text-xs">${translations[currentLang].alreadyVoted}</div>`;
                 } else if (m.isOpen) {
                     voteDiv.innerHTML = `
                         <div class="grid grid-cols-3 gap-2">
@@ -345,7 +475,7 @@
                             <button onclick="vote('${m.id}','AWAY',${m.time})" class="bg-white/5 py-3 rounded-xl hover:bg-red-600 transition-all font-black italic text-xs">2</button>
                         </div>`;
                 } else {
-                    voteDiv.innerHTML = `<div class="py-2 bg-black/40 rounded-xl text-center text-[9px] text-zinc-600 font-black italic uppercase">Voting Closed</div>`;
+                    voteDiv.innerHTML = `<div class="py-2 bg-black/40 rounded-xl text-center text-[9px] text-zinc-600 font-black italic uppercase">${translations[currentLang].closed}</div>`;
                 }
             });
         }
@@ -357,7 +487,7 @@
             if (r.success) {
                 tg.HapticFeedback.notificationOccurred('success');
                 const v = document.getElementById(`v-${id}`);
-                if (v) v.innerHTML = `<div class="py-2 text-center text-green-500 font-black italic text-xs">✅ تم التصويت مسبقاً</div>`;
+                if (v) v.innerHTML = `<div class="py-2 text-center text-green-500 font-black italic text-xs">${translations[currentLang].alreadyVoted}</div>`;
                 await loadLeaderboard();
             } else {
                 tg.showAlert(r.message || (currentLang === 'ar' ? "خطأ" : "Error"));
@@ -404,7 +534,7 @@
             const data = await apiReq('/leaderboard');
             const list = document.getElementById('lb-list');
             if (!data || data.length === 0) {
-                list.innerHTML = `<div class="text-center text-zinc-500 py-8">لا يوجد متصدرين بعد</div>`;
+                list.innerHTML = `<div class="text-center text-zinc-500 py-8">${currentLang === 'ar' ? 'لا يوجد متصدرين بعد' : 'No leaders yet'}</div>`;
                 return;
             }
             let html = '';
@@ -530,17 +660,6 @@
             }
         }
 
-        // ========== فتح MetaMask عبر رابط (اختياري) ==========
-        function openMetaMask() {
-            const dappUrl = encodeURIComponent(window.location.origin);
-            const metamaskDeeplink = `https://metamask.app.link/dapp/${dappUrl}`;
-            if (Telegram.WebApp.openLink) {
-                Telegram.WebApp.openLink(metamaskDeeplink);
-            } else {
-                window.open(metamaskDeeplink, '_blank');
-            }
-        }
-
         // ========== وظائف إضافية ==========
         function openBuyLink() {
             const tokenAddress = "0x583787E29Bb2D92FcBc713389FD66807602c72F3";
@@ -582,8 +701,6 @@
             document.body.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
             document.getElementById('btn-lang').innerText = currentLang === 'ar' ? 'EN' : 'AR';
             applyTranslations();
-            const activeTab = document.querySelector('.tab-content.active')?.id;
-            if (activeTab === 'store') loadStoreItems();
         }
 
         init();
