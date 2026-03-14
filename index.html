@@ -120,7 +120,7 @@
 
             <button id="claim-btn" onclick="claimRewards()" class="w-full py-4 bg-red-600 text-white font-black rounded-2xl shadow-xl shadow-red-900/40 active:scale-95 transition-all">سحب المكافآت</button>
 
-            <!-- قسم ربط المحفظة (محدث مع حل مشكلة فتح الرابط) -->
+            <!-- قسم ربط المحفظة (محدث مع آخر تحسينات WalletConnect) -->
             <div class="dragon-card p-5 space-y-3">
                 <p id="connect-wallet-label" class="text-[9px] text-zinc-500 font-bold text-center italic">
                     ربط محفظة BSC لتحديث الرتبة والرصيد
@@ -510,66 +510,81 @@
             }
         }
 
-        // ========== WalletConnect محسّن ==========
+        // ========== WalletConnect محسّن نهائياً ==========
         async function connectWallet() {
             try {
                 const projectId = 'a9351c7f86cc1e297719aba320b2f9bf';
                 tg.MainButton.setText(currentLang === 'ar' ? 'جاري ربط المحفظة...' : 'Connecting wallet...').show();
 
-                // محاولة استخدام الطريقة العادية (مع modal)
-                const provider = await EthereumProvider.init({
-                    projectId,
-                    chains: [56],
-                    showQrModal: true,
-                    rpcMap: { 56: 'https://bsc-dataseed.binance.org/' }
-                });
-
-                await provider.connect();
-                const accounts = provider.accounts;
-                if (accounts && accounts.length > 0) {
-                    const address = accounts[0];
-                    document.getElementById('wallet-info').innerHTML = `✅ متصل: ${address.slice(0,6)}...${address.slice(-4)}`;
-                    document.getElementById('wallet-info').classList.remove('hidden');
-                    await updateWallet(address);
-                    tg.HapticFeedback.notificationOccurred('success');
+                // التحقق من توفر مكتبة WalletConnect
+                const Provider = window.EthereumProvider || window.WalletConnectProvider;
+                if (!Provider) {
+                    throw new Error('WalletConnect library not loaded');
                 }
-            } catch (error) {
-                console.error('WalletConnect error:', error);
-                
-                // إذا فشل (بسبب حظر النوافذ المنبثقة)، نستخدم الطريقة البديلة: إنشاء رابط URI وفتحه في متصفح خارجي
+
+                // محاولة الاتصال باستخدام modal
                 try {
-                    const provider = await EthereumProvider.init({
+                    const provider = await Provider.init({
                         projectId,
                         chains: [56],
-                        showQrModal: false, // لا نستخدم modal
-                        rpcMap: { 56: 'https://bsc-dataseed.binance.org/' }
+                        showQrModal: true,
+                        rpcMap: { 56: 'https://bsc-dataseed.binance.org/' },
+                        methods: ['eth_sendTransaction', 'eth_sign'],
+                        optionalMethods: ['eth_accounts']
                     });
-                    
-                    // الحصول على رابط الاتصال (URI)
-                    const uri = await provider.client.connect({
-                        permissions: {
-                            blockchain: { chains: ['eip155:56'] },
-                            jsonrpc: { methods: ['eth_sendTransaction', 'eth_sign'] }
-                        }
-                    });
-                    
-                    // فتح الرابط في متصفح خارجي (إذا كان متاحًا في بيئة Telegram)
-                    if (Telegram.WebApp.openLink) {
-                        Telegram.WebApp.openLink(uri);
-                        tg.showAlert(currentLang === 'ar' 
-                            ? 'تم فتح رابط الاتصال في متصفح خارجي. يرجى إتمام الخطوات هناك، ثم العودة للضغط على "تحديث المحفظة يدوياً" بعد الربط.'
-                            : 'Connection link opened in external browser. Please complete the steps there, then press "Update Wallet Manually" after connecting.');
-                    } else {
-                        // إذا لم يكن openLink متاحًا، نعرض الرابط للمستخدم
-                        tg.showAlert(currentLang === 'ar' 
-                            ? `الرابط: ${uri}\nانسخه وافتحه في متصفح.`
-                            : `Link: ${uri}\nCopy and open in browser.`);
+
+                    await provider.connect();
+                    const accounts = provider.accounts;
+                    if (accounts && accounts.length > 0) {
+                        const address = accounts[0];
+                        document.getElementById('wallet-info').innerHTML = `✅ متصل: ${address.slice(0,6)}...${address.slice(-4)}`;
+                        document.getElementById('wallet-info').classList.remove('hidden');
+                        await updateWallet(address);
+                        tg.HapticFeedback.notificationOccurred('success');
+                        tg.MainButton.hide();
+                        return;
                     }
-                } catch (e) {
-                    tg.showAlert(currentLang === 'ar' 
-                        ? 'فشل الاتصال. حاول مرة أخرى أو استخدم الإدخال اليدوي.' 
-                        : 'Connection failed. Try again or use manual entry.');
+                } catch (modalError) {
+                    console.log('Modal connection failed, trying URI method...', modalError);
+                    // إذا فشل، نحاول طريقة URI
                 }
+
+                // الطريقة البديلة: إنشاء رابط URI وفتحه في المتصفح
+                const provider = await Provider.init({
+                    projectId,
+                    chains: [56],
+                    showQrModal: false,
+                    rpcMap: { 56: 'https://bsc-dataseed.binance.org/' },
+                    methods: ['eth_sendTransaction', 'eth_sign'],
+                    optionalMethods: ['eth_accounts']
+                });
+
+                // الحصول على رابط الاتصال (URI)
+                const uri = await provider.client.connect({
+                    permissions: {
+                        blockchain: { chains: ['eip155:56'] },
+                        jsonrpc: { methods: ['eth_sendTransaction', 'eth_sign'] }
+                    }
+                });
+
+                // محاولة فتح الرابط في متصفح خارجي
+                if (Telegram.WebApp.openLink) {
+                    Telegram.WebApp.openLink(uri);
+                    tg.showAlert(currentLang === 'ar' 
+                        ? 'تم فتح رابط الاتصال في متصفح خارجي. يرجى إتمام الخطوات هناك، ثم العودة للضغط على "تحديث المحفظة يدوياً" بعد الربط.'
+                        : 'Connection link opened in external browser. Please complete the steps there, then press "Update Wallet Manually" after connecting.');
+                } else {
+                    // إذا لم يكن openLink متاحًا، نعرض الرابط للمستخدم
+                    tg.showAlert(currentLang === 'ar' 
+                        ? `انسخ الرابط وافتحه في متصفح: ${uri}`
+                        : `Copy and open this link in browser: ${uri}`);
+                }
+
+            } catch (error) {
+                console.error('WalletConnect fatal error:', error);
+                tg.showAlert(currentLang === 'ar' 
+                    ? 'تعذر الاتصال بمكتبة WalletConnect. يرجى استخدام الإدخال اليدوي أو تحديث الصفحة.'
+                    : 'Cannot connect to WalletConnect library. Please use manual entry or refresh.');
             } finally {
                 tg.MainButton.hide();
             }
