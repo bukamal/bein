@@ -77,7 +77,7 @@ body { background: #000; color: #fff; font-family: 'Tajawal', sans-serif; }
 
 <script>
 const tg = window.Telegram.WebApp;
-const API = "https://noisy-moon-4289.manhal-almasriiii199119.workers.dev";
+const API = "https://your-worker-url.workers.dev"; // ضع رابط الباك الحقيقي
 let currentLang = 'ar';
 
 const i18n = {
@@ -163,7 +163,11 @@ async function updateWallet(){
 
 async function claimRewards(){
   const res = await request('/claim-rewards','POST');
-  if(res.success){ tg.showAlert("تم السحب!"); init(); }
+  if(res.success){
+    tg.showAlert("تم سحب المكافآت!");
+    render(res.user);
+    fetchLeaderboard();
+  } else tg.showAlert(res.message);
 }
 
 function render(u){
@@ -183,10 +187,14 @@ function showTab(id){
 
 async function vote(matchId, voteFor){
   const res = await request('/vote','POST',{ matchId, voteFor });
-  if(res.success){ tg.showAlert("تم التصويت!"); fetchMatches(); }
-  else tg.showAlert(res.message);
+  if(res.success){ 
+    tg.showAlert("تم التصويت!");
+    fetchMatches();
+    fetchLeaderboard();
+  } else tg.showAlert(res.message);
 }
 
+// بدء التطبيق
 init();
 </script>
 </body>
