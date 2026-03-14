@@ -50,7 +50,7 @@
 
         <section id="league" class="tab-content space-y-4">
             <div class="dragon-card p-5 border-red-900/30">
-                <h2 id="leaderboard-title" class="text-center text-red-600 font-black italic mb-4">LEADERBOARD</h2>
+                <h2 id="leaderboard-title" class="text-center text-red-600 font-black italic mb-4">قائمة المتصدرين</h2>
                 <div id="lb-list" class="space-y-2"></div>
             </div>
         </section>
@@ -58,7 +58,7 @@
         <section id="account" class="tab-content space-y-4">
             <div class="dragon-card p-6 text-center relative overflow-hidden">
                 <div class="absolute top-0 left-0 w-full h-1 bg-red-600"></div>
-                <p id="total-assets-label" class="text-[10px] text-zinc-500 font-black uppercase tracking-widest">Total Assets</p>
+                <p id="total-assets-label" class="text-[10px] text-zinc-500 font-black uppercase tracking-widest">إجمالي الأصول</p>
                 <div class="flex items-center justify-center gap-2 mt-2">
                     <h2 id="total-balance" class="text-4xl font-black italic">0</h2>
                     <span class="text-red-600 font-bold text-xs uppercase italic">DRGN</span>
@@ -68,11 +68,11 @@
 
             <div class="grid grid-cols-2 gap-4">
                 <div class="dragon-card p-4 text-center">
-                    <p id="game-wallet-label" class="text-[8px] text-zinc-500 font-bold uppercase">Game Wallet</p>
+                    <p id="game-wallet-label" class="text-[8px] text-zinc-500 font-bold uppercase">محفظة اللعبة</p>
                     <p id="game-balance" class="text-lg font-black mt-1">0</p>
                 </div>
                 <div class="dragon-card p-4 text-center">
-                    <p id="pending-label" class="text-[8px] text-zinc-500 font-bold uppercase">Pending</p>
+                    <p id="pending-label" class="text-[8px] text-zinc-500 font-bold uppercase">معلق</p>
                     <p id="pending-rewards" class="text-lg font-black mt-1 text-yellow-500">0</p>
                 </div>
             </div>
@@ -83,6 +83,24 @@
                 <p id="connect-wallet-label" class="text-[9px] text-zinc-500 font-bold text-center italic">ربط محفظة BSC لتحديث الرتبة والرصيد</p>
                 <input id="bsc-address" type="text" placeholder="0x..." class="w-full bg-black border border-white/10 p-4 rounded-xl text-xs text-center outline-none focus:border-red-600 transition-all">
                 <button onclick="updateWallet()" id="update-wallet-btn" class="w-full py-3 bg-white text-black text-[11px] font-black rounded-xl uppercase active:scale-95 transition-all">تحديث المحفظة</button>
+
+                <div class="flex gap-2 mt-2">
+                    <button onclick="openBuyLink()" class="flex-1 py-3 bg-yellow-600 text-white text-[11px] font-black rounded-xl uppercase active:scale-95 transition-all">
+                        <i class="fas fa-shopping-cart ml-1"></i> اشترِ DRGN
+                    </button>
+                </div>
+                <div id="price-container" class="text-center text-[9px] text-zinc-500 mt-2 hidden">
+                    السعر الحالي: <span id="drgn-price">...</span> USD
+                </div>
+            </div>
+
+            <div class="dragon-card p-5 mt-2 border border-yellow-600/30">
+                <p class="text-center text-[10px] text-yellow-500 font-bold">
+                    ⚡ رصيد اللعبة (Game Balance) يمكن استخدامه لاحقاً في شراء تذاكر التصويت أو رفع المستوى.
+                </p>
+                <p class="text-center text-[9px] text-zinc-500 mt-2">
+                    المكافآت الحالية هي نقاط داخلية، وسنعلن عن آلية صرفها قريباً.
+                </p>
             </div>
         </section>
     </main>
@@ -101,7 +119,7 @@
 
     <script>
         const tg = window.Telegram.WebApp;
-        const API = "https://noisy-moon-4289.manhal-almasriiii199119.workers.dev"; // ضع رابط الـ worker الخاص بك هنا
+        const API = "https://noisy-moon-4289.manhal-almasriiii199119.workers.dev"; // ⚠️ غيّر هذا إلى رابط الـ Worker الخاص بك
         let initDataStr = "";
         let currentLang = "ar";
 
@@ -110,12 +128,12 @@
                 headerTitle: "Dragon Stadium",
                 onlineHub: "Online Hub",
                 totalAssets: "إجمالي الأصول",
-                gameWallet: "محفظة اللعبة",          // ترجمة
-                pending: "معلق",                      // ترجمة
+                gameWallet: "محفظة اللعبة",
+                pending: "معلق",
                 claimRewards: "سحب المكافآت",
                 connectWallet: "ربط محفظة BSC لتحديث الرتبة والرصيد",
                 updateWallet: "تحديث المحفظة",
-                leaderboardTitle: "قائمة المتصدرين",  // ترجمة
+                leaderboardTitle: "قائمة المتصدرين",
                 navStadium: "الملعب",
                 navLeague: "الدوري",
                 navAccount: "الحساب"
@@ -173,6 +191,7 @@
             if (r.success) renderUser(r.user);
             loadMatches();
             loadLeaderboard();
+            fetchPrice();
             applyTranslations();
         }
 
@@ -221,7 +240,7 @@
         }
 
         async function vote(id, side, time) {
-            tg.MainButton.setText(currentLang === 'ar' ? "جاري إرسال التصويت..." : "Sending vote...").show();
+            tg.MainButton.setText(currentLang === 'ar' ? "جاري إرسال التصويت (1000 DRGN)..." : "Sending vote (1000 DRGN)...").show();
             const r = await apiReq('/vote', 'POST', { matchId: id, voteFor: side, matchTime: time });
             tg.MainButton.hide();
             if (r.success) {
@@ -250,7 +269,6 @@
             const r = await apiReq('/check-balance', 'POST', { wallet });
             if (r.success) {
                 renderUser(r.user);
-                // إعادة تحميل لوحة المتصدرين بعد التحديث
                 await loadLeaderboard();
                 tg.showAlert(currentLang === 'ar' ? "✅ تم تحديث المحفظة والرتبة!" : "✅ Wallet updated successfully!");
             } else {
@@ -296,7 +314,6 @@
             document.getElementById(id).classList.add('active');
             const activeBtn = document.querySelector(`button[onclick="showTab('${id}')"]`);
             if (activeBtn) activeBtn.classList.add('active');
-            // تحميل لوحة المتصدرين عند فتح التبويب
             if (id === 'league') {
                 loadLeaderboard();
             }
@@ -307,6 +324,25 @@
             document.body.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
             document.getElementById('btn-lang').innerText = currentLang === 'ar' ? 'EN' : 'AR';
             applyTranslations();
+        }
+
+        function openBuyLink() {
+            const tokenAddress = "0x583787E29Bb2D92FcBc713389FD66807602c72F3";
+            const network = "bsc";
+            const url = `https://pancakeswap.finance/swap?outputCurrency=${tokenAddress}&chain=${network}`;
+            window.open(url, '_blank');
+        }
+
+        async function fetchPrice() {
+            try {
+                const response = await apiReq('/price');
+                if (response.success) {
+                    document.getElementById('drgn-price').innerText = parseFloat(response.price).toFixed(8);
+                    document.getElementById('price-container').classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error("Error fetching price:", error);
+            }
         }
 
         init();
