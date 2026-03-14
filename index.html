@@ -101,8 +101,7 @@
 
     <script>
         const tg = window.Telegram.WebApp;
-        const API = "https://your-worker-url.workers.dev"; // استبدله برابط الـ Worker الخاص بك
-        let currentLang = 'ar';
+        const API = "https://noisy-moon-4289.manhal-almasriiii199119.workers.dev";
 
         const i18n = {
             ar: { logo: "ملعب التنين", home: "الملعب", league: "الدوري", acc: "الحساب", update: "تحديث المحفظة", claim: "سحب المكافآت", lb: "قائمة المتصدرين", bal: "إجمالي الأصول" },
@@ -132,25 +131,28 @@
             const d = await apiReq('/get-matches');
             document.getElementById('match-loader').classList.add('hidden');
             
-            if (!d.success) return;
+            if (!d.success) {
+                document.getElementById('match-container').innerHTML = `<div class="dragon-card p-6 text-center text-red-500">خطأ في تحميل المباريات<br><small>${d.message || ''}</small></div>`;
+                return;
+            }
             document.getElementById('match-container').innerHTML = d.matches.map(m => {
                 const time = new Date(m.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                 return `
                 <div class="dragon-card p-4 border-l-4 ${m.isOpen ? 'border-l-green-600' : 'border-l-zinc-800'}">
                     <div class="flex justify-between items-center mb-4 text-[9px] font-bold uppercase tracking-widest text-zinc-500">
                         <span>${m.league}</span>
-                        <span class="${m.isOpen ? 'text-green-500' : ''}">${m.isOpen ? '● LIVE VOTING' : time}</span>
+                        <span class="\( {m.isOpen ? 'text-green-500' : ''}"> \){m.isOpen ? '● LIVE VOTING' : time}</span>
                     </div>
                     <div class="flex items-center gap-4">
-                        <div class="flex-1 text-center"><img src="${m.logoA}" class="w-12 h-12 mx-auto mb-2 drop-shadow-lg"><p class="text-[10px] font-black uppercase">${m.teamA}</p></div>
+                        <div class="flex-1 text-center"><img src="\( {m.logoA}" class="w-12 h-12 mx-auto mb-2 drop-shadow-lg"><p class="text-[10px] font-black uppercase"> \){m.teamA}</p></div>
                         <div class="text-red-600 font-black italic">VS</div>
-                        <div class="flex-1 text-center"><img src="${m.logoB}" class="w-12 h-12 mx-auto mb-2 drop-shadow-lg"><p class="text-[10px] font-black uppercase">${m.teamB}</p></div>
+                        <div class="flex-1 text-center"><img src="\( {m.logoB}" class="w-12 h-12 mx-auto mb-2 drop-shadow-lg"><p class="text-[10px] font-black uppercase"> \){m.teamB}</p></div>
                     </div>
                     ${m.isOpen ? `
                     <div class="grid grid-cols-3 gap-2 mt-4" id="v-${m.id}">
-                        <button onclick="vote('${m.id}','HOME',${m.time})" class="bg-white/5 py-3 rounded-xl hover:bg-red-600 transition-all font-black italic text-xs">1</button>
-                        <button onclick="vote('${m.id}','DRAW',${m.time})" class="bg-white/5 py-3 rounded-xl hover:bg-red-600 transition-all font-black italic text-xs">X</button>
-                        <button onclick="vote('${m.id}','AWAY',${m.time})" class="bg-white/5 py-3 rounded-xl hover:bg-red-600 transition-all font-black italic text-xs">2</button>
+                        <button onclick="vote('\( {m.id}','HOME', \){m.time})" class="bg-white/5 py-3 rounded-xl hover:bg-red-600 transition-all font-black italic text-xs">1</button>
+                        <button onclick="vote('\( {m.id}','DRAW', \){m.time})" class="bg-white/5 py-3 rounded-xl hover:bg-red-600 transition-all font-black italic text-xs">X</button>
+                        <button onclick="vote('\( {m.id}','AWAY', \){m.time})" class="bg-white/5 py-3 rounded-xl hover:bg-red-600 transition-all font-black italic text-xs">2</button>
                     </div>` : `
                     <div class="mt-4 py-2 bg-black/40 rounded-xl text-center text-[9px] text-zinc-600 font-black italic uppercase">Voting Closed</div>
                     `}
@@ -177,29 +179,36 @@
         }
 
         async function updateWallet() {
-            const wallet = document.getElementById('bsc-address').value;
-            if (!wallet.startsWith('0x')) return tg.showAlert("Invalid BSC Address");
+            const wallet = document.getElementById('bsc-address').value.trim();
+            if (!wallet.startsWith('0x') || wallet.length !== 42) return tg.showAlert("Invalid BSC Address");
             const r = await apiReq('/check-balance', 'POST', { wallet });
-            if (r.success) { renderUser(r.user); tg.showConfirm("Wallet & Rank Updated!"); }
-            else tg.showAlert(r.message);
+            if (r.success) { 
+                renderUser(r.user); 
+                tg.showConfirm("Wallet & Rank Updated!"); 
+            } else tg.showAlert(r.message);
         }
 
         async function claimRewards() {
             const r = await apiReq('/claim-rewards', 'POST');
-            if (r.success) { renderUser(r.user); tg.showAlert("Rewards moved to Game Wallet!"); }
-            else tg.showAlert(r.message);
+            if (r.success) { 
+                renderUser(r.user); 
+                tg.showAlert("Rewards moved to Game Wallet!"); 
+            } else tg.showAlert(r.message || "Error");
         }
 
         async function loadLeaderboard() {
             const data = await apiReq('/leaderboard');
-            if (!data.length) return;
+            if (!data || !data.length) {
+                document.getElementById('lb-list').innerHTML = `<div class="text-center text-zinc-500 py-8">لا يوجد لاعبين بعد</div>`;
+                return;
+            }
             document.getElementById('lb-list').innerHTML = data.map((p, i) => `
                 <div class="flex justify-between items-center bg-white/5 p-4 rounded-xl border border-white/5">
                     <div class="flex items-center gap-3">
                         <span class="text-zinc-600 font-black italic text-xs">#${i + 1}</span>
                         <span class="font-bold text-xs">${p.username}</span>
                     </div>
-                    <span class="font-black text-red-600 italic text-xs">${Math.floor(p.score).toLocaleString()}</span>
+                    <span class="font-black text-red-600 italic text-xs">${Math.floor(p.score).toLocaleString()} DRGN</span>
                 </div>`).join('');
         }
 
@@ -212,10 +221,11 @@
         }
 
         function toggleLang() {
+            let currentLang = document.body.dir === 'rtl' ? 'ar' : 'en';
             currentLang = currentLang === 'ar' ? 'en' : 'ar';
             document.body.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
             Object.keys(i18n[currentLang]).forEach(key => {
-                const el = document.getElementById(`nav-${key}`) || document.getElementById(`txt-${key}`) || document.getElementById(`btn-${key}`);
+                const el = document.getElementById(`nav-\( {key}`) || document.getElementById(`txt- \){key}`) || document.getElementById(`btn-${key}`);
                 if (el) el.innerText = i18n[currentLang][key];
             });
             document.getElementById('btn-lang').innerText = currentLang === 'ar' ? 'EN' : 'AR';
