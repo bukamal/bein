@@ -1,193 +1,184 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-
 <head>
-
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-
-<title>Dragon Stadium</title>
-
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-
-<script src="https://cdn.tailwindcss.com"></script>
-
-<style>
-
-body{
-background:#000;
-color:white;
-font-family:sans-serif;
-padding-bottom:80px
-}
-
-.card{
-background:#111;
-border-radius:16px;
-padding:12px
-}
-
-</style>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dragon Stadium v3</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;900&display=swap');
+        body { background: #000; color: #fff; font-family: 'Tajawal', sans-serif; }
+        .dragon-card { background: linear-gradient(145deg, #0a0a0a, #020202); border: 1px solid #151515; border-radius: 24px; }
+        .tab-content { display: none; animation: fadeIn 0.3s ease; padding-bottom: 110px; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .nav-btn.active { color: #ff3333; border-top: 2px solid #ff3333; }
+        .rtl { direction: rtl; } .ltr { direction: ltr; }
+    </style>
 </head>
-
-<body class="p-3">
-
-<h1 class="text-center text-xl font-bold mb-4">
-🐉 Dragon Stadium
-</h1>
-
-<div id="matches"></div>
-
-<hr class="my-4">
-
-<h2 class="text-lg mb-2">🏆 Leaderboard</h2>
-
-<div id="leaderboard"></div>
-
-<hr class="my-4">
-
-<h2 class="text-lg mb-2">👤 Account</h2>
-
-<div class="card">
-
-<div>Game Balance: <span id="gameBalance">0</span></div>
-
-<div>Rewards: <span id="rewards">0</span></div>
-
-<div>Rank: <span id="rank">BRONZE</span></div>
-
-<input id="wallet" placeholder="BSC wallet" class="text-black p-1 mt-2 w-full">
-
-<button onclick="updateWallet()" class="bg-red-500 p-2 mt-2 w-full">
-Update Wallet
-</button>
-
-<button onclick="claim()" class="bg-green-500 p-2 mt-2 w-full">
-Claim Rewards
-</button>
-
-</div>
-
-<script>
-
-const API="https://noisy-moon-4289.manhal-almasriiii199119.workers.dev"
-
-async function api(p,m="GET",d=null){
-
-let o={method:m,headers:{"Content-Type":"application/json"}}
-
-if(d)o.body=JSON.stringify(d)
-
-let r=await fetch(API+p,o)
-
-return r.json()
-
-}
-
-/* MATCHES */
-
-async function loadMatches(){
-
-let d=await api("/get-matches")
-
-if(!d.success)return
-
-const now=Date.now()
-
-document.getElementById("matches").innerHTML=
-
-d.matches.map(m=>{
-
-const canVote=now<m.time
-
-return`
-
-<div class="card mb-2">
-
-${m.teamA} VS ${m.teamB}
-
-${canVote?
-
-`<button onclick="vote('${m.id}','HOME')" class="bg-blue-500 p-1">1</button>
-<button onclick="vote('${m.id}','DRAW')" class="bg-blue-500 p-1">X</button>
-<button onclick="vote('${m.id}','AWAY')" class="bg-blue-500 p-1">2</button>`
-:
-`<div>closed</div>`
-}
-
-</div>
-
-`
-
-}).join("")
-
-}
-
-async function vote(id,v){
-
-let r=await api("/vote","POST",{matchId:id,voteFor:v})
-
-alert(JSON.stringify(r))
-
-}
-
-/* LEADERBOARD */
-
-async function loadLeaderboard(){
-
-let d=await api("/leaderboard")
-
-document.getElementById("leaderboard").innerHTML=
-
-d.map(p=>`<div>${p.username} : ${p.score}</div>`).join("")
-
-}
-
-/* ACCOUNT */
-
-async function sync(){
-
-let r=await api("/sync","POST")
-
-let u=r.user
-
-document.getElementById("gameBalance").innerText=u.gameBalance
-document.getElementById("rewards").innerText=u.pendingRewards
-document.getElementById("rank").innerText=u.rank
-
-}
-
-async function updateWallet(){
-
-let w=document.getElementById("wallet").value
-
-let r=await api("/check-balance","POST",{wallet:w})
-
-alert(JSON.stringify(r))
-
-sync()
-
-}
-
-async function claim(){
-
-let r=await api("/claim-rewards","POST")
-
-alert(JSON.stringify(r))
-
-sync()
-
-}
-
-/* INIT */
-
-loadMatches()
-loadLeaderboard()
-sync()
-
-</script>
-
+<body class="rtl">
+
+    <header class="p-5 flex justify-between items-center sticky top-0 bg-black/90 backdrop-blur-md z-50 border-b border-white/5">
+        <div class="flex items-center gap-2">
+            <i class="fas fa-dragon text-red-600 text-xl"></i>
+            <span id="txt-logo" class="text-[10px] font-black uppercase tracking-widest">ملعب التنين</span>
+        </div>
+        <button onclick="toggleLang()" class="bg-white/5 px-4 py-2 rounded-xl border border-white/10">
+            <i class="fas fa-globe text-red-600"></i> <span id="btn-lang" class="text-[9px] font-bold">EN</span>
+        </button>
+    </header>
+
+    <main class="p-4">
+        <div id="home" class="tab-content active space-y-4">
+            <div id="match-container" class="space-y-4"></div>
+        </div>
+
+        <div id="league" class="tab-content">
+            <div class="dragon-card p-4">
+                <h3 id="txt-lb-title" class="text-center font-black mb-4 text-red-600 tracking-widest uppercase italic">ترتيب التنانين</h3>
+                <div id="lb-list" class="space-y-3"></div>
+            </div>
+        </div>
+
+        <div id="account" class="tab-content space-y-4 text-center">
+            <div class="dragon-card p-8">
+                <p id="txt-bal-label" class="text-[8px] text-zinc-500 font-black uppercase mb-1">إجمالي الأصول</p>
+                <h2 id="total-balance" class="text-4xl font-black italic">0</h2>
+                <p id="rank-name" class="text-[9px] text-red-600 font-black mt-2 tracking-widest uppercase">BRONZE MEMBER</p>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-3">
+                <div class="dragon-card p-5">
+                    <p class="text-[7px] text-zinc-500 font-black uppercase">رصيد اللعبة</p>
+                    <h3 id="game-balance" class="text-xl font-black">0</h3>
+                </div>
+                <div class="dragon-card p-5">
+                    <p class="text-[7px] text-zinc-500 font-black uppercase">مكافآت معلقة</p>
+                    <h3 id="pending-rewards" class="text-xl font-black text-yellow-500">0</h3>
+                </div>
+            </div>
+
+            <button onclick="claimRewards()" id="btn-claim" class="w-full py-4 bg-red-600 text-white text-[10px] font-black rounded-2xl uppercase shadow-lg shadow-red-900/20 active:scale-95 transition-all">سحب المكافآت</button>
+
+            <div class="dragon-card p-5">
+                <input id="bsc-address" type="text" placeholder="BSC Wallet (0x...)" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl text-[9px] text-center mb-3 outline-none focus:border-red-600">
+                <button onclick="updateWallet()" id="btn-update" class="w-full py-4 bg-white text-black text-[10px] font-black rounded-xl uppercase">تحديث المحفظة</button>
+            </div>
+        </div>
+    </main>
+
+    <nav class="fixed bottom-0 left-0 right-0 bg-black/95 border-t border-white/5 flex justify-around p-4 z-50">
+        <button onclick="showTab('home')" class="nav-btn active flex-1 flex flex-col items-center" id="n-home">
+            <i class="fas fa-th-large mb-1 text-lg"></i><span id="nav-home" class="text-[8px] font-black">الملعب</span>
+        </button>
+        <button onclick="showTab('league')" class="nav-btn flex-1 flex flex-col items-center" id="n-league">
+            <i class="fas fa-trophy mb-1 text-lg"></i><span id="nav-league" class="text-[8px] font-black">الدوري</span>
+        </button>
+        <button onclick="showTab('account')" class="nav-btn flex-1 flex flex-col items-center" id="n-account">
+            <i class="fas fa-user mb-1 text-lg"></i><span id="nav-acc" class="text-[8px] font-black">الحساب</span>
+        </button>
+    </nav>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        const API = "https://noisy-moon-4289.manhal-almasriiii199119.workers.dev";
+        let currentLang = 'ar';
+
+        const i18n = {
+            ar: { logo: "ملعب التنين", home: "الملعب", league: "الدوري", acc: "الحساب", update: "تحديث المحفظة", claim: "سحب المكافآت", lb: "ترتيب التنانين" },
+            en: { logo: "DRAGON STADIUM", home: "STADIUM", league: "LEAGUE", acc: "ACCOUNT", update: "UPDATE WALLET", claim: "CLAIM REWARDS", lb: "LEADERBOARD" }
+        };
+
+        async function request(path, method = 'GET', body = null) {
+            const options = { method, headers: { 'Content-Type': 'application/json', 'x-telegram-init-data': tg.initData } };
+            if (body) options.body = JSON.stringify(body);
+            const r = await fetch(API + path, options);
+            return r.json();
+        }
+
+        async function init() {
+            tg.ready(); tg.expand();
+            const r = await request('/sync', 'POST');
+            if (r.success) render(r.user);
+            loadMatches();
+            loadLeaderboard();
+        }
+
+        async function loadMatches() {
+            const d = await request('/get-matches');
+            if (!d.success) return;
+            const now = Date.now();
+            document.getElementById('match-container').innerHTML = d.matches.map(m => `
+                <div class="dragon-card p-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="text-center w-1/3"><img src="${m.logoA}" class="w-10 h-10 mx-auto mb-1"><p class="text-[8px] font-bold">${m.teamA}</p></div>
+                        <div class="text-red-600 font-black italic text-[10px]">VS</div>
+                        <div class="text-center w-1/3"><img src="${m.logoB}" class="w-10 h-10 mx-auto mb-1"><p class="text-[8px] font-bold">${m.teamB}</p></div>
+                    </div>
+                    ${now < m.time ? `
+                    <div class="grid grid-cols-3 gap-2">
+                        <button onclick="vote('${m.id}','HOME')" class="bg-white/5 py-2 rounded-lg text-[9px] font-black hover:bg-red-600 transition-all">1</button>
+                        <button onclick="vote('${m.id}','DRAW')" class="bg-white/5 py-2 rounded-lg text-[9px] font-black hover:bg-red-600 transition-all">X</button>
+                        <button onclick="vote('${m.id}','AWAY')" class="bg-white/5 py-2 rounded-lg text-[9px] font-black hover:bg-red-600 transition-all">2</button>
+                    </div>` : `<div class="text-center text-[8px] opacity-20 uppercase font-black tracking-widest">Closed</div>`}
+                </div>`).join('');
+        }
+
+        async function vote(id, v) {
+            const r = await request('/vote', 'POST', { matchId: id, voteFor: v });
+            tg.showAlert(r.success ? "Done! 🐉" : r.message);
+        }
+
+        async function loadLeaderboard() {
+            const data = await request('/leaderboard');
+            document.getElementById('lb-list').innerHTML = data.map((p, i) => `
+                <div class="flex justify-between items-center bg-white/5 p-3 rounded-xl border border-white/5">
+                    <span class="text-[10px] font-bold">#${i + 1} ${p.username}</span>
+                    <span class="text-[10px] font-black text-red-600 italic">${Math.floor(p.score).toLocaleString()}</span>
+                </div>`).join('');
+        }
+
+        function render(u) {
+            document.getElementById('total-balance').innerText = Math.floor((u.gameBalance || 0) + (u.tokenBalance || 0)).toLocaleString();
+            document.getElementById('game-balance').innerText = Math.floor(u.gameBalance || 0).toLocaleString();
+            document.getElementById('pending-rewards').innerText = Math.floor(u.pendingRewards || 0).toLocaleString();
+            document.getElementById('rank-name').innerText = `${u.rank} MEMBER`;
+            if (u.wallet) document.getElementById('bsc-address').value = u.wallet;
+        }
+
+        async function updateWallet() {
+            const w = document.getElementById('bsc-address').value;
+            const r = await request('/check-balance', 'POST', { wallet: w });
+            if (r.success) { render(r.user); tg.showAlert("Wallet Updated!"); }
+            else tg.showAlert(r.message);
+        }
+
+        async function claimRewards() {
+            const r = await request('/claim-rewards', 'POST');
+            if (r.success) { render(r.user); tg.showAlert("Rewards Claimed!"); }
+        }
+
+        function showTab(id) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.getElementById('n-' + id).classList.add('active');
+        }
+
+        function toggleLang() {
+            currentLang = currentLang === 'ar' ? 'en' : 'ar';
+            document.body.className = currentLang === 'ar' ? 'rtl' : 'ltr';
+            Object.keys(i18n[currentLang]).forEach(key => {
+                const el = document.getElementById(`nav-${key}`) || document.getElementById(`txt-${key}`) || document.getElementById(`btn-${key}`);
+                if (el) el.innerText = i18n[currentLang][key];
+            });
+            document.getElementById('nav-acc').innerText = i18n[currentLang].acc;
+            document.getElementById('btn-lang').innerText = currentLang === 'ar' ? 'EN' : 'AR';
+        }
+
+        init();
+    </script>
 </body>
-
 </html>
