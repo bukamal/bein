@@ -105,6 +105,77 @@
             </div>
         </section>
 
+        <!-- تبويب التنين (جديد) -->
+        <section id="dragon" class="tab-content space-y-4">
+            <div class="dragon-card p-6 text-center relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-1 bg-purple-600"></div>
+                <div class="flex justify-center mb-4">
+                    <div class="w-24 h-24 bg-gradient-to-br from-purple-600 to-red-600 rounded-full flex items-center justify-center text-6xl animate-pulse">
+                        🐉
+                    </div>
+                </div>
+                <h2 id="dragon-name" class="text-xl font-black italic mb-2">التنين الناري</h2>
+                <div class="flex justify-center gap-4 mb-3">
+                    <span class="bg-purple-600/20 px-3 py-1 rounded-full text-xs font-bold" id="dragon-level">المستوى 1</span>
+                    <span class="bg-blue-600/20 px-3 py-1 rounded-full text-xs font-bold" id="dragon-element">عنصر: ناري</span>
+                </div>
+                
+                <!-- شريط XP -->
+                <div class="w-full bg-zinc-800 h-3 rounded-full mb-4 overflow-hidden">
+                    <div id="xp-bar" class="bg-yellow-500 h-3 rounded-full" style="width: 0%;"></div>
+                </div>
+                <p class="text-xs text-zinc-400 mb-4" id="xp-text">0 / 100 XP</p>
+                
+                <!-- إحصائيات سريعة -->
+                <div class="grid grid-cols-3 gap-2 mb-4 text-center">
+                    <div class="bg-white/5 p-2 rounded-lg">
+                        <p class="text-[10px] text-zinc-500" id="dragon-accuracy-label">دقة</p>
+                        <p id="dragon-accuracy" class="font-black text-sm">0%</p>
+                    </div>
+                    <div class="bg-white/5 p-2 rounded-lg">
+                        <p class="text-[10px] text-zinc-500" id="dragon-wins-label">فوز</p>
+                        <p id="dragon-wins" class="font-black text-sm text-green-500">0</p>
+                    </div>
+                    <div class="bg-white/5 p-2 rounded-lg">
+                        <p class="text-[10px] text-zinc-500" id="dragon-losses-label">خسارة</p>
+                        <p id="dragon-losses" class="font-black text-sm text-red-500">0</p>
+                    </div>
+                </div>
+                
+                <!-- الطاقة -->
+                <div class="flex items-center justify-between bg-white/5 p-3 rounded-xl mb-4">
+                    <span class="text-xs font-bold" id="dragon-energy-label">⚡ الطاقة</span>
+                    <div class="flex items-center gap-1">
+                        <span id="dragon-energy" class="font-black text-yellow-500">10</span>
+                        <span class="text-xs text-zinc-400" id="dragon-max-energy">/ 10</span>
+                    </div>
+                </div>
+                
+                <!-- أزرار المعارك -->
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <button onclick="quickBattle()" id="quick-battle-btn" class="bg-red-600 py-3 rounded-xl text-xs font-black active:scale-95 transition-all">
+                        ⚔️ معركة سريعة
+                    </button>
+                    <button onclick="findOpponent()" id="random-challenge-btn" class="bg-purple-600 py-3 rounded-xl text-xs font-black active:scale-95 transition-all">
+                        🔍 تحدٍ عشوائي
+                    </button>
+                </div>
+                
+                <!-- زر تحدي صديق -->
+                <button onclick="challengeFriend()" id="challenge-friend-btn" class="w-full bg-blue-600 py-3 rounded-xl text-xs font-black active:scale-95 transition-all mb-4">
+                    👥 تحدي صديق
+                </button>
+                
+                <!-- سجل المعارك -->
+                <div class="text-right">
+                    <p class="text-xs text-zinc-500 mb-2" id="battle-log-label">📜 آخر المعارك</p>
+                    <div id="battle-log" class="space-y-2 max-h-40 overflow-y-auto">
+                        <!-- ستضاف المعارك هنا ديناميكياً -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- تبويب محفظتي -->
         <section id="account" class="tab-content space-y-4">
             <div class="dragon-card p-6 text-center relative overflow-hidden">
@@ -212,6 +283,9 @@
         <button onclick="showTab('store')" class="nav-btn flex-1 flex flex-col items-center">
             <i class="fas fa-store text-xl mb-1"></i><span id="nav-store">السوق</span>
         </button>
+        <button onclick="showTab('dragon')" class="nav-btn flex-1 flex flex-col items-center">
+            <i class="fas fa-dragon text-xl mb-1"></i><span id="nav-dragon">التنين</span>
+        </button>
         <button onclick="showTab('account')" class="nav-btn flex-1 flex flex-col items-center">
             <i class="fas fa-wallet text-xl mb-1"></i><span id="nav-account">محفظتي</span>
         </button>
@@ -239,6 +313,7 @@
                 navStadium: "المباريات",
                 navLeague: "المتصدرون",
                 navStore: "السوق",
+                navDragon: "التنين",
                 navAccount: "محفظتي",
                 referralTitle: "🤝 نظام الإحالة",
                 referralLinkLabel: "رابط الإحالة الخاص بك:",
@@ -260,7 +335,23 @@
                 votingOpen: "● مفتوح الآن",
                 startsIn: "⏳ يبدأ بعد",
                 ended: "✓ انتهت",
-                closed: "Voting Closed"
+                closed: "Voting Closed",
+                // Dragon translations
+                dragonName: "التنين الناري",
+                dragonLevel: "المستوى",
+                dragonElement: "عنصر: ناري",
+                dragonAccuracyLabel: "دقة",
+                dragonWinsLabel: "فوز",
+                dragonLossesLabel: "خسارة",
+                dragonEnergyLabel: "⚡ الطاقة",
+                quickBattle: "⚔️ معركة سريعة",
+                randomChallenge: "🔍 تحدٍ عشوائي",
+                challengeFriend: "👥 تحدي صديق",
+                battleLogLabel: "📜 آخر المعارك",
+                noBattles: "لا توجد معارك بعد",
+                win: "فوز",
+                loss: "خسارة",
+                vs: "ضد"
             },
             en: {
                 headerTitle: "Dragon Stadium",
@@ -276,6 +367,7 @@
                 navStadium: "Matches",
                 navLeague: "Leaderboard",
                 navStore: "Market",
+                navDragon: "Dragon",
                 navAccount: "My Wallet",
                 referralTitle: "🤝 Referral System",
                 referralLinkLabel: "Your referral link:",
@@ -297,7 +389,23 @@
                 votingOpen: "● Open now",
                 startsIn: "⏳ Starts in",
                 ended: "✓ Ended",
-                closed: "Voting Closed"
+                closed: "Voting Closed",
+                // Dragon translations
+                dragonName: "Fire Dragon",
+                dragonLevel: "Level",
+                dragonElement: "Element: Fire",
+                dragonAccuracyLabel: "Accuracy",
+                dragonWinsLabel: "Wins",
+                dragonLossesLabel: "Losses",
+                dragonEnergyLabel: "⚡ Energy",
+                quickBattle: "⚔️ Quick Battle",
+                randomChallenge: "🔍 Random Challenge",
+                challengeFriend: "👥 Challenge Friend",
+                battleLogLabel: "📜 Recent Battles",
+                noBattles: "No battles yet",
+                win: "Win",
+                loss: "Loss",
+                vs: "vs"
             }
         };
 
@@ -330,6 +438,7 @@
             document.getElementById('nav-stadium').innerText = t.navStadium;
             document.getElementById('nav-league').innerText = t.navLeague;
             document.getElementById('nav-store').innerText = t.navStore;
+            document.getElementById('nav-dragon').innerText = t.navDragon;
             document.getElementById('nav-account').innerText = t.navAccount;
             document.getElementById('referral-title').innerText = t.referralTitle;
             document.getElementById('referral-link-label').innerText = t.referralLinkLabel;
@@ -345,12 +454,26 @@
             document.getElementById('convert-confirm-btn').innerText = t.convertConfirm;
             document.getElementById('convert-cancel-btn').innerText = t.convertCancel;
 
-            // تحديث النصوص في التبويبات الديناميكية
+            // Dragon tab translations
+            document.getElementById('dragon-name').innerText = t.dragonName;
+            document.getElementById('dragon-accuracy-label').innerText = t.dragonAccuracyLabel;
+            document.getElementById('dragon-wins-label').innerText = t.dragonWinsLabel;
+            document.getElementById('dragon-losses-label').innerText = t.dragonLossesLabel;
+            document.getElementById('dragon-energy-label').innerText = t.dragonEnergyLabel;
+            document.getElementById('quick-battle-btn').innerText = t.quickBattle;
+            document.getElementById('random-challenge-btn').innerText = t.randomChallenge;
+            document.getElementById('challenge-friend-btn').innerText = t.challengeFriend;
+            document.getElementById('battle-log-label').innerText = t.battleLogLabel;
+
+            // تحديث المحتوى الديناميكي إذا كان ظاهراً
             if (document.getElementById('match-container').innerHTML) {
-                loadMatches(); // إعادة تحميل المباريات لتحديث النصوص
+                loadMatches();
             }
             if (document.getElementById('store-items').innerHTML) {
-                loadStoreItems(); // إعادة تحميل المتجر لتحديث الأسماء
+                loadStoreItems();
+            }
+            if (document.getElementById('dragon').classList.contains('active')) {
+                loadDragonData();
             }
         }
 
@@ -363,10 +486,13 @@
                     document.getElementById('slippage-value').innerText = data.slippage;
                     
                     // تحديث تسميات الشريط حسب اللغة
+                    const t = translations[currentLang];
                     const tickerItems = document.querySelectorAll('.ticker-item');
-                    tickerItems[0].innerHTML = `🔮 ${translations[currentLang].liquidityLabel}: <span>${parseFloat(data.liquidity).toFixed(2)} USDT</span>`;
-                    tickerItems[1].innerHTML = `📊 ${translations[currentLang].volumeLabel}: <span>${parseFloat(data.volume24h).toFixed(2)} USDT</span>`;
-                    tickerItems[2].innerHTML = `${translations[currentLang].slippageWarning}: <span>${data.slippage}%</span>`;
+                    if (tickerItems.length >= 3) {
+                        tickerItems[0].innerHTML = `🔮 ${t.liquidityLabel}: <span>${parseFloat(data.liquidity).toFixed(2)} USDT</span>`;
+                        tickerItems[1].innerHTML = `📊 ${t.volumeLabel}: <span>${parseFloat(data.volume24h).toFixed(2)} USDT</span>`;
+                        tickerItems[2].innerHTML = `${t.slippageWarning}: <span>${data.slippage}%</span>`;
+                    }
                 }
             } catch (error) {
                 console.error('Error loading liquidity data:', error);
@@ -660,6 +786,113 @@
             }
         }
 
+        // ========== دوال التنين ==========
+        async function loadDragonData() {
+            const data = await apiReq('/dragon-data');
+            if (data.success) {
+                const d = data.dragon;
+                const t = translations[currentLang];
+                document.getElementById('dragon-level').innerText = `${t.dragonLevel} ${d.level}`;
+                const elementName = getElementName(d.element, currentLang);
+                document.getElementById('dragon-element').innerText = `${t.dragonElement.split(':')[0]}: ${elementName}`;
+                document.getElementById('dragon-accuracy').innerText = d.accuracy ? d.accuracy.toFixed(1) + '%' : '0%';
+                document.getElementById('dragon-wins').innerText = d.wins || 0;
+                document.getElementById('dragon-losses').innerText = d.losses || 0;
+                document.getElementById('dragon-energy').innerText = d.energy || 0;
+                
+                const xpNeeded = d.level * 100;
+                const xpPercent = (d.xp / xpNeeded) * 100;
+                document.getElementById('xp-bar').style.width = xpPercent + '%';
+                document.getElementById('xp-text').innerText = `${d.xp} / ${xpNeeded} XP`;
+                
+                // عرض سجل المعارك
+                const logDiv = document.getElementById('battle-log');
+                if (d.battles && d.battles.length > 0) {
+                    let html = '';
+                    d.battles.forEach(b => {
+                        const date = new Date(b.timestamp).toLocaleDateString(currentLang === 'ar' ? 'ar-SA' : 'en-US');
+                        const result = b.won ? 
+                            `<span class="text-green-500">${t.win}</span>` : 
+                            `<span class="text-red-500">${t.loss}</span>`;
+                        html += `
+                        <div class="flex justify-between items-center text-[10px] bg-white/5 p-2 rounded-lg">
+                            <span>${result} ${t.vs} ${b.opponent}</span>
+                            <span class="text-zinc-400">${date}</span>
+                        </div>`;
+                    });
+                    logDiv.innerHTML = html;
+                } else {
+                    logDiv.innerHTML = `<div class="text-center text-zinc-500 text-[10px] py-2">${t.noBattles}</div>`;
+                }
+            }
+        }
+
+        function getElementName(element, lang) {
+            if (lang === 'ar') {
+                switch(element) {
+                    case 'fire': return 'ناري';
+                    case 'ice': return 'جليدي';
+                    case 'electric': return 'كهربائي';
+                    default: return 'ناري';
+                }
+            } else {
+                switch(element) {
+                    case 'fire': return 'Fire';
+                    case 'ice': return 'Ice';
+                    case 'electric': return 'Electric';
+                    default: return 'Fire';
+                }
+            }
+        }
+
+        async function quickBattle() {
+            const opponentData = await apiReq('/find-opponent', 'POST', {});
+            if (!opponentData.success) {
+                tg.showAlert(currentLang === 'ar' ? 'لا يوجد خصوم متاحين حالياً' : 'No opponents available');
+                return;
+            }
+            await startBattle(opponentData.opponentId, 0);
+        }
+
+        async function findOpponent() {
+            const opponentData = await apiReq('/find-opponent', 'POST', {});
+            if (!opponentData.success) {
+                tg.showAlert(currentLang === 'ar' ? 'لا يوجد خصوم متاحين حالياً' : 'No opponents available');
+                return;
+            }
+            const betAmount = prompt(currentLang === 'ar' ? 'أدخل مبلغ الرهان (0 للعب بدون رهان)' : 'Enter bet amount (0 for free battle)', '0');
+            if (betAmount === null) return;
+            await startBattle(opponentData.opponentId, parseInt(betAmount) || 0);
+        }
+
+        function challengeFriend() {
+            const refLink = document.getElementById('referral-link').value;
+            const battleLink = refLink.replace('start=', 'start=battle_');
+            navigator.clipboard.writeText(battleLink);
+            tg.showAlert(currentLang === 'ar' 
+                ? 'تم نسخ رابط التحدي. أرسله لصديقك!' 
+                : 'Challenge link copied. Send it to your friend!');
+        }
+
+        async function startBattle(opponentId, betAmount) {
+            tg.MainButton.setText(currentLang === 'ar' ? 'جاري بدء المعركة...' : 'Starting battle...').show();
+            const r = await apiReq('/battle', 'POST', { opponentId, betAmount });
+            tg.MainButton.hide();
+            
+            if (r.success) {
+                const result = r.won ? 
+                    (currentLang === 'ar' ? '🎉 انتصر تنينك!' : '🎉 Your dragon won!') : 
+                    (currentLang === 'ar' ? '😢 خسر تنينك هذه المرة' : '😢 Your dragon lost this time');
+                tg.showAlert(`${result}\nقوتك: ${r.uPower} - قوة الخصم: ${r.oPower}`);
+                loadDragonData();
+                if (betAmount > 0 && r.gameBalance !== undefined) {
+                    document.getElementById('game-balance').innerText = Math.floor(r.gameBalance).toLocaleString();
+                }
+            } else {
+                tg.showAlert(r.message || (currentLang === 'ar' ? 'حدث خطأ' : 'Error'));
+            }
+        }
+
         // ========== وظائف إضافية ==========
         function openBuyLink() {
             const tokenAddress = "0x583787E29Bb2D92FcBc713389FD66807602c72F3";
@@ -693,6 +926,8 @@
                 loadStoreItems();
             } else if (id === 'account') {
                 loadReferralData();
+            } else if (id === 'dragon') {
+                loadDragonData();
             }
         }
 
