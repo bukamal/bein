@@ -9,181 +9,350 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap');
-        body { background: #050505; color: #fff; font-family: 'Tajawal', sans-serif; -webkit-tap-highlight-color: transparent; }
-        .dragon-card { background: linear-gradient(160deg, #111, #070707); border: 1px solid #222; border-radius: 20px; transition: 0.3s; }
-        .nav-btn.active { color: #ff3333; transform: translateY(-3px); }
-        .loading-pulse { animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
-        .tab-content { display: none; animation: slideUp 0.4s ease-out; }
-        .tab-content.active { display: block; }
-        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         
-        /* شريط التنبيه المتحرك */
-        .ticker-wrap {
-            width: 100%;
-            overflow: hidden;
-            background: linear-gradient(90deg, #1a1a1a, #2d2d2d);
-            border-bottom: 1px solid #ff3333;
-            padding: 8px 0;
-            white-space: nowrap;
-            position: relative;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        .ticker {
-            display: inline-block;
-            animation: ticker 20s linear infinite;
-            padding-left: 100%;
-        }
-        .ticker-item {
-            display: inline-block;
-            margin-right: 40px;
-            color: #ffaa00;
-            font-weight: bold;
-            font-size: 12px;
-        }
-        .ticker-item span {
+
+        body {
+            background: #0a0a0f;
             color: #fff;
-            margin-left: 5px;
+            font-family: 'Tajawal', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            background-image: radial-gradient(circle at 10% 20%, rgba(255, 51, 51, 0.05) 0%, transparent 30%);
         }
-        @keyframes ticker {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-100%); }
+
+        /* بطاقات محسنة */
+        .dragon-card {
+            background: linear-gradient(165deg, #121218, #08080c);
+            border: 1px solid rgba(255, 51, 51, 0.2);
+            border-radius: 28px;
+            transition: all 0.3s ease;
+            box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 51, 51, 0.1) inset;
+            backdrop-filter: blur(10px);
+        }
+
+        .dragon-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(255, 51, 51, 0.4);
+            box-shadow: 0 20px 40px -10px #ff333320;
+        }
+
+        /* أزرار التنقل */
+        .nav-btn {
+            transition: all 0.2s ease;
+            color: #888;
+            font-weight: bold;
+            font-size: 11px;
+        }
+
+        .nav-btn.active {
+            color: #ff3333;
+            transform: translateY(-3px);
+            text-shadow: 0 0 10px #ff333380;
+        }
+
+        .nav-btn i {
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        /* مؤشر التحميل */
+        .loading-pulse {
+            animation: pulse 1.5s infinite;
+            background: linear-gradient(90deg, #1a1a1a, #2a2a2a, #1a1a1a);
+            background-size: 200% 100%;
+        }
+
+        @keyframes pulse {
+            0% { background-position: 100% 0; }
+            100% { background-position: -100% 0; }
+        }
+
+        /* التبويبات */
+        .tab-content {
+            display: none;
+            animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes slideUp {
+            from { 
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* صورة التنين - نسخة محسنة */
+        .dragon-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff4d4d, #b30000);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 50px;
+            box-shadow: 0 10px 30px #ff333380, 0 0 0 3px #ffaa00 inset;
+            transition: all 0.3s ease;
+            margin: 0 auto 15px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dragon-avatar::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.3), transparent 70%);
+            opacity: 0.6;
+        }
+
+        /* شريط XP */
+        .xp-bar {
+            background: #2a2a2a;
+            border-radius: 30px;
+            height: 8px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px #00000080;
+        }
+
+        .xp-fill {
+            background: linear-gradient(90deg, #ffd966, #ffaa00);
+            height: 100%;
+            border-radius: 30px;
+            box-shadow: 0 0 10px #ffaa00;
+            transition: width 0.3s ease;
+        }
+
+        /* عناصر إحصاءات */
+        .stat-box {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 51, 51, 0.2);
+            border-radius: 20px;
+            padding: 10px 5px;
+            backdrop-filter: blur(5px);
+            transition: 0.2s;
+        }
+
+        .stat-box:hover {
+            background: rgba(255, 51, 51, 0.1);
+            border-color: #ff3333;
+        }
+
+        /* أزرار رئيسية */
+        .btn-primary {
+            background: linear-gradient(145deg, #ff3333, #cc0000);
+            border: none;
+            border-radius: 40px;
+            padding: 14px 20px;
+            font-weight: 900;
+            font-size: 13px;
+            color: white;
+            box-shadow: 0 8px 0 #660000, 0 10px 20px #ff333380;
+            transition: all 0.1s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary:active {
+            transform: translateY(5px);
+            box-shadow: 0 3px 0 #660000, 0 8px 15px #ff333380;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid #ff3333;
+            border-radius: 40px;
+            padding: 14px 20px;
+            font-weight: 900;
+            font-size: 13px;
+            color: #ff3333;
+            transition: 0.2s;
+        }
+
+        .btn-secondary:active {
+            background: #ff3333;
+            color: white;
+        }
+
+        /* تحسين التمرير */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #ff3333;
+            border-radius: 10px;
         }
     </style>
 </head>
-<body class="pb-24">
+<body class="pb-28">
 
-    <header class="p-4 flex justify-between items-center bg-black/50 backdrop-blur-lg sticky top-0 z-[100] border-b border-white/5">
+    <header class="p-4 flex justify-between items-center bg-black/70 backdrop-blur-xl sticky top-0 z-[100] border-b border-red-900/30">
         <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center shadow-lg shadow-red-600/20">
-                <i class="fas fa-dragon text-white"></i>
+            <div class="w-10 h-10 bg-gradient-to-br from-red-600 to-red-800 rounded-2xl flex items-center justify-center shadow-xl shadow-red-600/30 rotate-45">
+                <i class="fas fa-dragon text-white text-xl -rotate-45"></i>
             </div>
             <div>
-                <h1 id="header-title" class="text-sm font-black tracking-tighter uppercase italic">Dragon Stadium</h1>
+                <h1 id="header-title" class="text-base font-black tracking-wider uppercase" style="text-shadow: 0 0 10px red;">Dragon Stadium</h1>
                 <div class="flex items-center gap-1">
-                    <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                    <span id="online-hub" class="text-[8px] text-zinc-500 font-bold uppercase">Online Hub</span>
+                    <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse shadow-lg shadow-green-500"></span>
+                    <span id="online-hub" class="text-[9px] text-zinc-400 font-bold uppercase tracking-widest">LIVE</span>
                 </div>
             </div>
         </div>
-        <button onclick="toggleLang()" class="bg-white/5 border border-white/10 px-3 py-1.5 rounded-lg text-[10px] font-bold">
-            <i class="fas fa-language text-red-500"></i> <span id="btn-lang">EN</span>
+        <button onclick="toggleLang()" class="bg-white/5 border border-white/10 px-4 py-2 rounded-2xl text-[11px] font-bold backdrop-blur-sm">
+            <i class="fas fa-language text-red-500 ml-1"></i> <span id="btn-lang">EN</span>
         </button>
     </header>
 
-    <!-- شريط التنبيه المتحرك -->
-    <div class="ticker-wrap" id="ticker-wrap">
-        <div class="ticker" id="ticker">
-            <div class="ticker-item">🔮 <span id="liquidity-value">0</span> USDT</div>
-            <div class="ticker-item">📊 <span id="volume-value">0</span> USDT</div>
-            <div class="ticker-item">⚠️ <span id="slippage-value">0</span>%</div>
-        </div>
-    </div>
-
-    <main class="p-4 space-y-6">
+    <main class="p-4 space-y-5">
         <!-- تبويب المباريات -->
         <section id="home" class="tab-content active space-y-4">
+            <div class="flex items-center justify-between mb-2">
+                <h2 class="text-red-500 font-black text-lg tracking-wider" style="text-shadow: 0 0 5px red;">⚽ المباريات</h2>
+                <span class="bg-red-600/20 text-red-400 text-[10px] px-3 py-1 rounded-full border border-red-800">تصويت مباشر</span>
+            </div>
             <div id="match-loader" class="hidden space-y-4">
-                <div class="dragon-card p-10 loading-pulse bg-zinc-900"></div>
-                <div class="dragon-card p-10 loading-pulse bg-zinc-900"></div>
+                <div class="dragon-card h-40 loading-pulse"></div>
+                <div class="dragon-card h-40 loading-pulse"></div>
             </div>
             <div id="match-container" class="space-y-4"></div>
         </section>
 
+        <!-- تبويب التنين (بجانب المباريات) -->
+        <section id="dragon" class="tab-content space-y-5">
+            <div class="dragon-card p-6 text-center relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-600 via-red-600 to-yellow-500"></div>
+                
+                <!-- صورة التنين المتطورة -->
+                <div class="dragon-avatar" id="dragon-avatar">
+                    <span id="dragon-emoji">🐉</span>
+                </div>
+                
+                <h2 id="dragon-name" class="text-2xl font-black italic mb-1 bg-gradient-to-r from-red-500 to-yellow-500 bg-clip-text text-transparent">التنين الناري</h2>
+                
+                <div class="flex justify-center gap-3 mb-4">
+                    <span class="bg-purple-600/30 px-4 py-1.5 rounded-full text-xs font-bold border border-purple-500/30 backdrop-blur-sm" id="dragon-level">المستوى 1</span>
+                    <span class="bg-blue-600/30 px-4 py-1.5 rounded-full text-xs font-bold border border-blue-500/30 backdrop-blur-sm" id="dragon-element">عنصر: ناري</span>
+                </div>
+                
+                <!-- شريط XP متطور -->
+                <div class="mb-3">
+                    <div class="flex justify-between text-[10px] text-zinc-400 mb-1">
+                        <span>نقاط الخبرة</span>
+                        <span id="xp-text">0 / 100 XP</span>
+                    </div>
+                    <div class="xp-bar">
+                        <div id="xp-bar" class="xp-fill" style="width: 0%;"></div>
+                    </div>
+                </div>
+                
+                <!-- إحصائيات بتصميم جديد -->
+                <div class="grid grid-cols-3 gap-3 mb-5">
+                    <div class="stat-box">
+                        <p class="text-[9px] text-zinc-400 mb-1" id="dragon-accuracy-label">الدقة</p>
+                        <p id="dragon-accuracy" class="font-black text-lg text-yellow-500">0%</p>
+                    </div>
+                    <div class="stat-box">
+                        <p class="text-[9px] text-zinc-400 mb-1" id="dragon-wins-label">الانتصارات</p>
+                        <p id="dragon-wins" class="font-black text-lg text-green-500">0</p>
+                    </div>
+                    <div class="stat-box">
+                        <p class="text-[9px] text-zinc-400 mb-1" id="dragon-losses-label">الخسائر</p>
+                        <p id="dragon-losses" class="font-black text-lg text-red-500">0</p>
+                    </div>
+                </div>
+                
+                <!-- الطاقة بشكل عصري -->
+                <div class="flex items-center justify-between bg-gradient-to-r from-yellow-900/30 to-orange-900/30 p-4 rounded-2xl mb-5 border border-yellow-700/30">
+                    <span class="text-sm font-bold flex items-center gap-2">
+                        <i class="fas fa-bolt text-yellow-500 animate-pulse"></i>
+                        <span id="dragon-energy-label">الطاقة</span>
+                    </span>
+                    <div class="flex items-center gap-2">
+                        <div class="flex gap-1">
+                            <span id="dragon-energy" class="font-black text-xl text-yellow-500">10</span>
+                            <span class="text-sm text-zinc-400" id="dragon-max-energy">/10</span>
+                        </div>
+                        <button onclick="buyEnergy()" class="bg-yellow-600/30 text-yellow-400 text-[10px] px-3 py-1 rounded-full border border-yellow-700">+ شحن</button>
+                    </div>
+                </div>
+                
+                <!-- التحديات اليومية -->
+                <div class="bg-white/5 p-4 rounded-2xl mb-5 border border-white/10">
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="text-sm font-bold text-yellow-500 flex items-center gap-2">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span id="daily-title">التحديات اليومية</span>
+                        </span>
+                        <span class="text-[9px] text-zinc-500 bg-white/5 px-2 py-1 rounded-full" id="daily-reset">يتبقى 10 ساعات</span>
+                    </div>
+                    <div id="daily-challenges" class="space-y-3">
+                        <!-- ستضاف ديناميكياً -->
+                    </div>
+                </div>
+                
+                <!-- أزرار المعارك بشكل جذاب -->
+                <div class="grid grid-cols-2 gap-3 mb-3">
+                    <button onclick="quickBattle()" class="btn-primary flex items-center justify-center gap-2">
+                        <i class="fas fa-bolt"></i> <span id="quick-battle-btn">سريعة</span>
+                    </button>
+                    <button onclick="findOpponent()" class="btn-secondary flex items-center justify-center gap-2">
+                        <i class="fas fa-search"></i> <span id="random-challenge-btn">عشوائي</span>
+                    </button>
+                </div>
+                
+                <button onclick="challengeFriend()" class="w-full bg-gradient-to-r from-blue-700 to-blue-900 py-4 rounded-2xl text-sm font-black flex items-center justify-center gap-2 shadow-xl shadow-blue-900/50 border border-blue-500/30 active:scale-95 transition-all mb-5">
+                    <i class="fas fa-user-friends"></i> <span id="challenge-friend-btn">تحدي صديق</span>
+                </button>
+                
+                <!-- سجل المعارك -->
+                <div class="text-right">
+                    <p class="text-xs text-zinc-400 mb-3 flex items-center gap-2" id="battle-log-label">
+                        <i class="fas fa-history"></i> آخر المعارك
+                    </p>
+                    <div id="battle-log" class="space-y-2 max-h-32 overflow-y-auto pr-1">
+                        <!-- ستضاف هنا -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- تبويب لوحة الشرف -->
         <section id="league" class="tab-content space-y-4">
-            <div class="dragon-card p-5 border-red-900/30">
-                <h2 id="leaderboard-title" class="text-center text-red-600 font-black italic mb-4">لوحة الشرف</h2>
+            <div class="dragon-card p-5">
+                <h2 id="leaderboard-title" class="text-center text-red-500 font-black text-xl italic mb-4 flex items-center justify-center gap-2">
+                    <i class="fas fa-crown text-yellow-500"></i> لوحة الشرف
+                </h2>
                 <div id="lb-list" class="space-y-2"></div>
             </div>
         </section>
 
         <!-- تبويب السوق -->
         <section id="store" class="tab-content space-y-4">
-            <div class="dragon-card p-5 border-purple-900/30">
-                <h2 id="store-title" class="text-center text-purple-600 font-black italic mb-4">السوق</h2>
+            <div class="dragon-card p-5">
+                <h2 id="store-title" class="text-center text-purple-500 font-black text-xl italic mb-4 flex items-center justify-center gap-2">
+                    <i class="fas fa-store-alt"></i> السوق
+                </h2>
                 <div id="store-items" class="space-y-3"></div>
-            </div>
-        </section>
-
-        <!-- تبويب التنين -->
-        <section id="dragon" class="tab-content space-y-4">
-            <div class="dragon-card p-6 text-center relative overflow-hidden">
-                <div class="absolute top-0 left-0 w-full h-1 bg-purple-600"></div>
-                <div class="flex justify-center mb-4">
-                    <div class="w-24 h-24 bg-gradient-to-br from-purple-600 to-red-600 rounded-full flex items-center justify-center text-6xl animate-pulse">
-                        🐉
-                    </div>
-                </div>
-                <h2 id="dragon-name" class="text-xl font-black italic mb-2">التنين الناري</h2>
-                <div class="flex justify-center gap-4 mb-3">
-                    <span class="bg-purple-600/20 px-3 py-1 rounded-full text-xs font-bold" id="dragon-level">المستوى 1</span>
-                    <span class="bg-blue-600/20 px-3 py-1 rounded-full text-xs font-bold" id="dragon-element">عنصر: ناري</span>
-                </div>
-                
-                <!-- شريط XP -->
-                <div class="w-full bg-zinc-800 h-3 rounded-full mb-4 overflow-hidden">
-                    <div id="xp-bar" class="bg-yellow-500 h-3 rounded-full" style="width: 0%;"></div>
-                </div>
-                <p class="text-xs text-zinc-400 mb-4" id="xp-text">0 / 100 XP</p>
-                
-                <!-- إحصائيات سريعة -->
-                <div class="grid grid-cols-3 gap-2 mb-4 text-center">
-                    <div class="bg-white/5 p-2 rounded-lg">
-                        <p class="text-[10px] text-zinc-500" id="dragon-accuracy-label">دقة</p>
-                        <p id="dragon-accuracy" class="font-black text-sm">0%</p>
-                    </div>
-                    <div class="bg-white/5 p-2 rounded-lg">
-                        <p class="text-[10px] text-zinc-500" id="dragon-wins-label">فوز</p>
-                        <p id="dragon-wins" class="font-black text-sm text-green-500">0</p>
-                    </div>
-                    <div class="bg-white/5 p-2 rounded-lg">
-                        <p class="text-[10px] text-zinc-500" id="dragon-losses-label">خسارة</p>
-                        <p id="dragon-losses" class="font-black text-sm text-red-500">0</p>
-                    </div>
-                </div>
-                
-                <!-- الطاقة -->
-                <div class="flex items-center justify-between bg-white/5 p-3 rounded-xl mb-4">
-                    <span class="text-xs font-bold" id="dragon-energy-label">⚡ الطاقة</span>
-                    <div class="flex items-center gap-1">
-                        <span id="dragon-energy" class="font-black text-yellow-500">10</span>
-                        <span class="text-xs text-zinc-400" id="dragon-max-energy">/ 10</span>
-                    </div>
-                </div>
-                
-                <!-- التحديات اليومية -->
-                <div class="bg-white/5 p-3 rounded-xl mb-4">
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="text-xs font-bold text-yellow-500" id="daily-title">📅 التحديات اليومية</span>
-                        <span class="text-[8px] text-zinc-400" id="daily-reset">(تتجدد يومياً)</span>
-                    </div>
-                    <div id="daily-challenges" class="space-y-2">
-                        <!-- ستضاف ديناميكياً -->
-                    </div>
-                </div>
-                
-                <!-- أزرار المعارك -->
-                <div class="grid grid-cols-2 gap-3 mb-4">
-                    <button onclick="quickBattle()" id="quick-battle-btn" class="bg-red-600 py-3 rounded-xl text-xs font-black active:scale-95 transition-all">
-                        ⚔️ معركة سريعة
-                    </button>
-                    <button onclick="findOpponent()" id="random-challenge-btn" class="bg-purple-600 py-3 rounded-xl text-xs font-black active:scale-95 transition-all">
-                        🔍 تحدٍ عشوائي
-                    </button>
-                </div>
-                
-                <!-- زر تحدي صديق -->
-                <button onclick="challengeFriend()" id="challenge-friend-btn" class="w-full bg-blue-600 py-3 rounded-xl text-xs font-black active:scale-95 transition-all mb-4">
-                    👥 تحدي صديق
-                </button>
-                
-                <!-- سجل المعارك -->
-                <div class="text-right">
-                    <p class="text-xs text-zinc-500 mb-2" id="battle-log-label">📜 آخر المعارك</p>
-                    <div id="battle-log" class="space-y-2 max-h-40 overflow-y-auto">
-                        <!-- ستضاف المعارك هنا ديناميكياً -->
-                    </div>
-                </div>
             </div>
         </section>
 
@@ -191,55 +360,60 @@
         <section id="guild" class="tab-content space-y-4">
             <div class="dragon-card p-5">
                 <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-red-600 font-black italic" id="guild-title">🏰 العشيرة</h2>
-                    <span id="guild-tag" class="bg-purple-600/20 px-2 py-1 rounded text-xs"></span>
+                    <h2 class="text-red-500 font-black text-xl italic flex items-center gap-2">
+                        <i class="fas fa-shield-alt"></i> <span id="guild-title">العشيرة</span>
+                    </h2>
+                    <span id="guild-tag" class="bg-purple-600/30 px-3 py-1 rounded-full text-xs border border-purple-500"></span>
                 </div>
                 
-                <div id="guild-not-in" class="text-center py-8">
-                    <p class="text-zinc-400 mb-4" id="guild-not-in-text">أنت لست عضوًا في أي عشيرة بعد</p>
-                    <div class="flex flex-col gap-3">
-                        <button onclick="showCreateGuild()" id="create-guild-btn" class="bg-green-600 py-3 rounded-xl text-sm font-black active:scale-95 transition-all">
-                            ➕ إنشاء عشيرة جديدة
+                <div id="guild-not-in" class="text-center py-10">
+                    <i class="fas fa-ghost text-5xl text-zinc-700 mb-3"></i>
+                    <p class="text-zinc-400 mb-5" id="guild-not-in-text">أنت لست عضوًا في أي عشيرة بعد</p>
+                    <div class="flex flex-col gap-3 max-w-xs mx-auto">
+                        <button onclick="showCreateGuild()" class="btn-primary flex items-center justify-center gap-2">
+                            <i class="fas fa-plus-circle"></i> <span id="create-guild-btn">إنشاء عشيرة جديدة</span>
                         </button>
-                        <button onclick="showJoinGuild()" id="join-guild-btn" class="bg-blue-600 py-3 rounded-xl text-sm font-black active:scale-95 transition-all">
-                            🔍 الانضمام إلى عشيرة
+                        <button onclick="showJoinGuild()" class="btn-secondary flex items-center justify-center gap-2">
+                            <i class="fas fa-sign-in-alt"></i> <span id="join-guild-btn">الانضمام إلى عشيرة</span>
                         </button>
                     </div>
                 </div>
                 
                 <div id="guild-info" class="hidden">
-                    <div class="flex items-center gap-4 mb-4">
-                        <div class="w-16 h-16 bg-gradient-to-br from-purple-700 to-red-700 rounded-full flex items-center justify-center text-3xl">
+                    <div class="flex items-center gap-4 mb-5">
+                        <div class="w-16 h-16 bg-gradient-to-br from-purple-800 to-red-800 rounded-2xl flex items-center justify-center text-3xl shadow-2xl border-2 border-yellow-500">
                             🛡️
                         </div>
                         <div>
-                            <h3 id="guild-name" class="font-bold text-lg"></h3>
+                            <h3 id="guild-name" class="font-black text-xl"></h3>
                             <p id="guild-description" class="text-xs text-zinc-400"></p>
                         </div>
                     </div>
                     
-                    <div class="grid grid-cols-3 gap-2 mb-4 text-center">
-                        <div class="bg-white/5 p-2 rounded-lg">
-                            <p class="text-[10px] text-zinc-500" id="guild-level-label">المستوى</p>
+                    <div class="grid grid-cols-3 gap-3 mb-5">
+                        <div class="stat-box">
+                            <p class="text-[9px] text-zinc-400" id="guild-level-label">المستوى</p>
                             <p id="guild-level" class="font-black text-yellow-500">1</p>
                         </div>
-                        <div class="bg-white/5 p-2 rounded-lg">
-                            <p class="text-[10px] text-zinc-500" id="guild-members-label">الأعضاء</p>
+                        <div class="stat-box">
+                            <p class="text-[9px] text-zinc-400" id="guild-members-label">الأعضاء</p>
                             <p id="guild-members-count" class="font-black text-blue-500">1</p>
                         </div>
-                        <div class="bg-white/5 p-2 rounded-lg">
-                            <p class="text-[10px] text-zinc-500" id="guild-xp-label">XP</p>
+                        <div class="stat-box">
+                            <p class="text-[9px] text-zinc-400" id="guild-xp-label">XP</p>
                             <p id="guild-xp" class="font-black text-green-500">0</p>
                         </div>
                     </div>
                     
-                    <div class="mb-4">
-                        <p class="text-xs text-zinc-500 mb-2" id="guild-members-list-label">👥 قائمة الأعضاء</p>
+                    <div class="mb-5">
+                        <p class="text-xs text-zinc-400 mb-3 flex items-center gap-2" id="guild-members-list-label">
+                            <i class="fas fa-users"></i> قائمة الأعضاء
+                        </p>
                         <div id="guild-members-list" class="space-y-2 max-h-40 overflow-y-auto"></div>
                     </div>
                     
-                    <button onclick="leaveGuild()" id="leave-guild-btn" class="w-full bg-red-600/50 py-3 rounded-xl text-xs font-black active:scale-95 transition-all">
-                        🚪 مغادرة العشيرة
+                    <button onclick="leaveGuild()" class="w-full bg-red-950/50 py-4 rounded-2xl text-sm font-black flex items-center justify-center gap-2 border border-red-800 active:scale-95 transition-all">
+                        <i class="fas fa-sign-out-alt"></i> <span id="leave-guild-btn">مغادرة العشيرة</span>
                     </button>
                 </div>
             </div>
@@ -247,235 +421,233 @@
 
         <!-- تبويب محفظتي -->
         <section id="account" class="tab-content space-y-4">
-            <div class="dragon-card p-6 text-center relative overflow-hidden">
-                <div class="absolute top-0 left-0 w-full h-1 bg-red-600"></div>
-                <p id="total-assets-label" class="text-[10px] text-zinc-500 font-black uppercase tracking-widest">إجمالي الرصيد</p>
-                <div class="flex items-center justify-center gap-2 mt-2">
-                    <h2 id="total-balance" class="text-4xl font-black italic">0</h2>
-                    <span class="text-red-600 font-bold text-xs uppercase italic">DRGN</span>
+            <div class="dragon-card p-6 text-center">
+                <div class="w-20 h-20 bg-gradient-to-br from-red-600 to-red-800 rounded-3xl mx-auto mb-4 flex items-center justify-center rotate-12 shadow-2xl">
+                    <i class="fas fa-wallet text-3xl -rotate-12"></i>
                 </div>
-                <div id="rank-name" class="inline-block mt-3 px-4 py-1 bg-white/5 rounded-full text-[9px] font-black border border-white/10 tracking-widest">BRONZE MEMBER</div>
+                <p id="total-assets-label" class="text-xs text-zinc-400 font-bold uppercase tracking-widest">إجمالي الرصيد</p>
+                <div class="flex items-center justify-center gap-2 mt-1">
+                    <h2 id="total-balance" class="text-5xl font-black italic">0</h2>
+                    <span class="text-red-600 font-black text-sm uppercase tracking-wider">DRGN</span>
+                </div>
+                <div id="rank-name" class="inline-block mt-4 px-6 py-2 bg-gradient-to-r from-zinc-800 to-zinc-900 rounded-full text-[10px] font-black border border-red-900/30">BRONZE MEMBER</div>
             </div>
 
             <div class="grid grid-cols-2 gap-4">
-                <div class="dragon-card p-4 text-center">
-                    <p id="game-wallet-label" class="text-[8px] text-zinc-500 font-bold uppercase">رصيد اللعبة</p>
-                    <p id="game-balance" class="text-lg font-black mt-1">0</p>
+                <div class="dragon-card p-5 text-center">
+                    <p id="game-wallet-label" class="text-[9px] text-zinc-400 mb-2">رصيد اللعبة</p>
+                    <p id="game-balance" class="text-2xl font-black">0</p>
                 </div>
-                <div class="dragon-card p-4 text-center">
-                    <p id="pending-label" class="text-[8px] text-zinc-500 font-bold uppercase">مكافآت معلقة</p>
-                    <p id="pending-rewards" class="text-lg font-black mt-1 text-yellow-500">0</p>
+                <div class="dragon-card p-5 text-center">
+                    <p id="pending-label" class="text-[9px] text-zinc-400 mb-2">مكافآت معلقة</p>
+                    <p id="pending-rewards" class="text-2xl font-black text-yellow-500">0</p>
                 </div>
             </div>
 
-            <!-- عرض الرصيد الحقيقي وزر التحويل -->
-            <div class="dragon-card p-4 text-center">
-                <p id="real-balance-label" class="text-[8px] text-zinc-500 font-bold uppercase">الرصيد الحقيقي</p>
-                <p id="token-balance-display" class="text-lg font-black mt-1 text-blue-500">0</p>
-                <button onclick="showConvertModal()" class="mt-2 w-full py-2 bg-blue-600 text-white text-[9px] font-black rounded-lg active:scale-95 transition-all">
-                    <i id="convert-btn-text" class="fas fa-exchange-alt ml-1"></i> تحويل إلى رصيد اللعبة
+            <!-- تحويل الرصيد -->
+            <div class="dragon-card p-5">
+                <p id="real-balance-label" class="text-[9px] text-zinc-400 text-center mb-2">الرصيد الحقيقي</p>
+                <p id="token-balance-display" class="text-3xl font-black text-blue-500 text-center mb-4">0</p>
+                <button onclick="showConvertModal()" class="btn-primary w-full flex items-center justify-center gap-2">
+                    <i class="fas fa-exchange-alt"></i> <span id="convert-btn-text">تحويل</span>
                 </button>
             </div>
 
-            <!-- نظام الإحالة -->
-            <div class="dragon-card p-5 border-blue-600/30">
-                <p id="referral-title" class="text-center text-blue-500 font-bold text-[10px] mb-2">🤝 نظام الإحالة</p>
+            <!-- الإحالة -->
+            <div class="dragon-card p-5">
+                <p id="referral-title" class="text-center text-blue-500 font-black text-sm mb-3 flex items-center justify-center gap-2">
+                    <i class="fas fa-gift"></i> نظام الإحالة
+                </p>
                 <div class="text-center">
-                    <p id="referral-link-label" class="text-[9px] text-zinc-400">رابط الإحالة الخاص بك:</p>
-                    <div class="flex items-center gap-2 mt-1">
-                        <input id="referral-link" type="text" readonly class="flex-1 bg-black/50 border border-white/10 p-2 rounded-lg text-[8px] text-center outline-none" value="جاري التحميل...">
-                        <button onclick="copyReferralLink()" class="bg-blue-600 px-3 py-2 rounded-lg text-[10px] font-bold">
+                    <p id="referral-link-label" class="text-[9px] text-zinc-400 mb-2">رابط الإحالة الخاص بك:</p>
+                    <div class="flex items-center gap-2 mb-3">
+                        <input id="referral-link" type="text" readonly class="flex-1 bg-black/50 border border-white/10 p-3 rounded-2xl text-[9px] text-center outline-none focus:border-red-600" value="جاري التحميل...">
+                        <button onclick="copyReferralLink()" class="bg-blue-600 w-12 h-12 rounded-2xl text-lg flex items-center justify-center active:scale-95 transition-all">
                             <i class="fas fa-copy"></i>
                         </button>
                     </div>
-                    <div class="flex justify-between mt-3 text-[9px]">
-                        <span id="referrals-count-label">عدد المُحالين: <span id="referrals-count" class="text-blue-500 font-bold">0</span></span>
-                        <span id="referral-rewards-label">مكافآت الإحالة: <span id="referral-rewards" class="text-yellow-500 font-bold">0</span> DRGN</span>
+                    <div class="flex justify-between text-[10px]">
+                        <span id="referrals-count-label">المُحالين: <span id="referrals-count" class="text-blue-500 font-bold">0</span></span>
+                        <span id="referral-rewards-label">المكافآت: <span id="referral-rewards" class="text-yellow-500 font-bold">0</span> DRGN</span>
                     </div>
                 </div>
             </div>
 
-            <button id="claim-btn" onclick="claimRewards()" class="w-full py-4 bg-red-600 text-white font-black rounded-2xl shadow-xl shadow-red-900/40 active:scale-95 transition-all">سحب الأرباح</button>
+            <button id="claim-btn" onclick="claimRewards()" class="btn-primary w-full flex items-center justify-center gap-2">
+                <i class="fas fa-hand-holding-usd"></i> <span>سحب الأرباح</span>
+            </button>
 
-            <!-- قسم ربط المحفظة -->
-            <div class="dragon-card p-5 space-y-3">
-                <p id="connect-wallet-label" class="text-[9px] text-zinc-500 font-bold text-center italic">
-                    لربط محفظة BSC، أدخل عنوان محفظتك يدوياً واضغط تحديث:
-                </p>
-                
-                <input id="bsc-address" type="text" placeholder="0x..." class="w-full bg-black border border-white/10 p-4 rounded-xl text-xs text-center outline-none focus:border-red-600 transition-all">
-                <button onclick="updateWallet()" id="update-wallet-btn" class="w-full py-3 bg-white text-black text-[11px] font-black rounded-xl uppercase active:scale-95 transition-all">
-                    تحديث الرصيد
-                </button>
-
-                <div class="flex gap-2 mt-2">
-                    <button onclick="openBuyLink()" id="buy-btn" class="flex-1 py-3 bg-yellow-600 text-white text-[11px] font-black rounded-xl uppercase active:scale-95 transition-all">
-                        <i class="fas fa-shopping-cart ml-1"></i> اشترِ DRGN
-                    </button>
-                </div>
-                <div id="price-container" class="text-center text-[9px] text-zinc-500 mt-2 hidden">
-                    <span id="price-label">السعر الحالي:</span> <span id="drgn-price">...</span> USD
-                </div>
+            <!-- ربط المحفظة -->
+            <div class="dragon-card p-5">
+                <p id="connect-wallet-label" class="text-[9px] text-zinc-400 text-center mb-4">أدخل عنوان محفظة BSC يدوياً</p>
+                <input id="bsc-address" type="text" placeholder="0x..." class="w-full bg-black/50 border border-white/10 p-4 rounded-2xl text-xs text-center outline-none focus:border-red-600 mb-3">
+                <button onclick="updateWallet()" id="update-wallet-btn" class="btn-secondary w-full">تحديث الرصيد</button>
             </div>
 
-            <div class="dragon-card p-5 mt-2 border border-yellow-600/30">
-                <p id="game-balance-note" class="text-center text-[10px] text-yellow-500 font-bold">
-                    ⚡ رصيد اللعبة يمكن استخدامه في السوق لشراء التذاكر والشارات.
-                </p>
+            <button onclick="openBuyLink()" class="w-full bg-gradient-to-r from-yellow-700 to-yellow-900 py-4 rounded-2xl text-sm font-black flex items-center justify-center gap-2 shadow-xl shadow-yellow-900/50 border border-yellow-600/30">
+                <i class="fas fa-shopping-cart"></i> <span id="buy-btn">اشترِ DRGN</span>
+            </button>
+
+            <div id="price-container" class="text-center text-[9px] text-zinc-500 hidden">
+                <span id="price-label">السعر الحالي:</span> <span id="drgn-price">...</span> USD
             </div>
         </section>
     </main>
 
     <!-- نافذة تحويل الرصيد -->
-    <div id="convert-modal" class="fixed inset-0 bg-black/90 backdrop-blur-sm z-[200] hidden items-center justify-center p-4">
-        <div class="dragon-card p-6 w-full max-w-sm relative">
-            <button onclick="hideConvertModal()" class="absolute top-2 left-2 text-zinc-500">
+    <div id="convert-modal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-[200] hidden items-center justify-center p-4">
+        <div class="dragon-card p-6 w-full max-w-sm relative border-2 border-red-600/30">
+            <button onclick="hideConvertModal()" class="absolute top-3 left-3 text-zinc-400 text-xl">
                 <i class="fas fa-times"></i>
             </button>
-            <h3 id="convert-modal-title" class="text-center text-blue-500 font-black italic mb-4">تحويل الرصيد الحقيقي</h3>
-            <p id="convert-available-label" class="text-[10px] text-zinc-400 text-center mb-2">الرصيد المتاح للتحويل: <span id="available-token" class="text-blue-500 font-bold">0</span> DRGN</p>
-            <input id="convert-amount" type="number" min="1" placeholder="الكمية" class="w-full bg-black border border-white/10 p-3 rounded-xl text-xs text-center outline-none focus:border-blue-600 transition-all mb-3">
-            <div class="flex gap-2">
-                <button onclick="convertToGame()" id="convert-confirm-btn" class="flex-1 py-3 bg-blue-600 text-white text-[10px] font-black rounded-xl active:scale-95 transition-all">تحويل</button>
-                <button onclick="hideConvertModal()" id="convert-cancel-btn" class="flex-1 py-3 bg-white/10 text-white text-[10px] font-black rounded-xl active:scale-95 transition-all">إلغاء</button>
+            <h3 id="convert-modal-title" class="text-center text-blue-500 font-black text-xl italic mb-4">تحويل الرصيد</h3>
+            <p id="convert-available-label" class="text-xs text-zinc-400 text-center mb-3">الرصيد المتاح: <span id="available-token" class="text-blue-500 font-bold">0</span> DRGN</p>
+            <input id="convert-amount" type="number" min="1" placeholder="الكمية" class="w-full bg-black/50 border border-white/10 p-4 rounded-2xl text-center mb-4">
+            <div class="flex gap-3">
+                <button onclick="convertToGame()" class="btn-primary flex-1">تحويل</button>
+                <button onclick="hideConvertModal()" class="btn-secondary flex-1">إلغاء</button>
             </div>
         </div>
     </div>
 
-    <nav class="fixed bottom-0 left-0 right-0 bg-black/80 backdrop-blur-xl border-t border-white/5 flex justify-around p-3 z-[100]">
-        <button onclick="showTab('home')" class="nav-btn active flex-1 flex flex-col items-center">
-            <i class="fas fa-gamepad text-xl mb-1"></i><span id="nav-stadium">المباريات</span>
+    <!-- شريط التنقل الجديد (التنين ثاني أيقونة) -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-black/90 backdrop-blur-xl border-t border-red-900/30 flex justify-around items-center py-2 px-1 z-[100]">
+        <button onclick="showTab('home')" class="nav-btn active flex flex-col items-center flex-1">
+            <i class="fas fa-futbol"></i>
+            <span id="nav-stadium">المباريات</span>
         </button>
-        <button onclick="showTab('league')" class="nav-btn flex-1 flex flex-col items-center">
-            <i class="fas fa-trophy text-xl mb-1"></i><span id="nav-league">المتصدرون</span>
+        <button onclick="showTab('dragon')" class="nav-btn flex flex-col items-center flex-1">
+            <i class="fas fa-dragon"></i>
+            <span id="nav-dragon">التنين</span>
         </button>
-        <button onclick="showTab('store')" class="nav-btn flex-1 flex flex-col items-center">
-            <i class="fas fa-store text-xl mb-1"></i><span id="nav-store">السوق</span>
+        <button onclick="showTab('league')" class="nav-btn flex flex-col items-center flex-1">
+            <i class="fas fa-trophy"></i>
+            <span id="nav-league">المتصدرون</span>
         </button>
-        <button onclick="showTab('dragon')" class="nav-btn flex-1 flex flex-col items-center">
-            <i class="fas fa-dragon text-xl mb-1"></i><span id="nav-dragon">التنين</span>
+        <button onclick="showTab('store')" class="nav-btn flex flex-col items-center flex-1">
+            <i class="fas fa-store"></i>
+            <span id="nav-store">السوق</span>
         </button>
-        <button onclick="showTab('guild')" class="nav-btn flex-1 flex flex-col items-center">
-            <i class="fas fa-shield-alt text-xl mb-1"></i><span id="nav-guild">العشيرة</span>
+        <button onclick="showTab('guild')" class="nav-btn flex flex-col items-center flex-1">
+            <i class="fas fa-shield-alt"></i>
+            <span id="nav-guild">العشيرة</span>
         </button>
-        <button onclick="showTab('account')" class="nav-btn flex-1 flex flex-col items-center">
-            <i class="fas fa-wallet text-xl mb-1"></i><span id="nav-account">محفظتي</span>
+        <button onclick="showTab('account')" class="nav-btn flex flex-col items-center flex-1">
+            <i class="fas fa-wallet"></i>
+            <span id="nav-account">محفظتي</span>
         </button>
     </nav>
 
-    <script>
+    <!-- نهاية الجزء الأول، يليه الجزء الثاني في الرسالة التالية -->
+        <script>
+        // ================== الإعدادات العامة ==================
         const tg = window.Telegram.WebApp;
         const API = "https://noisy-moon-4289.manhal-almasriiii199119.workers.dev"; // ضع رابط الـ Worker الخاص بك
         let initDataStr = "";
         let currentLang = "ar";
         let storeItems = [];
 
+        // ================== الترجمات ==================
         const translations = {
             ar: {
                 headerTitle: "Dragon Stadium",
-                onlineHub: "Online Hub",
+                onlineHub: "LIVE",
                 totalAssets: "إجمالي الرصيد",
                 gameWallet: "رصيد اللعبة",
                 pending: "مكافآت معلقة",
                 claimRewards: "سحب الأرباح",
-                connectWallet: "أدخل عنوان محفظة BSC لتحديث الرتبة والرصيد",
+                connectWallet: "أدخل عنوان محفظة BSC يدوياً",
                 updateWallet: "تحديث الرصيد",
                 leaderboardTitle: "لوحة الشرف",
                 storeTitle: "السوق",
                 navStadium: "المباريات",
+                navDragon: "التنين",
                 navLeague: "المتصدرون",
                 navStore: "السوق",
-                navDragon: "التنين",
                 navGuild: "العشيرة",
                 navAccount: "محفظتي",
-                referralTitle: "🤝 نظام الإحالة",
+                referralTitle: "نظام الإحالة",
                 referralLinkLabel: "رابط الإحالة الخاص بك:",
-                referralsCountLabel: "عدد المُحالين:",
-                referralRewardsLabel: "مكافآت الإحالة:",
+                referralsCountLabel: "المُحالين:",
+                referralRewardsLabel: "المكافآت:",
                 realBalanceLabel: "الرصيد الحقيقي",
-                convertBtn: "تحويل إلى رصيد اللعبة",
+                convertBtn: "تحويل",
                 buyBtn: "اشترِ DRGN",
                 priceLabel: "السعر الحالي:",
-                gameBalanceNote: "⚡ رصيد اللعبة يمكن استخدامه في السوق لشراء التذاكر والشارات.",
-                convertModalTitle: "تحويل الرصيد الحقيقي",
-                convertAvailableLabel: "الرصيد المتاح للتحويل:",
+                gameBalanceNote: "⚡ رصيد اللعبة يمكن استخدامه في السوق",
+                convertModalTitle: "تحويل الرصيد",
+                convertAvailableLabel: "الرصيد المتاح:",
                 convertConfirm: "تحويل",
                 convertCancel: "إلغاء",
-                slippageWarning: "⚠️ انزلاق",
-                liquidityLabel: "سيولة",
-                volumeLabel: "حجم 24h",
                 alreadyVoted: "✅ تم التصويت مسبقاً",
                 votingOpen: "● مفتوح الآن",
                 startsIn: "⏳ يبدأ بعد",
                 ended: "✓ انتهت",
-                closed: "Voting Closed",
+                closed: "مغلق",
                 // Dragon
                 dragonName: "التنين الناري",
                 dragonLevel: "المستوى",
                 dragonElement: "عنصر: ناري",
-                dragonAccuracyLabel: "دقة",
-                dragonWinsLabel: "فوز",
-                dragonLossesLabel: "خسارة",
-                dragonEnergyLabel: "⚡ الطاقة",
-                quickBattle: "⚔️ معركة سريعة",
-                randomChallenge: "🔍 تحدٍ عشوائي",
-                challengeFriend: "👥 تحدي صديق",
-                battleLogLabel: "📜 آخر المعارك",
+                dragonAccuracyLabel: "الدقة",
+                dragonWinsLabel: "الانتصارات",
+                dragonLossesLabel: "الخسائر",
+                dragonEnergyLabel: "الطاقة",
+                quickBattle: "سريعة",
+                randomChallenge: "عشوائي",
+                challengeFriend: "تحدي صديق",
+                battleLogLabel: "آخر المعارك",
                 noBattles: "لا توجد معارك بعد",
                 win: "فوز",
                 loss: "خسارة",
                 vs: "ضد",
-                dailyTitle: "📅 التحديات اليومية",
-                dailyReset: "(تتجدد يومياً)",
+                dailyTitle: "التحديات اليومية",
+                dailyReset: "يتبقى 10 ساعات",
                 // Guild
-                guildTitle: "🏰 العشيرة",
+                guildTitle: "العشيرة",
                 guildNotIn: "أنت لست عضوًا في أي عشيرة بعد",
-                createGuild: "➕ إنشاء عشيرة جديدة",
-                joinGuild: "🔍 الانضمام إلى عشيرة",
+                createGuild: "إنشاء عشيرة جديدة",
+                joinGuild: "الانضمام إلى عشيرة",
                 guildLevelLabel: "المستوى",
                 guildMembersLabel: "الأعضاء",
                 guildXpLabel: "XP",
-                guildMembersListLabel: "👥 قائمة الأعضاء",
-                leaveGuild: "🚪 مغادرة العشيرة"
+                guildMembersListLabel: "قائمة الأعضاء",
+                leaveGuild: "مغادرة العشيرة"
             },
             en: {
                 headerTitle: "Dragon Stadium",
-                onlineHub: "Online Hub",
+                onlineHub: "LIVE",
                 totalAssets: "Total Balance",
                 gameWallet: "Game Balance",
                 pending: "Pending Rewards",
                 claimRewards: "Claim Earnings",
-                connectWallet: "Enter BSC wallet address to update rank and balance",
+                connectWallet: "Enter BSC wallet address",
                 updateWallet: "Update Balance",
                 leaderboardTitle: "Hall of Fame",
                 storeTitle: "Market",
                 navStadium: "Matches",
+                navDragon: "Dragon",
                 navLeague: "Leaderboard",
                 navStore: "Market",
-                navDragon: "Dragon",
                 navGuild: "Guild",
-                navAccount: "My Wallet",
-                referralTitle: "🤝 Referral System",
+                navAccount: "Wallet",
+                referralTitle: "Referral System",
                 referralLinkLabel: "Your referral link:",
                 referralsCountLabel: "Referrals:",
-                referralRewardsLabel: "Referral Rewards:",
+                referralRewardsLabel: "Rewards:",
                 realBalanceLabel: "Real Balance",
-                convertBtn: "Convert to Game Balance",
+                convertBtn: "Convert",
                 buyBtn: "Buy DRGN",
                 priceLabel: "Current price:",
-                gameBalanceNote: "⚡ Game balance can be used in the market to buy tickets and badges.",
-                convertModalTitle: "Convert Real Balance",
-                convertAvailableLabel: "Available balance:",
+                gameBalanceNote: "⚡ Game balance can be used in the market",
+                convertModalTitle: "Convert Balance",
+                convertAvailableLabel: "Available:",
                 convertConfirm: "Convert",
                 convertCancel: "Cancel",
-                slippageWarning: "⚠️ Slippage",
-                liquidityLabel: "Liquidity",
-                volumeLabel: "24h Volume",
                 alreadyVoted: "✅ Already voted",
                 votingOpen: "● Open now",
                 startsIn: "⏳ Starts in",
                 ended: "✓ Ended",
-                closed: "Voting Closed",
+                closed: "Closed",
                 // Dragon
                 dragonName: "Fire Dragon",
                 dragonLevel: "Level",
@@ -483,30 +655,31 @@
                 dragonAccuracyLabel: "Accuracy",
                 dragonWinsLabel: "Wins",
                 dragonLossesLabel: "Losses",
-                dragonEnergyLabel: "⚡ Energy",
-                quickBattle: "⚔️ Quick Battle",
-                randomChallenge: "🔍 Random Challenge",
-                challengeFriend: "👥 Challenge Friend",
-                battleLogLabel: "📜 Recent Battles",
+                dragonEnergyLabel: "Energy",
+                quickBattle: "Quick",
+                randomChallenge: "Random",
+                challengeFriend: "Challenge Friend",
+                battleLogLabel: "Recent Battles",
                 noBattles: "No battles yet",
                 win: "Win",
                 loss: "Loss",
                 vs: "vs",
-                dailyTitle: "📅 Daily Challenges",
-                dailyReset: "(resets daily)",
+                dailyTitle: "Daily Challenges",
+                dailyReset: "10h left",
                 // Guild
-                guildTitle: "🏰 Guild",
-                guildNotIn: "You are not a member of any guild yet",
-                createGuild: "➕ Create New Guild",
-                joinGuild: "🔍 Join Guild",
+                guildTitle: "Guild",
+                guildNotIn: "You are not in a guild yet",
+                createGuild: "Create New Guild",
+                joinGuild: "Join Guild",
                 guildLevelLabel: "Level",
                 guildMembersLabel: "Members",
                 guildXpLabel: "XP",
-                guildMembersListLabel: "👥 Member List",
-                leaveGuild: "🚪 Leave Guild"
+                guildMembersListLabel: "Member List",
+                leaveGuild: "Leave Guild"
             }
         };
 
+        // ================== دوال مساعدة ==================
         async function apiReq(path, method = 'GET', body = null) {
             if (!initDataStr) initDataStr = tg.initData || '';
             const options = { 
@@ -531,91 +704,59 @@
             document.getElementById('claim-btn').innerText = t.claimRewards;
             document.getElementById('connect-wallet-label').innerText = t.connectWallet;
             document.getElementById('update-wallet-btn').innerText = t.updateWallet;
-            document.getElementById('leaderboard-title').innerText = t.leaderboardTitle;
-            document.getElementById('store-title').innerText = t.storeTitle;
+            document.getElementById('leaderboard-title').innerHTML = `<i class="fas fa-crown text-yellow-500"></i> ${t.leaderboardTitle}`;
+            document.getElementById('store-title').innerHTML = `<i class="fas fa-store-alt"></i> ${t.storeTitle}`;
             document.getElementById('nav-stadium').innerText = t.navStadium;
+            document.getElementById('nav-dragon').innerText = t.navDragon;
             document.getElementById('nav-league').innerText = t.navLeague;
             document.getElementById('nav-store').innerText = t.navStore;
-            document.getElementById('nav-dragon').innerText = t.navDragon;
             document.getElementById('nav-guild').innerText = t.navGuild;
             document.getElementById('nav-account').innerText = t.navAccount;
-            document.getElementById('referral-title').innerText = t.referralTitle;
+            document.getElementById('referral-title').innerHTML = `<i class="fas fa-gift"></i> ${t.referralTitle}`;
             document.getElementById('referral-link-label').innerText = t.referralLinkLabel;
             document.getElementById('referrals-count-label').innerHTML = `${t.referralsCountLabel} <span id="referrals-count" class="text-blue-500 font-bold">0</span>`;
             document.getElementById('referral-rewards-label').innerHTML = `${t.referralRewardsLabel} <span id="referral-rewards" class="text-yellow-500 font-bold">0</span> DRGN`;
             document.getElementById('real-balance-label').innerText = t.realBalanceLabel;
             document.getElementById('convert-btn-text').innerText = t.convertBtn;
-            document.getElementById('buy-btn').innerHTML = `<i class="fas fa-shopping-cart ml-1"></i> ${t.buyBtn}`;
+            document.getElementById('buy-btn').innerHTML = `<i class="fas fa-shopping-cart"></i> ${t.buyBtn}`;
             document.getElementById('price-label').innerText = t.priceLabel;
-            document.getElementById('game-balance-note').innerText = t.gameBalanceNote;
             document.getElementById('convert-modal-title').innerText = t.convertModalTitle;
             document.getElementById('convert-available-label').innerHTML = `${t.convertAvailableLabel} <span id="available-token" class="text-blue-500 font-bold">0</span> DRGN`;
             document.getElementById('convert-confirm-btn').innerText = t.convertConfirm;
             document.getElementById('convert-cancel-btn').innerText = t.convertCancel;
 
-            // Dragon tab
-            document.getElementById('dragon-name').innerText = t.dragonName;
+            // Dragon
             document.getElementById('dragon-accuracy-label').innerText = t.dragonAccuracyLabel;
             document.getElementById('dragon-wins-label').innerText = t.dragonWinsLabel;
             document.getElementById('dragon-losses-label').innerText = t.dragonLossesLabel;
-            document.getElementById('dragon-energy-label').innerText = t.dragonEnergyLabel;
+            document.getElementById('dragon-energy-label').innerHTML = `<i class="fas fa-bolt text-yellow-500 animate-pulse"></i> ${t.dragonEnergyLabel}`;
             document.getElementById('quick-battle-btn').innerText = t.quickBattle;
             document.getElementById('random-challenge-btn').innerText = t.randomChallenge;
-            document.getElementById('challenge-friend-btn').innerText = t.challengeFriend;
-            document.getElementById('battle-log-label').innerText = t.battleLogLabel;
-            document.getElementById('daily-title').innerText = t.dailyTitle;
+            document.getElementById('challenge-friend-btn').innerHTML = `<i class="fas fa-user-friends"></i> ${t.challengeFriend}`;
+            document.getElementById('battle-log-label').innerHTML = `<i class="fas fa-history"></i> ${t.battleLogLabel}`;
+            document.getElementById('daily-title').innerHTML = `<i class="fas fa-calendar-alt"></i> ${t.dailyTitle}`;
             document.getElementById('daily-reset').innerText = t.dailyReset;
 
-            // Guild tab
-            document.getElementById('guild-title').innerText = t.guildTitle;
+            // Guild
+            document.getElementById('guild-title').innerHTML = `<i class="fas fa-shield-alt"></i> ${t.guildTitle}`;
             document.getElementById('guild-not-in-text').innerText = t.guildNotIn;
-            document.getElementById('create-guild-btn').innerText = t.createGuild;
-            document.getElementById('join-guild-btn').innerText = t.joinGuild;
+            document.getElementById('create-guild-btn').innerHTML = `<i class="fas fa-plus-circle"></i> ${t.createGuild}`;
+            document.getElementById('join-guild-btn').innerHTML = `<i class="fas fa-sign-in-alt"></i> ${t.joinGuild}`;
             document.getElementById('guild-level-label').innerText = t.guildLevelLabel;
             document.getElementById('guild-members-label').innerText = t.guildMembersLabel;
             document.getElementById('guild-xp-label').innerText = t.guildXpLabel;
-            document.getElementById('guild-members-list-label').innerText = t.guildMembersListLabel;
-            document.getElementById('leave-guild-btn').innerText = t.leaveGuild;
+            document.getElementById('guild-members-list-label').innerHTML = `<i class="fas fa-users"></i> ${t.guildMembersListLabel}`;
+            document.getElementById('leave-guild-btn').innerHTML = `<i class="fas fa-sign-out-alt"></i> ${t.leaveGuild}`;
 
-            // تحديث المحتوى الديناميكي
-            if (document.getElementById('match-container').innerHTML) {
-                loadMatches();
-            }
-            if (document.getElementById('store-items').innerHTML) {
-                loadStoreItems();
-            }
-            if (document.getElementById('dragon').classList.contains('active')) {
-                loadDragonData();
-            }
-            if (document.getElementById('guild').classList.contains('active')) {
-                loadGuildData();
-            }
+            // تحديث المحتوى الديناميكي حسب التبويب النشط
+            const activeTab = document.querySelector('.tab-content.active')?.id;
+            if (activeTab === 'home') loadMatches();
+            else if (activeTab === 'store') loadStoreItems();
+            else if (activeTab === 'dragon') loadDragonData();
+            else if (activeTab === 'guild') loadGuildData();
         }
 
-        // نهاية الجزء الأول. يتبع الجزء الثاني...
-                // ================== الجزء الثاني ==================
-
-        async function loadLiquidityData() {
-            try {
-                const data = await apiReq('/liquidity-data');
-                if (data.success) {
-                    document.getElementById('liquidity-value').innerText = parseFloat(data.liquidity).toFixed(2);
-                    document.getElementById('volume-value').innerText = parseFloat(data.volume24h).toFixed(2);
-                    document.getElementById('slippage-value').innerText = data.slippage;
-                    
-                    const t = translations[currentLang];
-                    const tickerItems = document.querySelectorAll('.ticker-item');
-                    if (tickerItems.length >= 3) {
-                        tickerItems[0].innerHTML = `🔮 ${t.liquidityLabel}: <span>${parseFloat(data.liquidity).toFixed(2)} USDT</span>`;
-                        tickerItems[1].innerHTML = `📊 ${t.volumeLabel}: <span>${parseFloat(data.volume24h).toFixed(2)} USDT</span>`;
-                        tickerItems[2].innerHTML = `${t.slippageWarning}: <span>${data.slippage}%</span>`;
-                    }
-                }
-            } catch (error) {
-                console.error('Error loading liquidity data:', error);
-            }
-        }
-
+        // ================== التهيئة ==================
         async function init() {
             tg.ready(); 
             tg.expand();
@@ -629,12 +770,10 @@
             loadLeaderboard();
             fetchPrice();
             loadReferralData();
-            loadLiquidityData();
             applyTranslations();
-
-            setInterval(loadLiquidityData, 60000);
         }
 
+        // ================== المباريات ==================
         function getTimeRemaining(matchTime) {
             const now = Date.now();
             const diff = matchTime - now;
@@ -678,19 +817,19 @@
                 }
                 
                 html += `
-                <div class="dragon-card p-4 border-l-4 ${m.isOpen ? 'border-l-green-600' : 'border-l-zinc-800'}" id="match-${m.id}">
+                <div class="dragon-card p-4 border-r-4 ${m.isOpen ? 'border-green-600' : 'border-zinc-800'}" id="match-${m.id}">
                     <div class="flex justify-between items-center mb-4 text-[9px] font-bold uppercase tracking-widest text-zinc-500">
                         <span>${m.league}</span>
                         <span class="${m.isOpen ? 'text-green-500' : ''}">${statusText}</span>
                     </div>
                     <div class="flex items-center gap-4">
                         <div class="flex-1 text-center">
-                            <img src="${m.logoA}" class="w-12 h-12 mx-auto mb-2 drop-shadow-lg" onerror="this.src='https://via.placeholder.com/48?text=A'">
+                            <img src="${m.logoA}" class="w-12 h-12 mx-auto mb-2 drop-shadow-lg rounded-full" onerror="this.src='https://via.placeholder.com/48?text=A'">
                             <p class="text-[10px] font-black uppercase">${m.teamA}</p>
                         </div>
                         <div class="text-red-600 font-black italic text-xl">VS</div>
                         <div class="flex-1 text-center">
-                            <img src="${m.logoB}" class="w-12 h-12 mx-auto mb-2 drop-shadow-lg" onerror="this.src='https://via.placeholder.com/48?text=B'">
+                            <img src="${m.logoB}" class="w-12 h-12 mx-auto mb-2 drop-shadow-lg rounded-full" onerror="this.src='https://via.placeholder.com/48?text=B'">
                             <p class="text-[10px] font-black uppercase">${m.teamB}</p>
                         </div>
                     </div>
@@ -736,6 +875,7 @@
             }
         }
 
+        // ================== تحديث واجهة المستخدم ==================
         function renderUser(u) {
             document.getElementById('total-balance').innerText = Math.floor((u.gameBalance || 0) + (u.tokenBalance || 0)).toLocaleString();
             document.getElementById('game-balance').innerText = Math.floor(u.gameBalance || 0).toLocaleString();
@@ -793,7 +933,7 @@
             list.innerHTML = html;
         }
 
-        // ========== نظام الإحالة ==========
+        // ================== الإحالة ==================
         async function loadReferralData() {
             const data = await apiReq('/referral-data');
             if (data.success) {
@@ -810,7 +950,7 @@
             tg.showAlert(currentLang === 'ar' ? "تم نسخ الرابط!" : "Link copied!");
         }
 
-        // ========== السوق ==========
+        // ================== المتجر ==================
         async function loadStoreItems() {
             const data = await apiReq('/store/items');
             if (!data.success || !data.items) return;
@@ -863,7 +1003,7 @@
             }
         }
 
-        // ========== تحويل الرصيد ==========
+        // ================== تحويل الرصيد ==================
         function showConvertModal() {
             const available = parseInt(document.getElementById('token-balance-display').innerText.replace(/,/g, '')) || 0;
             document.getElementById('available-token').innerText = available.toLocaleString();
@@ -902,26 +1042,59 @@
             }
         }
 
-        // ========== دوال التنين ==========
+        // ================== التنين (محسّن مع أشكال واقعية) ==================
+        function getDragonEmoji(level, element) {
+            // تغيير شكل التنين حسب المستوى والعنصر
+            const baseEmojis = {
+                fire: ['🐣', '🐲', '🐉', '🔥🐉', '👑🐉'],
+                ice: ['❄️🐣', '❄️🐲', '❄️🐉', '🧊🐉', '👑❄️🐉'],
+                electric: ['⚡🐣', '⚡🐲', '⚡🐉', '💫🐉', '👑⚡🐉']
+            };
+            const levelIndex = Math.min(Math.floor(level / 5), 4);
+            return baseEmojis[element]?.[levelIndex] || '🐉';
+        }
+
         async function loadDragonData() {
             const data = await apiReq('/dragon-data');
             if (data.success) {
                 const d = data.dragon;
                 const t = translations[currentLang];
-                document.getElementById('dragon-level').innerText = `${t.dragonLevel} ${d.level}`;
+                
+                // تحديث اسم التنين والعنصر
                 const elementName = getElementName(d.element, currentLang);
+                document.getElementById('dragon-name').innerText = `${elementName} ${t.dragonName.split(' ')[1] || 'Dragon'}`;
+                document.getElementById('dragon-level').innerText = `${t.dragonLevel} ${d.level}`;
                 document.getElementById('dragon-element').innerText = `${t.dragonElement.split(':')[0]}: ${elementName}`;
+                
+                // تحديث الأيقونة بشكل ديناميكي حسب المستوى والعنصر
+                document.getElementById('dragon-emoji').innerText = getDragonEmoji(d.level, d.element);
+                
+                // تحديث الألوان حسب العنصر
+                const avatar = document.getElementById('dragon-avatar');
+                if (d.element === 'fire') {
+                    avatar.style.background = 'linear-gradient(135deg, #ff4d4d, #b30000)';
+                    avatar.style.boxShadow = '0 10px 30px #ff333380, 0 0 0 3px #ffaa00 inset';
+                } else if (d.element === 'ice') {
+                    avatar.style.background = 'linear-gradient(135deg, #4dd0ff, #0066b3)';
+                    avatar.style.boxShadow = '0 10px 30px #4dd0ff80, 0 0 0 3px #aaffff inset';
+                } else if (d.element === 'electric') {
+                    avatar.style.background = 'linear-gradient(135deg, #ffdd4d, #b38600)';
+                    avatar.style.boxShadow = '0 10px 30px #ffdd4d80, 0 0 0 3px #ffffaa inset';
+                }
+                
+                // الإحصائيات
                 document.getElementById('dragon-accuracy').innerText = d.accuracy ? d.accuracy.toFixed(1) + '%' : '0%';
                 document.getElementById('dragon-wins').innerText = d.wins || 0;
                 document.getElementById('dragon-losses').innerText = d.losses || 0;
                 document.getElementById('dragon-energy').innerText = d.energy || 0;
                 
+                // XP
                 const xpNeeded = d.level * 100;
                 const xpPercent = (d.xp / xpNeeded) * 100;
                 document.getElementById('xp-bar').style.width = xpPercent + '%';
                 document.getElementById('xp-text').innerText = `${d.xp} / ${xpNeeded} XP`;
                 
-                // عرض سجل المعارك
+                // سجل المعارك
                 const logDiv = document.getElementById('battle-log');
                 if (d.battles && d.battles.length > 0) {
                     let html = '';
@@ -1012,7 +1185,29 @@
             }
         }
 
-        // ========== التحديات اليومية ==========
+        // شراء الطاقة
+        function buyEnergy() {
+            const amount = prompt(currentLang === 'ar' ? 'كم نقطة طاقة تريد شراء؟ (كل نقطة = 60 DRGN)' : 'How many energy points? (each = 60 DRGN)', '1');
+            if (!amount) return;
+            const num = parseInt(amount);
+            if (num < 1 || num > 10) {
+                tg.showAlert(currentLang === 'ar' ? 'يجب أن يكون بين 1 و 10' : 'Must be between 1 and 10');
+                return;
+            }
+            tg.MainButton.setText(currentLang === 'ar' ? 'جاري الشراء...' : 'Buying...').show();
+            apiReq('/buy-energy', 'POST', { amount: num }).then(r => {
+                tg.MainButton.hide();
+                if (r.success) {
+                    tg.showAlert(currentLang === 'ar' ? '✅ تم شراء الطاقة!' : '✅ Energy purchased!');
+                    loadDragonData();
+                    document.getElementById('game-balance').innerText = Math.floor(r.gameBalance).toLocaleString();
+                } else {
+                    tg.showAlert(r.message || (currentLang === 'ar' ? 'فشل الشراء' : 'Purchase failed'));
+                }
+            });
+        }
+
+        // ================== التحديات اليومية ==================
         async function loadDailyChallenges() {
             const data = await apiReq('/daily-challenges');
             if (data.success) {
@@ -1062,7 +1257,7 @@
             }
         }
 
-        // ========== دوال العشيرة ==========
+        // ================== العشيرة ==================
         async function loadGuildData() {
             const data = await apiReq('/guild/data');
             if (data.success) {
@@ -1143,7 +1338,7 @@
             });
         }
 
-        // ========== وظائف إضافية ==========
+        // ================== أخرى ==================
         function openBuyLink() {
             const tokenAddress = "0x583787E29Bb2D92FcBc713389FD66807602c72F3";
             const network = "bsc";
@@ -1180,6 +1375,8 @@
                 loadDragonData();
             } else if (id === 'guild') {
                 loadGuildData();
+            } else if (id === 'home') {
+                loadMatches();
             }
         }
 
@@ -1190,6 +1387,7 @@
             applyTranslations();
         }
 
+        // بدء التطبيق
         init();
     </script>
 </body>
