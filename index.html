@@ -88,6 +88,15 @@
                 </div>
             </div>
 
+            <!-- عرض الرصيد الحقيقي وزر التحويل -->
+            <div class="dragon-card p-4 text-center">
+                <p class="text-[8px] text-zinc-500 font-bold uppercase">الرصيد الحقيقي (Token)</p>
+                <p id="token-balance-display" class="text-lg font-black mt-1 text-blue-500">0</p>
+                <button onclick="showConvertModal()" class="mt-2 w-full py-2 bg-blue-600 text-white text-[9px] font-black rounded-lg active:scale-95 transition-all">
+                    <i class="fas fa-exchange-alt ml-1"></i> تحويل إلى رصيد اللعبة
+                </button>
+            </div>
+
             <!-- نظام الإحالة -->
             <div class="dragon-card p-5 border-blue-600/30">
                 <p class="text-center text-blue-500 font-bold text-[10px] mb-2">🤝 نظام الإحالة</p>
@@ -125,16 +134,28 @@
 
             <div class="dragon-card p-5 mt-2 border border-yellow-600/30">
                 <p class="text-center text-[10px] text-yellow-500 font-bold">
-                    ⚡ رصيد اللعبة (Game Balance) يمكن استخدامه لاحقاً في شراء تذاكر التصويت أو رفع المستوى.
-                </p>
-                <p class="text-center text-[9px] text-zinc-500 mt-2">
-                    المكافآت الحالية هي نقاط داخلية، وسنعلن عن آلية صرفها قريباً.
+                    ⚡ رصيد اللعبة (Game Balance) يمكن استخدامه في المتجر لشراء التذاكر والشارات.
                 </p>
             </div>
         </section>
     </main>
 
-    <!-- شريط التنقل -->
+    <!-- نافذة تحويل الرصيد -->
+    <div id="convert-modal" class="fixed inset-0 bg-black/90 backdrop-blur-sm z-[200] hidden items-center justify-center p-4">
+        <div class="dragon-card p-6 w-full max-w-sm relative">
+            <button onclick="hideConvertModal()" class="absolute top-2 left-2 text-zinc-500">
+                <i class="fas fa-times"></i>
+            </button>
+            <h3 class="text-center text-blue-500 font-black italic mb-4">تحويل الرصيد الحقيقي</h3>
+            <p class="text-[10px] text-zinc-400 text-center mb-2">الرصيد المتاح للتحويل: <span id="available-token" class="text-blue-500 font-bold">0</span> DRGN</p>
+            <input id="convert-amount" type="number" min="1" placeholder="الكمية" class="w-full bg-black border border-white/10 p-3 rounded-xl text-xs text-center outline-none focus:border-blue-600 transition-all mb-3">
+            <div class="flex gap-2">
+                <button onclick="convertToGame()" class="flex-1 py-3 bg-blue-600 text-white text-[10px] font-black rounded-xl active:scale-95 transition-all">تحويل</button>
+                <button onclick="hideConvertModal()" class="flex-1 py-3 bg-white/10 text-white text-[10px] font-black rounded-xl active:scale-95 transition-all">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
     <nav class="fixed bottom-0 left-0 right-0 bg-black/80 backdrop-blur-xl border-t border-white/5 flex justify-around p-3 z-[100]">
         <button onclick="showTab('home')" class="nav-btn active flex-1 flex flex-col items-center">
             <i class="fas fa-gamepad text-xl mb-1"></i><span id="nav-stadium">الملعب</span>
@@ -155,6 +176,7 @@
         const API = "https://noisy-moon-4289.manhal-almasriiii199119.workers.dev"; // ⚠️ غيّر إلى رابط الـ Worker الخاص بك
         let initDataStr = "";
         let currentLang = "ar";
+        let storeItems = []; // لتخزين عناصر المتجر
 
         const translations = {
             ar: {
@@ -223,7 +245,6 @@
             tg.ready(); 
             tg.expand();
             initDataStr = tg.initData || '';
-            // تمرير باراميتر ref من URL إلى الـ sync (إذا كان موجودًا)
             const urlParams = new URLSearchParams(window.location.search);
             const ref = urlParams.get('ref');
             const syncUrl = ref ? `/sync?ref=${ref}` : '/sync';
@@ -232,7 +253,7 @@
             loadMatches();
             loadLeaderboard();
             fetchPrice();
-            loadReferralData(); // تحميل بيانات الإحالة
+            loadReferralData();
             applyTranslations();
         }
 
@@ -298,6 +319,7 @@
             document.getElementById('game-balance').innerText = Math.floor(u.gameBalance || 0).toLocaleString();
             document.getElementById('pending-rewards').innerText = Math.floor(u.pendingRewards || 0).toLocaleString();
             document.getElementById('rank-name').innerText = `${u.rank} MEMBER`;
+            document.getElementById('token-balance-display').innerText = Math.floor(u.tokenBalance || 0).toLocaleString();
             if (u.wallet) document.getElementById('bsc-address').value = u.wallet;
         }
 
@@ -369,9 +391,9 @@
         // ========== المتجر ==========
         async function loadStoreItems() {
             const data = await apiReq('/store/items');
-            const container = document.getElementById('store-items');
             if (!data.success || !data.items) return;
-            
+            storeItems = data.items; // حفظ للاستخدام
+            const container = document.getElementById('store-items');
             let html = '';
             data.items.forEach(item => {
                 html += `
@@ -395,15 +417,66 @@
         }
 
         async function purchaseItem(itemId) {
+            const item = storeItems.find(i => i.id === itemId);
+            if (!item) return;
+            
+            const currentBalance = parseInt(document.getElementById('game-balance').innerText.replace(/,/g, '')) || 0;
+            if (currentBalance < item.price) {
+                tg.showAlert(currentLang === 'ar' 
+                    ? `⚠️ رصيدك غير كافٍ. الرصيد الحالي: ${currentBalance} DRGN` 
+                    : `⚠️ Insufficient balance. Current balance: ${currentBalance} DRGN`);
+                return;
+            }
+
             tg.MainButton.setText(currentLang === 'ar' ? "جاري الشراء..." : "Purchasing...").show();
             const r = await apiReq('/store/purchase', 'POST', { itemId });
             tg.MainButton.hide();
             if (r.success) {
-                renderUser(r.user); // تحديث الرصيد
+                renderUser(r.user);
+                await loadLeaderboard();
                 tg.showAlert(currentLang === 'ar' ? "✅ تم الشراء بنجاح!" : "✅ Purchase successful!");
-                loadStoreItems(); // إعادة تحميل المتجر
+                loadStoreItems();
             } else {
                 tg.showAlert(r.message || (currentLang === 'ar' ? "فشل الشراء" : "Purchase failed"));
+            }
+        }
+
+        // ========== تحويل الرصيد ==========
+        function showConvertModal() {
+            const available = parseInt(document.getElementById('token-balance-display').innerText.replace(/,/g, '')) || 0;
+            document.getElementById('available-token').innerText = available.toLocaleString();
+            document.getElementById('convert-modal').classList.remove('hidden');
+            document.getElementById('convert-modal').classList.add('flex');
+        }
+
+        function hideConvertModal() {
+            document.getElementById('convert-modal').classList.add('hidden');
+            document.getElementById('convert-modal').classList.remove('flex');
+        }
+
+        async function convertToGame() {
+            const amount = parseInt(document.getElementById('convert-amount').value);
+            if (!amount || amount <= 0) {
+                tg.showAlert(currentLang === 'ar' ? "الرجاء إدخال كمية صحيحة" : "Please enter a valid amount");
+                return;
+            }
+
+            const available = parseInt(document.getElementById('token-balance-display').innerText.replace(/,/g, '')) || 0;
+            if (amount > available) {
+                tg.showAlert(currentLang === 'ar' ? "الكمية أكبر من الرصيد المتاح" : "Amount exceeds available balance");
+                return;
+            }
+
+            tg.MainButton.setText(currentLang === 'ar' ? "جاري التحويل..." : "Converting...").show();
+            const r = await apiReq('/convert-to-game', 'POST', { amount });
+            tg.MainButton.hide();
+            
+            if (r.success) {
+                renderUser(r.user);
+                hideConvertModal();
+                tg.showAlert(currentLang === 'ar' ? "✅ تم التحويل بنجاح!" : "✅ Conversion successful!");
+            } else {
+                tg.showAlert(r.message || (currentLang === 'ar' ? "فشل التحويل" : "Conversion failed"));
             }
         }
 
@@ -448,7 +521,6 @@
             document.body.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
             document.getElementById('btn-lang').innerText = currentLang === 'ar' ? 'EN' : 'AR';
             applyTranslations();
-            // إعادة تحميل المحتوى المعتمد على اللغة في التبويبات المفتوحة
             const activeTab = document.querySelector('.tab-content.active')?.id;
             if (activeTab === 'store') loadStoreItems();
         }
