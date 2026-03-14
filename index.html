@@ -40,6 +40,7 @@
     </header>
 
     <main class="p-4 space-y-6">
+        <!-- تبويب المباريات -->
         <section id="home" class="tab-content active space-y-4">
             <div id="match-loader" class="hidden space-y-4">
                 <div class="dragon-card p-10 loading-pulse bg-zinc-900"></div>
@@ -48,6 +49,7 @@
             <div id="match-container" class="space-y-4"></div>
         </section>
 
+        <!-- تبويب الدوري -->
         <section id="league" class="tab-content space-y-4">
             <div class="dragon-card p-5 border-red-900/30">
                 <h2 id="leaderboard-title" class="text-center text-red-600 font-black italic mb-4">قائمة المتصدرين</h2>
@@ -55,6 +57,15 @@
             </div>
         </section>
 
+        <!-- تبويب المتجر -->
+        <section id="store" class="tab-content space-y-4">
+            <div class="dragon-card p-5 border-purple-900/30">
+                <h2 class="text-center text-purple-600 font-black italic mb-4">المتجر</h2>
+                <div id="store-items" class="space-y-3"></div>
+            </div>
+        </section>
+
+        <!-- تبويب الحساب -->
         <section id="account" class="tab-content space-y-4">
             <div class="dragon-card p-6 text-center relative overflow-hidden">
                 <div class="absolute top-0 left-0 w-full h-1 bg-red-600"></div>
@@ -74,6 +85,24 @@
                 <div class="dragon-card p-4 text-center">
                     <p id="pending-label" class="text-[8px] text-zinc-500 font-bold uppercase">معلق</p>
                     <p id="pending-rewards" class="text-lg font-black mt-1 text-yellow-500">0</p>
+                </div>
+            </div>
+
+            <!-- نظام الإحالة -->
+            <div class="dragon-card p-5 border-blue-600/30">
+                <p class="text-center text-blue-500 font-bold text-[10px] mb-2">🤝 نظام الإحالة</p>
+                <div class="text-center">
+                    <p class="text-[9px] text-zinc-400">رابط الإحالة الخاص بك:</p>
+                    <div class="flex items-center gap-2 mt-1">
+                        <input id="referral-link" type="text" readonly class="flex-1 bg-black/50 border border-white/10 p-2 rounded-lg text-[8px] text-center outline-none" value="جاري التحميل...">
+                        <button onclick="copyReferralLink()" class="bg-blue-600 px-3 py-2 rounded-lg text-[10px] font-bold">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                    <div class="flex justify-between mt-3 text-[9px]">
+                        <span>عدد المُحالين: <span id="referrals-count" class="text-blue-500 font-bold">0</span></span>
+                        <span>مكافآت الإحالة: <span id="referral-rewards" class="text-yellow-500 font-bold">0</span> DRGN</span>
+                    </div>
                 </div>
             </div>
 
@@ -105,12 +134,16 @@
         </section>
     </main>
 
+    <!-- شريط التنقل -->
     <nav class="fixed bottom-0 left-0 right-0 bg-black/80 backdrop-blur-xl border-t border-white/5 flex justify-around p-3 z-[100]">
         <button onclick="showTab('home')" class="nav-btn active flex-1 flex flex-col items-center">
             <i class="fas fa-gamepad text-xl mb-1"></i><span id="nav-stadium">الملعب</span>
         </button>
         <button onclick="showTab('league')" class="nav-btn flex-1 flex flex-col items-center">
             <i class="fas fa-trophy text-xl mb-1"></i><span id="nav-league">الدوري</span>
+        </button>
+        <button onclick="showTab('store')" class="nav-btn flex-1 flex flex-col items-center">
+            <i class="fas fa-store text-xl mb-1"></i><span id="nav-store">المتجر</span>
         </button>
         <button onclick="showTab('account')" class="nav-btn flex-1 flex flex-col items-center">
             <i class="fas fa-wallet text-xl mb-1"></i><span id="nav-account">الحساب</span>
@@ -119,7 +152,7 @@
 
     <script>
         const tg = window.Telegram.WebApp;
-        const API = "https://noisy-moon-4289.manhal-almasriiii199119.workers.dev"; // ⚠️ غيّر هذا إلى رابط الـ Worker الخاص بك
+        const API = "https://noisy-moon-4289.manhal-almasriiii199119.workers.dev"; // ⚠️ غيّر إلى رابط الـ Worker الخاص بك
         let initDataStr = "";
         let currentLang = "ar";
 
@@ -136,6 +169,7 @@
                 leaderboardTitle: "قائمة المتصدرين",
                 navStadium: "الملعب",
                 navLeague: "الدوري",
+                navStore: "المتجر",
                 navAccount: "الحساب"
             },
             en: {
@@ -150,6 +184,7 @@
                 leaderboardTitle: "LEADERBOARD",
                 navStadium: "Stadium",
                 navLeague: "League",
+                navStore: "Store",
                 navAccount: "Account"
             }
         };
@@ -180,6 +215,7 @@
             document.getElementById('leaderboard-title').innerText = translations[currentLang].leaderboardTitle;
             document.getElementById('nav-stadium').innerText = translations[currentLang].navStadium;
             document.getElementById('nav-league').innerText = translations[currentLang].navLeague;
+            document.getElementById('nav-store').innerText = translations[currentLang].navStore;
             document.getElementById('nav-account').innerText = translations[currentLang].navAccount;
         }
 
@@ -187,11 +223,16 @@
             tg.ready(); 
             tg.expand();
             initDataStr = tg.initData || '';
-            const r = await apiReq('/sync', 'POST');
+            // تمرير باراميتر ref من URL إلى الـ sync (إذا كان موجودًا)
+            const urlParams = new URLSearchParams(window.location.search);
+            const ref = urlParams.get('ref');
+            const syncUrl = ref ? `/sync?ref=${ref}` : '/sync';
+            const r = await apiReq(syncUrl, 'POST');
             if (r.success) renderUser(r.user);
             loadMatches();
             loadLeaderboard();
             fetchPrice();
+            loadReferralData(); // تحميل بيانات الإحالة
             applyTranslations();
         }
 
@@ -308,24 +349,65 @@
             list.innerHTML = html;
         }
 
-        function showTab(id) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            const activeBtn = document.querySelector(`button[onclick="showTab('${id}')"]`);
-            if (activeBtn) activeBtn.classList.add('active');
-            if (id === 'league') {
-                loadLeaderboard();
+        // ========== نظام الإحالة ==========
+        async function loadReferralData() {
+            const data = await apiReq('/referral-data');
+            if (data.success) {
+                document.getElementById('referral-link').value = data.referralLink;
+                document.getElementById('referrals-count').innerText = data.referralsCount;
+                document.getElementById('referral-rewards').innerText = data.referralRewards;
             }
         }
 
-        function toggleLang() {
-            currentLang = currentLang === 'ar' ? 'en' : 'ar';
-            document.body.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
-            document.getElementById('btn-lang').innerText = currentLang === 'ar' ? 'EN' : 'AR';
-            applyTranslations();
+        function copyReferralLink() {
+            const link = document.getElementById('referral-link');
+            link.select();
+            navigator.clipboard.writeText(link.value);
+            tg.showAlert(currentLang === 'ar' ? "تم نسخ الرابط!" : "Link copied!");
         }
 
+        // ========== المتجر ==========
+        async function loadStoreItems() {
+            const data = await apiReq('/store/items');
+            const container = document.getElementById('store-items');
+            if (!data.success || !data.items) return;
+            
+            let html = '';
+            data.items.forEach(item => {
+                html += `
+                <div class="bg-white/5 p-4 rounded-xl border border-white/5">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h3 class="font-bold text-sm">${currentLang === 'ar' ? item.nameAr : item.nameEn}</h3>
+                            <p class="text-[8px] text-zinc-400">${currentLang === 'ar' ? item.descriptionAr : item.descriptionEn}</p>
+                        </div>
+                        <div class="text-left">
+                            <span class="text-yellow-500 font-black text-sm">${item.price}</span>
+                            <span class="text-[8px] text-zinc-500">DRGN</span>
+                        </div>
+                    </div>
+                    <button onclick="purchaseItem('${item.id}')" class="w-full mt-3 py-2 bg-purple-600 text-white text-[10px] font-black rounded-lg active:scale-95 transition-all">
+                        ${currentLang === 'ar' ? 'شراء' : 'Buy'}
+                    </button>
+                </div>`;
+            });
+            container.innerHTML = html;
+        }
+
+        async function purchaseItem(itemId) {
+            tg.MainButton.setText(currentLang === 'ar' ? "جاري الشراء..." : "Purchasing...").show();
+            const r = await apiReq('/store/purchase', 'POST', { itemId });
+            tg.MainButton.hide();
+            if (r.success) {
+                renderUser(r.user); // تحديث الرصيد
+                tg.showAlert(currentLang === 'ar' ? "✅ تم الشراء بنجاح!" : "✅ Purchase successful!");
+                loadStoreItems(); // إعادة تحميل المتجر
+            } else {
+                tg.showAlert(r.message || (currentLang === 'ar' ? "فشل الشراء" : "Purchase failed"));
+            }
+        }
+
+        // ========== وظائف إضافية ==========
         function openBuyLink() {
             const tokenAddress = "0x583787E29Bb2D92FcBc713389FD66807602c72F3";
             const network = "bsc";
@@ -343,6 +425,32 @@
             } catch (error) {
                 console.error("Error fetching price:", error);
             }
+        }
+
+        function showTab(id) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            const activeBtn = document.querySelector(`button[onclick="showTab('${id}')"]`);
+            if (activeBtn) activeBtn.classList.add('active');
+            
+            if (id === 'league') {
+                loadLeaderboard();
+            } else if (id === 'store') {
+                loadStoreItems();
+            } else if (id === 'account') {
+                loadReferralData();
+            }
+        }
+
+        function toggleLang() {
+            currentLang = currentLang === 'ar' ? 'en' : 'ar';
+            document.body.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+            document.getElementById('btn-lang').innerText = currentLang === 'ar' ? 'EN' : 'AR';
+            applyTranslations();
+            // إعادة تحميل المحتوى المعتمد على اللغة في التبويبات المفتوحة
+            const activeTab = document.querySelector('.tab-content.active')?.id;
+            if (activeTab === 'store') loadStoreItems();
         }
 
         init();
