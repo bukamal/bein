@@ -279,6 +279,26 @@
             applyTranslations();
         }
 
+        // دالة لحساب الوقت المتبقي
+        function getTimeRemaining(matchTime) {
+            const now = Date.now();
+            const diff = matchTime - now;
+            if (diff <= 0) return 'انتهت';
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(minutes / 60);
+            const remainingMinutes = minutes % 60;
+            if (hours > 0) return `${hours}س ${remainingMinutes}د`;
+            return `${minutes}د`;
+        }
+
+        // دالة لجلب المباريات التي صوت عليها المستخدم
+        async function checkUserVotes(matchIds) {
+            if (!matchIds || matchIds.length === 0) return [];
+            const r = await apiReq('/get-user-votes', 'POST', { matchIds });
+            if (r.success) return r.votes;
+            return [];
+        }
+
         async function loadMatches() {
             document.getElementById('match-loader').classList.remove('hidden');
             const d = await apiReq('/get-matches');
@@ -289,22 +309,26 @@
                 container.innerHTML = `<div class="dragon-card p-6 text-center text-red-500">خطأ في تحميل المباريات</div>`;
                 return;
             }
+            
+            // بناء HTML أولي
             let html = '';
             d.matches.forEach(m => {
-                const timeStr = new Date(m.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                const status = m.isOpen ? `<span class="text-green-500">● LIVE VOTING</span>` : `<span>${timeStr}</span>`;
-                const votingHTML = m.isOpen ? `
-                    <div class="grid grid-cols-3 gap-2 mt-4" id="v-${m.id}">
-                        <button onclick="vote('${m.id}','HOME',${m.time})" class="bg-white/5 py-3 rounded-xl hover:bg-red-600 transition-all font-black italic text-xs">1</button>
-                        <button onclick="vote('${m.id}','DRAW',${m.time})" class="bg-white/5 py-3 rounded-xl hover:bg-red-600 transition-all font-black italic text-xs">X</button>
-                        <button onclick="vote('${m.id}','AWAY',${m.time})" class="bg-white/5 py-3 rounded-xl hover:bg-red-600 transition-all font-black italic text-xs">2</button>
-                    </div>` : `
-                    <div class="mt-4 py-2 bg-black/40 rounded-xl text-center text-[9px] text-zinc-600 font-black italic uppercase">Voting Closed</div>`;
+                const now = Date.now();
+                const matchTime = m.time;
+                let statusText = '';
+                if (m.isOpen) {
+                    statusText = '● مفتوح الآن';
+                } else if (matchTime > now) {
+                    statusText = `⏳ يبدأ بعد ${getTimeRemaining(matchTime)}`;
+                } else {
+                    statusText = '✓ انتهت';
+                }
+                
                 html += `
-                <div class="dragon-card p-4 border-l-4 ${m.isOpen ? 'border-l-green-600' : 'border-l-zinc-800'}">
+                <div class="dragon-card p-4 border-l-4 ${m.isOpen ? 'border-l-green-600' : 'border-l-zinc-800'}" id="match-${m.id}">
                     <div class="flex justify-between items-center mb-4 text-[9px] font-bold uppercase tracking-widest text-zinc-500">
                         <span>${m.league}</span>
-                        ${status}
+                        <span class="${m.isOpen ? 'text-green-500' : ''}">${statusText}</span>
                     </div>
                     <div class="flex items-center gap-4">
                         <div class="flex-1 text-center">
@@ -317,10 +341,34 @@
                             <p class="text-[10px] font-black uppercase">${m.teamB}</p>
                         </div>
                     </div>
-                    ${votingHTML}
+                    <div id="v-${m.id}" class="mt-4"></div>
                 </div>`;
             });
             container.innerHTML = html;
+
+            // التحقق من التصويتات السابقة
+            const matchIds = d.matches.map(m => m.id);
+            const votedMatches = await checkUserVotes(matchIds);
+            
+            // تحديث كل مباراة
+            d.matches.forEach(m => {
+                const voteDiv = document.getElementById(`v-${m.id}`);
+                if (!voteDiv) return;
+                
+                const hasVoted = votedMatches.includes(m.id);
+                if (hasVoted) {
+                    voteDiv.innerHTML = `<div class="py-2 text-center text-green-500 font-black italic text-xs">✅ تم التصويت مسبقاً</div>`;
+                } else if (m.isOpen) {
+                    voteDiv.innerHTML = `
+                        <div class="grid grid-cols-3 gap-2">
+                            <button onclick="vote('${m.id}','HOME',${m.time})" class="bg-white/5 py-3 rounded-xl hover:bg-red-600 transition-all font-black italic text-xs">1</button>
+                            <button onclick="vote('${m.id}','DRAW',${m.time})" class="bg-white/5 py-3 rounded-xl hover:bg-red-600 transition-all font-black italic text-xs">X</button>
+                            <button onclick="vote('${m.id}','AWAY',${m.time})" class="bg-white/5 py-3 rounded-xl hover:bg-red-600 transition-all font-black italic text-xs">2</button>
+                        </div>`;
+                } else {
+                    voteDiv.innerHTML = `<div class="py-2 bg-black/40 rounded-xl text-center text-[9px] text-zinc-600 font-black italic uppercase">Voting Closed</div>`;
+                }
+            });
         }
 
         async function vote(id, side, time) {
@@ -330,7 +378,9 @@
             if (r.success) {
                 tg.HapticFeedback.notificationOccurred('success');
                 const v = document.getElementById(`v-${id}`);
-                if (v) v.innerHTML = `<div class="col-span-3 py-2 text-center text-green-500 font-black italic text-xs animate-bounce">تم تسجيل التصويت ✓</div>`;
+                if (v) v.innerHTML = `<div class="py-2 text-center text-green-500 font-black italic text-xs">✅ تم التصويت مسبقاً</div>`;
+                // تحديث المتصدرين بعد التصويت (لأن المكافآت ستتغير لاحقاً)
+                await loadLeaderboard();
             } else {
                 tg.showAlert(r.message || "خطأ");
             }
