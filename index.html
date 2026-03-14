@@ -7,6 +7,8 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- MetaMask SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@metamask/sdk@0.14.1/dist/browser/umd/index.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap');
         body { background: #050505; color: #fff; font-family: 'Tajawal', sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -65,7 +67,7 @@
             </div>
         </section>
 
-        <!-- تبويب الحساب (بدون WalletConnect) -->
+        <!-- تبويب الحساب (مع MetaMask) -->
         <section id="account" class="tab-content space-y-4">
             <div class="dragon-card p-6 text-center relative overflow-hidden">
                 <div class="absolute top-0 left-0 w-full h-1 bg-red-600"></div>
@@ -117,15 +119,34 @@
 
             <button id="claim-btn" onclick="claimRewards()" class="w-full py-4 bg-red-600 text-white font-black rounded-2xl shadow-xl shadow-red-900/40 active:scale-95 transition-all">سحب المكافآت</button>
 
-            <!-- قسم ربط المحفظة (يدوي فقط) -->
+            <!-- قسم ربط المحفظة (يدوي + MetaMask) -->
             <div class="dragon-card p-5 space-y-3">
                 <p id="connect-wallet-label" class="text-[9px] text-zinc-500 font-bold text-center italic">
-                    لربط محفظة BSC، أدخل عنوان محفظتك يدوياً واضغط تحديث:
+                    ربط محفظة BSC لتحديث الرتبة والرصيد
                 </p>
+                
+                <!-- زر MetaMask SDK -->
+                <button onclick="connectMetaMask()" id="connect-metamask-btn" class="w-full py-3 bg-orange-600 text-white text-[11px] font-black rounded-xl uppercase active:scale-95 transition-all">
+                    <i class="fab fa-metamask ml-1"></i> ربط MetaMask
+                </button>
+                <p class="text-[8px] text-zinc-600 text-center">(سيتم فتح التطبيق، ثم العودة تلقائياً مع الاتصال)</p>
+                
+                <!-- معلومات المحفظة بعد الربط -->
+                <div id="wallet-info" class="hidden text-center text-[10px] text-green-500 break-all"></div>
+                
+                <!-- خيار يدوي احتياطي -->
+                <div class="relative">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-white/10"></div>
+                    </div>
+                    <div class="relative flex justify-center text-[8px]">
+                        <span class="px-2 bg-black text-zinc-500">أو أدخل العنوان يدوياً</span>
+                    </div>
+                </div>
                 
                 <input id="bsc-address" type="text" placeholder="0x..." class="w-full bg-black border border-white/10 p-4 rounded-xl text-xs text-center outline-none focus:border-red-600 transition-all">
                 <button onclick="updateWallet()" class="w-full py-3 bg-white text-black text-[11px] font-black rounded-xl uppercase active:scale-95 transition-all">
-                    تحديث المحفظة
+                    تحديث المحفظة يدوياً
                 </button>
 
                 <div class="flex gap-2 mt-2">
@@ -183,6 +204,7 @@
         let initDataStr = "";
         let currentLang = "ar";
         let storeItems = [];
+        let metaMaskSDK = null;
 
         const translations = {
             ar: {
@@ -192,7 +214,7 @@
                 gameWallet: "محفظة اللعبة",
                 pending: "معلق",
                 claimRewards: "سحب المكافآت",
-                connectWallet: "أدخل عنوان محفظة BSC لتحديث الرتبة والرصيد",
+                connectWallet: "ربط محفظة BSC لتحديث الرتبة والرصيد",
                 updateWallet: "تحديث المحفظة",
                 leaderboardTitle: "قائمة المتصدرين",
                 navStadium: "الملعب",
@@ -207,7 +229,7 @@
                 gameWallet: "Game Wallet",
                 pending: "Pending",
                 claimRewards: "Claim Rewards",
-                connectWallet: "Enter BSC wallet address to update rank and balance",
+                connectWallet: "Connect BSC Wallet to update rank and balance",
                 updateWallet: "Update Wallet",
                 leaderboardTitle: "LEADERBOARD",
                 navStadium: "Stadium",
@@ -329,8 +351,11 @@
             if (u.wallet) document.getElementById('bsc-address').value = u.wallet;
         }
 
-        async function updateWallet() {
-            const wallet = document.getElementById('bsc-address').value.trim();
+        // تحديث دالة updateWallet لقبول معامل اختياري
+        async function updateWallet(wallet = null) {
+            if (!wallet) {
+                wallet = document.getElementById('bsc-address').value.trim();
+            }
             if (!wallet || !/^0x[a-fA-F0-9]{40}$/.test(wallet)) {
                 tg.showAlert(currentLang === 'ar' ? "عنوان BSC غير صحيح" : "Invalid BSC address");
                 return;
@@ -483,6 +508,52 @@
                 tg.showAlert(currentLang === 'ar' ? "✅ تم التحويل بنجاح!" : "✅ Conversion successful!");
             } else {
                 tg.showAlert(r.message || (currentLang === 'ar' ? "فشل التحويل" : "Conversion failed"));
+            }
+        }
+
+        // ========== MetaMask SDK ==========
+        async function connectMetaMask() {
+            try {
+                tg.MainButton.setText(currentLang === 'ar' ? 'جاري ربط MetaMask...' : 'Connecting MetaMask...').show();
+
+                const MMSDK = window.MetaMaskSDK;
+                if (!MMSDK) {
+                    throw new Error('MetaMask SDK not loaded');
+                }
+
+                metaMaskSDK = new MMSDK({
+                    dappMetadata: {
+                        name: 'Dragon Stadium',
+                        url: window.location.origin,
+                    },
+                    checkInstallationImmediately: false,
+                    injectProvider: true,
+                    useDeeplink: true,
+                    preferDesktop: false,
+                });
+
+                const accounts = await metaMaskSDK.connect();
+                
+                if (accounts && accounts.length > 0) {
+                    const address = accounts[0];
+                    document.getElementById('wallet-info').innerHTML = `✅ متصل: ${address.slice(0,6)}...${address.slice(-4)}`;
+                    document.getElementById('wallet-info').classList.remove('hidden');
+                    await updateWallet(address);
+                    tg.HapticFeedback.notificationOccurred('success');
+                }
+            } catch (error) {
+                console.error('MetaMask SDK error:', error);
+                if (error.message?.includes('please install')) {
+                    if (confirm(currentLang === 'ar' ? 'MetaMask غير مثبت. هل تريد تثبيته؟' : 'MetaMask not installed. Install now?')) {
+                        Telegram.WebApp.openLink('https://metamask.io/download/');
+                    }
+                } else {
+                    tg.showAlert(currentLang === 'ar' 
+                        ? 'فشل الاتصال. حاول مرة أخرى أو استخدم الإدخال اليدوي.' 
+                        : 'Connection failed. Try again or use manual entry.');
+                }
+            } finally {
+                tg.MainButton.hide();
             }
         }
 
