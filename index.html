@@ -379,8 +379,7 @@
                 tg.HapticFeedback.notificationOccurred('success');
                 const v = document.getElementById(`v-${id}`);
                 if (v) v.innerHTML = `<div class="py-2 text-center text-green-500 font-black italic text-xs">✅ تم التصويت مسبقاً</div>`;
-                // تحديث المتصدرين بعد التصويت (لأن المكافآت ستتغير لاحقاً)
-                await loadLeaderboard();
+                await loadLeaderboard(); // تحديث المتصدرين
             } else {
                 tg.showAlert(r.message || "خطأ");
             }
