@@ -7,6 +7,9 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- WalletConnect v2 libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/@walletconnect/modal@2.6.2/dist/index.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@walletconnect/ethereum-provider@2.11.0/dist/index.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap');
         body { background: #050505; color: #fff; font-family: 'Tajawal', sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -65,7 +68,7 @@
             </div>
         </section>
 
-        <!-- تبويب الحساب -->
+        <!-- تبويب الحساب (محدث مع WalletConnect) -->
         <section id="account" class="tab-content space-y-4">
             <div class="dragon-card p-6 text-center relative overflow-hidden">
                 <div class="absolute top-0 left-0 w-full h-1 bg-red-600"></div>
@@ -117,10 +120,34 @@
 
             <button id="claim-btn" onclick="claimRewards()" class="w-full py-4 bg-red-600 text-white font-black rounded-2xl shadow-xl shadow-red-900/40 active:scale-95 transition-all">سحب المكافآت</button>
 
+            <!-- قسم ربط المحفظة (محدث) -->
             <div class="dragon-card p-5 space-y-3">
-                <p id="connect-wallet-label" class="text-[9px] text-zinc-500 font-bold text-center italic">ربط محفظة BSC لتحديث الرتبة والرصيد</p>
+                <p id="connect-wallet-label" class="text-[9px] text-zinc-500 font-bold text-center italic">
+                    ربط محفظة BSC لتحديث الرتبة والرصيد
+                </p>
+                
+                <!-- زر WalletConnect -->
+                <button onclick="connectWallet()" id="connect-wallet-btn" class="w-full py-3 bg-blue-600 text-white text-[11px] font-black rounded-xl uppercase active:scale-95 transition-all">
+                    <i class="fas fa-wallet ml-1"></i> ربط المحفظة عبر WalletConnect
+                </button>
+                
+                <!-- معلومات المحفظة بعد الربط (مخفية افتراضياً) -->
+                <div id="wallet-info" class="hidden text-center text-[10px] text-green-500 break-all"></div>
+                
+                <!-- خيار يدوي احتياطي -->
+                <div class="relative">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-white/10"></div>
+                    </div>
+                    <div class="relative flex justify-center text-[8px]">
+                        <span class="px-2 bg-black text-zinc-500">أو أدخل العنوان يدوياً</span>
+                    </div>
+                </div>
+                
                 <input id="bsc-address" type="text" placeholder="0x..." class="w-full bg-black border border-white/10 p-4 rounded-xl text-xs text-center outline-none focus:border-red-600 transition-all">
-                <button onclick="updateWallet()" id="update-wallet-btn" class="w-full py-3 bg-white text-black text-[11px] font-black rounded-xl uppercase active:scale-95 transition-all">تحديث المحفظة</button>
+                <button onclick="updateWallet()" class="w-full py-3 bg-white text-black text-[11px] font-black rounded-xl uppercase active:scale-95 transition-all">
+                    تحديث المحفظة يدوياً
+                </button>
 
                 <div class="flex gap-2 mt-2">
                     <button onclick="openBuyLink()" class="flex-1 py-3 bg-yellow-600 text-white text-[11px] font-black rounded-xl uppercase active:scale-95 transition-all">
@@ -177,6 +204,7 @@
         let initDataStr = "";
         let currentLang = "ar";
         let storeItems = []; // لتخزين عناصر المتجر
+        let walletConnectProvider = null; // لمزود WalletConnect
 
         const translations = {
             ar: {
@@ -323,8 +351,11 @@
             if (u.wallet) document.getElementById('bsc-address').value = u.wallet;
         }
 
-        async function updateWallet() {
-            const wallet = document.getElementById('bsc-address').value.trim();
+        // تحديث دالة updateWallet لقبول عنوان كمعامل (مع الحفاظ على التوافق)
+        async function updateWallet(wallet = null) {
+            if (!wallet) {
+                wallet = document.getElementById('bsc-address').value.trim();
+            }
             if (!wallet || !/^0x[a-fA-F0-9]{40}$/.test(wallet)) {
                 tg.showAlert(currentLang === 'ar' ? "عنوان BSC غير صحيح" : "Invalid BSC address");
                 return;
@@ -477,6 +508,48 @@
                 tg.showAlert(currentLang === 'ar' ? "✅ تم التحويل بنجاح!" : "✅ Conversion successful!");
             } else {
                 tg.showAlert(r.message || (currentLang === 'ar' ? "فشل التحويل" : "Conversion failed"));
+            }
+        }
+
+        // ========== WalletConnect ==========
+        async function connectWallet() {
+            try {
+                const projectId = 'a9351c7f86cc1e297719aba320b2f9bf'; // المشروع الخاص بك
+                
+                tg.MainButton.setText(currentLang === 'ar' ? 'جاري ربط المحفظة...' : 'Connecting wallet...').show();
+
+                walletConnectProvider = await WalletConnectProvider.init({
+                    projectId,
+                    chains: [56], // BSC Mainnet
+                    showQrModal: true,
+                    methods: ['eth_sendTransaction', 'eth_sign'],
+                    optionalChains: [56],
+                    rpcMap: {
+                        56: 'https://bsc-dataseed.binance.org/'
+                    }
+                });
+
+                await walletConnectProvider.connect();
+                
+                const accounts = walletConnectProvider.accounts;
+                if (accounts && accounts.length > 0) {
+                    const address = accounts[0];
+                    
+                    document.getElementById('wallet-info').innerHTML = `✅ متصل: ${address.slice(0,6)}...${address.slice(-4)}`;
+                    document.getElementById('wallet-info').classList.remove('hidden');
+                    
+                    // تحديث المحفظة تلقائياً
+                    await updateWallet(address);
+                    
+                    tg.HapticFeedback.notificationOccurred('success');
+                }
+            } catch (error) {
+                console.error('WalletConnect error:', error);
+                tg.showAlert(currentLang === 'ar' 
+                    ? 'فشل الاتصال بالمحفظة. تأكد من تثبيت محفظة مثل MetaMask أو TrustWallet.' 
+                    : 'Failed to connect wallet. Make sure you have a wallet like MetaMask or TrustWallet installed.');
+            } finally {
+                tg.MainButton.hide();
             }
         }
 
